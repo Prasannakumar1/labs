@@ -1,0 +1,992 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Lab Experiments</title>
+<style>
+    td{
+    text-align: justify;
+}
+     li{
+    text-align: justify;
+}
+    body{
+        font-family: Arial, Helvetica, sans-serif;
+        background:#f4f4f4;
+        margin:20px;
+    }
+    h2{
+        text-align:center;
+        color:#333;
+    }
+    table{
+        width:100%;
+        border-collapse:collapse;
+        background:#fff;
+        box-shadow:0 2px 5px rgba(0,0,0,0.2);
+    }
+    th, td{
+        border:1px solid #333;
+        padding:10px;
+        vertical-align:top;
+    }
+    th{
+        background:#007BFF;
+        color:#fff;
+        text-align:center;
+    }
+    tr:nth-child(even){
+        background:#f9f9f9;
+    }
+    .video-link a{
+        color:#007BFF;
+        text-decoration:none;
+    }
+    .video-link a:hover{
+        text-decoration:underline;
+    }
+</style>
+</head>
+<body>
+
+<header style="background:#003366; color:white; padding:10px 20px;">
+    <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+            <!-- Logo -->
+            <td width="120" align="center">
+                <img src="https://rymec.edu.in/wp-content/themes/ryse/assets/images/logos.gif"
+                     alt="RYMEC Logo"
+                     style="width:100px; height:auto;">
+            </td>
+
+            <!-- College Name -->
+            <td align="center" colour="blue">
+                <h2 style="margin:0; font-size:28px;" >
+                    Veerashaiva Vidyavardhaka Sangha's
+ <br>Rao Bahadur Y. Mahabaleswarappa Engineering College 
+Ballari <br>Affiliated to VTU, Belagavi | Approved by AICTE, New Delhi |
+                        NAAC A+ Accredited
+               </h1>
+
+                <p style="margin:0; font-size:18px;">
+                    <em>
+                                     </h2>
+
+                <h1 style="margin:5px 0; font-size:34px;">
+                                      </em>
+                </p>
+            </td>
+        </tr>
+    </table>
+</header>
+  <h2>Data Structure and Application Laboratory </h2>
+
+
+
+</td>
+    </tr>
+
+    
+</td>
+    </tr>
+
+    
+  <h2>List of Experiments </h2>
+<table>
+    <tr>
+        <th>Sl. No</th>
+        <th>Experiment</th>
+        <th>Video Link</th>
+        <th>Observations</th>
+        <th>Marks</th>
+    </tr>
+
+    <tr>
+        <td align="justify">1</td>
+        <td>
+            <strong>Dynamic Calendar using Structures</strong><br>
+           Develop a Program in C for the following:
+<br>a) Declare a calendar as an array of 7 elements (A dynamically Created array) to represent
+7 days of a week. Each Element of the array is a structure having three fields. The first
+field is the name of the Day (A dynamically allocated String), The second field is the
+date of the Day (A integer), the third field is the description of the activity for a
+particular day (A dynamically allocated String).
+<br>b) Write functions create(), read() and display(); to create the calendar, to read the data
+from the keyboard and to print weeks activity details report on screen. 
+        </td>
+        <td class="video-link">
+            <a href="p1.html" target="_blank">Watch Animation</a>
+        </td>
+        <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body><button>See Questions</button>
+
+<div id="exp1" style="display:none; margin-top:20px;">
+    <h3>Exp 1.Questions</h3>
+    <ol>
+         <li>What is a structure in C?</li>
+<li>Why is dynamic memory allocation used in calendar implementation?</li>
+<li>Which functions are used for dynamic memory allocation in C?</li>
+<li>Explain the purpose of create(), read() and display() functions.</li>
+<li>What is the difference between array and dynamic array?</li>
+<li>How are strings stored dynamically in C?</li>
+    </ol>
+</div>
+<script>
+function showQuestions111() {
+    document.getElementById("exp1").style.display = "block";
+}
+</script>
+
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">2</td>
+        <td>
+            <strong>String Pattern Matching and Replacement</strong><br>
+            Develop a Program in C for the following operations on Strings.
+<br>a. Read a main String (STR), a Pattern String (PAT) and a Replace String (REP)
+<br>b. Perform Pattern Matching Operation: Find and Replace all occurrences of PAT in
+STR with REP if PAT exists in STR. Report suitable messages in case PAT does not
+exist in STR
+Support the program with functions for each of the above operations. Don't use Built-in
+functions.
+           
+        </td>
+        <td class="video-link">
+            <a href="ds2a.html"_blank">Watch Animation</a>
+        </td>
+        <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions112()">See Questions</button>
+
+<div id="exp2" style="display:none; margin-top:20px;">
+    <h3>Exp 2.Questions</h3>
+    <ol>
+        <li>What is string pattern matching?</li>
+<li>Explain the difference between STR, PAT and REP.</li>
+<li>Why are built-in string functions avoided?</li>
+<li>Explain the algorithm used for pattern searching.</li>
+<li>What is the time complexity of pattern matching?</li>
+<li>How is replacement performed after finding a pattern?</li>
+       </ol>
+</div>
+
+<script>
+function showQuestions112() {
+    document.getElementById("exp2").style.display = "block";
+}
+</script>
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">3</td>
+        <td>
+            <strong>Stack Implementation using Array</strong><br>
+Develop a menu driven Program in C for the following operations on STACK of Integers(Array Implementation of Stack with maximum size MAX)
+<br>a. Push an Element on to Stack
+<br>b. Pop an Element from Stack
+<br>c. Demonstrate how Stack can be used to check Palindrome
+<br>d. Demonstrate Overflow and Underflow situations on Stack
+<br>e. Display the status of Stack
+<br>f. Exit
+<br>Support the program with appropriate functions for each of the above operations 
+        </td>
+        <td class="video-link">
+            <a href="stack7.html" target="_blank">Watch Animation</a>
+        </td>
+        <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions13()">See Questions</button>
+
+<div id="exp3" style="display:none; margin-top:20px;">
+    <h3>Exp 3.Questions</h3>
+    <ol>
+        <li>What is a stack data structure?</li>
+<li>Explain LIFO principle.</li>
+<li>What are stack overflow and stack underflow?</li>
+<li>Explain push() and pop() operations.</li>
+<li>How is stack used for palindrome checking?</li>
+<li>What is the difference between array and linked stack?</li>
+    </ol>
+</div>
+<script>
+function showQuestions13() {
+    document.getElementById("exp3").style.display = "block";
+}
+</script>
+
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">4</td>
+        <td>
+            <strong>Infix to Postfix Conversion</strong><br>
+            Develop a Program in C for converting an Infix Expression to Postfix Expression. Program
+should support for both parenthesized and free parenthesized expressions with the operators: +, -, *, /, % (Remainder), ^ (Power) and alphanumeric
+operands.
+        </td>
+        <td class="video-link">
+             <a href="ds4.html" target="_blank">Watch Animation</a>
+        </td>
+                <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions14()">See Questions</button>
+
+<div id="exp4" style="display:none; margin-top:20px;">
+    <h3>Exp 4.Questions</h3>
+    <ol>
+        <li>Why is stack used in infix to postfix conversion?</li>
+<li>What is operator precedence?</li>
+<li>Explain associativity of operators.</li>
+<li>Differentiate infix, prefix and postfix expressions.</li>
+<li>Explain the role of parentheses in conversion.</li>
+<li>How postfix expressions are evaluated?</li>
+    </ol>
+</div>
+
+<script>
+function showQuestions14() {
+    document.getElementById("exp4").style.display = "block";
+}
+</script>
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">5</td>
+        <td>
+            <strong>Stack Applications</strong><br>
+           Develop a Program in C for the following Stack Applications
+<br>a. Evaluation of Suffix expression with single digit operands and operators: +, -, *, /, %,^
+<br>b. Solving Tower of Hanoi problem with n disks
+        </td>
+        <td class="video-link">
+            <a href="ds4.html" target="_blank">Watch Animation</a>
+        </td>
+                <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions15()">See Questions</button>
+
+<div id="exp5" style="display:none; margin-top:20px;">
+    <h3>Exp 5.Questions</h3>
+    <ol>
+       <li>What is postfix expression evaluation?</li>
+<li>Why stack is suitable for expression evaluation?</li>
+<li>Explain Tower of Hanoi problem.</li>
+<li>What is recursion?</li>
+<li>Write recurrence relation for Tower of Hanoi.</li>
+<li>What is the minimum number of moves for n disks?</li>
+      
+    </ol>
+</div>
+
+<script>
+function showQuestions15() {
+    document.getElementById("exp5").style.display = "block";
+}
+</script>
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">6</td>
+        <td>
+            <strong>Circular Queue using Array</strong><br>
+          Develop a menu driven Program in C for the following operations on Circular QUEUE of
+Characters (Array Implementation of Queue with maximum size MAX)
+<br>a. Insert an Element on to Circular QUEUE
+<br>b. Delete an Element from Circular QUEUE
+<br>c. Demonstrate Overflow and Underflow situations on Circular QUEUE
+<br>d. Display the status of Circular QUEUE
+<br>e. Exit
+<br>Support the program with appropriate functions for each of the above operations
+        </td>
+        <td class="video-link">
+            <a href="ds6.html" target="_blank">Watch Animation</a>
+        </td>
+        <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions16()">See Questions</button>
+
+<div id="exp6" style="display:none; margin-top:20px;">
+    <h3>Exp 6.Questions</h3>
+    <ol>
+        <li>What is a queue data structure?</li>
+<li>Explain FIFO principle.</li>
+<li>Why circular queue is preferred over linear queue?</li>
+<li>Explain front and rear pointers.</li>
+<li>What are overflow and underflow conditions?</li>
+<li>Explain insertion and deletion operations.</li>
+    </ol>
+</div>
+<script>
+function showQuestions16() {
+    document.getElementById("exp6").style.display = "block";
+}
+</script>
+
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">7</td>
+        <td>
+            <strong>Singly Linked List (Student Data)</strong><br>
+            Develop a menu driven Program in C for the following operations on Singly Linked List
+(SLL) of Student Data with the fields: USN, Name, Programme, Sem,
+PhNo
+<br>a. Create a SLL of N Students Data by using front insertion.
+<br>b. Display the status of SLL and count the number of nodes in it
+<br>c. Perform Insertion / Deletion at End of SLL
+<br>d. Perform Insertion / Deletion at Front of SLL(Demonstration of stack)
+<br>e. Exit
+        </td>
+        <td class="video-link">
+            <a href="stack7.html" target="_blank">Watch Animation</a>
+        </td>
+        <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions17()">See Questions</button>
+
+<div id="exp7" style="display:none; margin-top:20px;">
+    <h3>Exp 7.Questions</h3>
+    <ol>
+        <li>What is a linked list?</li>
+<li>Difference between array and linked list.</li>
+<li>What is a node?</li>
+<li>Explain insertion and deletion operations.</li>
+<li>Why dynamic memory allocation is used in linked list?</li>
+<li>How stack can be implemented using linked list?</li>
+    </ol>
+</div>
+
+<script>
+function showQuestions17() {
+    document.getElementById("exp7").style.display = "block";
+}
+</script>
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">8</td>
+        <td>
+            <strong>Doubly Linked List (Employee Data)</strong><br>
+            Develop a menu driven Program in C for the following operations on Doubly Linked List
+(DLL) of Employee Data with the fields: SSN, Name, Dept, Designation,
+Sal, PhNo
+<br>a. Create a DLL of N Employees Data by using end insertion.
+<br>b. Display the status of DLL and count the number of nodes in it
+<br>c. Perform Insertion and Deletion at End of DLL
+<br>d. Perform Insertion and Deletion at Front of DLL
+<br>e. Demonstrate how this DLL can be used as Double Ended Queue.
+<br>f. Exit
+        </td>
+        <td class="video-link">
+            <a href="ds8.html" target="_blank">Watch Animation</a>
+        </td>
+                <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions18()">See Questions</button>
+
+<div id="exp8" style="display:none; margin-top:20px;">
+    <h3>Exp 8.Questions</h3>
+    <ol>
+       <li>What is doubly linked list?</li>
+<li>Difference between SLL and DLL.</li>
+<li>Explain previous and next pointers.</li>
+<li>What are advantages of DLL?</li>
+<li>How DLL works as deque?</li>
+<li>Explain insertion and deletion at both ends.</li>
+    </ol>
+</div>
+
+<script>
+function showQuestions18() {
+    document.getElementById("exp8").style.display = "block";
+}
+</script>
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">9</td>
+        <td>
+            <strong>Polynomial using Circular Linked List</strong><br>
+           Develop a Program in C for the following operationson Singly Circular Linked List (SCLL)
+with header nodes
+<br>a. Represent and Evaluate a Polynomial P(x,y,z) = 6x
+2
+y
+2
+z-4yz
+5
++3x
+3
+yz+2xy
+5
+z-2xyz
+3
+<br>b. Find the sum of two polynomials POLY1(x,y,z) and POLY2(x,y,z) and store the
+result in POLYSUM(x,y,z)
+Support the program with appropriate functions for each of the above operations
+
+        </td>
+        <td class="video-link">
+            <a href="ds9.html" target="_blank">Watch Animation</a>
+        </td>
+        <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions19()">See Questions</button>
+
+<div id="exp9" style="display:none; margin-top:20px;">
+    <h3>Exp 9.Questions</h3>
+    <ol>
+       <li>What is polynomial representation?</li>
+<li>Why circular linked list is used for polynomial?</li>
+<li>Explain polynomial addition process.</li>
+<li>What are coefficient and exponent?</li>
+<li>How polynomial evaluation is performed?</li>
+<li>Advantages of linked representation of polynomial.</li>
+    </ol>
+</div>
+
+<script>
+function showQuestions19() {
+    document.getElementById("exp9").style.display = "block";
+}
+</script>
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">10</td>
+        <td>
+            <strong>Binary Search Tree Operations</strong><br>
+            Develop a menu driven Program in C for the following operations on Binary Search Tree
+(BST) of Integers .
+<br>a. Create a BST of N Integers: 6, 9, 5, 2, 8, 15, 24, 14, 7, 8, 5, 2
+<br>b. Traverse the BST in Inorder, Preorder and Post Order
+<br>c. Search the BST for a given element (KEY) and report the appropriate message
+<br>d. Exit
+        </td>
+        <td class="video-link">
+            <a href="ds10.html" target="_blank">Watch Animation</a>
+        </td>
+        <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions10()">See Questions</button>
+
+<div id="exp10" style="display:none; margin-top:20px;">
+    <h3>Exp 10.Questions</h3>
+    <ol>
+       <li>What is Binary Search Tree?</li>
+<li>Explain BST properties.</li>
+<li>Difference between binary tree and BST.</li>
+<li>Explain inorder, preorder and postorder traversal.</li>
+<li>What is the complexity of searching in BST?</li>
+<li>How insertion is performed in BST?</li>
+    </ol>
+</div>
+
+<script>
+function showQuestions10() {
+    document.getElementById("exp10").style.display = "block";
+}
+</script>
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">11</td>
+        <td>
+            <strong>Graph Traversal</strong><br>
+            Develop a Program in C for the following operations on Graph(G) of Cities
+<br>a. Create a Graph of N cities using Adjacency Matrix.
+<br>b. Print all the nodes reachable from a given starting node in a digraph using DFS/BFS
+method
+        </td>
+        <td class="video-link">
+            <a href="ds11.html" target="_blank">Watch Animation</a>
+        </td>
+        <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions11()">See Questions</button>
+
+<div id="exp11" style="display:none; margin-top:20px;">
+    <h3>Exp 11.Questions</h3>
+    <ol>
+        <li>What is graph data structure?</li>
+<li>Difference between directed and undirected graph.</li>
+<li>Explain adjacency matrix representation.</li>
+<li>What is DFS traversal?</li>
+<li>What is BFS traversal?</li>
+<li>Compare DFS and BFS.</li>
+    </ol>
+</div>
+
+<script>
+function showQuestions11() {
+    document.getElementById("exp11").style.display = "block";
+}
+</script>
+
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+    <tr>
+        <td align="center">12</td>
+        <td>
+            <strong>Hashing using Linear Probing</strong><br>
+          Given a File of N employee records with a set K of Keys (4-digit) which uniquely determine
+the records in file F. Assume that file F is maintained in memory by a Hash Table (HT) of m
+memory locations with L as the set of memory addresses (2-digit) of locations in HT. Let the
+keys in K and addresses in L are Integers. Develop a Program in C that uses Hash function H:
+K ?L as H(K)=K mod m (remainder method), and implement hashing
+technique to map a given key K to the address space L. Resolve the collision (if any) using
+linear probing.
+        </td>
+        <td class="video-link">
+            <a href="ds12.html" target="_blank">Watch Animation</a>
+        </td>
+        <td><!DOCTYPE html>
+<html>
+<head>
+    <title>Show Questions</title>
+</head>
+<body>
+
+<button onclick="showQuestions12()">See Questions</button>
+
+<div id="exp12" style="display:none; margin-top:20px;">
+    <h3>Exp 12.Questions</h3>
+    <ol>
+        <li>What is hashing?</li>
+<li>Explain hash function H(K)=K mod m.</li>
+<li>What is collision in hashing?</li>
+<li>Explain linear probing technique.</li>
+<li>Difference between hashing and searching.</li>
+<li>What are advantages of hash tables?</li>
+    </ol>
+</div>
+<script>
+function showQuestions12() {
+    document.getElementById("exp12").style.display = "block";
+}
+</script>
+</body>
+</html>
+</td>
+<td> 1M</td>
+    </tr>
+
+</table>
+
+</script>
+<!-- started here -->
+ <h2>Exercise </h2>
+<table>
+    <tr>
+        <th>Sl. No</th>
+        <th>Description</th>
+        <th>Observations</th>
+     </tr>
+    <tr>
+        <td align="center">1</td>
+        <td><b>Student Information and Management System using Data Structures</b></td>
+       
+<td>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Show Exercise</title>
+</head>
+<body>
+<button onclick="showExercise1()">See Exercise</button>
+
+<div id="exercise1" style="display:none; margin-top:20px;">
+    <h3>1.Questions</h3>
+  <p>
+<br><b>Student Information and Management System using Data Structures</b>
+
+<br><br>
+
+<b>Project Title:</b>
+<br>
+Student Information and Management System using Data Structures
+
+<br><br>
+
+<b>Project Description:</b>
+<br>
+Develop a menu-driven C application to manage student activities, records,
+searching, scheduling, and data processing using various data structures.
+
+<br><br>
+
+<b>Project Modules:</b>
+
+<br><br>
+
+<b>Module 1: Student Calendar Management</b>
+<br>
+Data Structure Used: Structure and Dynamic Memory Allocation
+
+<br>
+Implementation:
+<br>
+- Create weekly student activity calendar
+<br>
+- Store Day Name, Date and Activity Description
+<br>
+- Display weekly activities
+
+<br><br>
+
+<b>Module 2: Notice Management System</b>
+<br>
+Data Structure Used: Strings
+
+<br>
+Implementation:
+<br>
+- Read main string (STR)
+<br>
+- Search pattern string (PAT)
+<br>
+- Replace pattern with replacement string (REP)
+<br>
+- Perform pattern matching without built-in functions
+
+<br><br>
+
+<b>Module 3: Stack Based Expression System</b>
+<br>
+Data Structure Used: Stack
+
+<br>
+Implementation:
+<br>
+- Push and Pop operations
+<br>
+- Check palindrome using stack
+<br>
+- Convert Infix expression to Postfix expression
+<br>
+- Evaluate Postfix expression
+
+<br><br>
+
+<b>Module 4: Student Service Request Management</b>
+<br>
+Data Structure Used: Circular Queue
+
+<br>
+Implementation:
+<br>
+- Insert service request
+<br>
+- Delete service request
+<br>
+- Display queue status
+<br>
+- Demonstrate overflow and underflow conditions
+
+<br><br>
+
+<b>Module 5: Student Record Management System</b>
+<br>
+Data Structure Used: Singly Linked List
+
+<br>
+Student Details:
+<br>
+- USN
+<br>
+- Name
+<br>
+- Programme
+<br>
+- Semester
+<br>
+- Phone Number
+
+<br>
+Operations:
+<br>
+- Create student records
+<br>
+- Insert and delete records
+<br>
+- Display student information
+
+<br><br>
+
+<b>Module 6: Employee Record Management System</b>
+<br>
+Data Structure Used: Doubly Linked List
+
+<br>
+Employee Details:
+<br>
+- SSN
+<br>
+- Name
+<br>
+- Department
+<br>
+- Designation
+<br>
+- Salary
+<br>
+- Phone Number
+
+<br>
+Operations:
+<br>
+- Insert employee details
+<br>
+- Delete employee details
+<br>
+- Forward and backward traversal
+
+<br><br>
+
+<b>Module 7: Polynomial Processing System</b>
+<br>
+Data Structure Used: Circular Linked List
+
+<br>
+Implementation:
+<br>
+- Represent polynomial expressions
+<br>
+- Evaluate polynomial
+<br>
+- Add two polynomials
+
+<br><br>
+
+<b>Module 8: Student Search System</b>
+<br>
+Data Structure Used: Binary Search Tree
+
+<br>
+Implementation:
+<br>
+- Create BST of student records
+<br>
+- Insert nodes
+<br>
+- Search student information
+<br>
+- Perform Inorder, Preorder and Postorder traversal
+
+<br><br>
+
+<b>Module 9: Campus Network Analysis</b>
+<br>
+Data Structure Used: Graph
+
+<br>
+Implementation:
+<br>
+- Create graph using adjacency matrix
+<br>
+- Represent city/campus network
+<br>
+- Perform DFS and BFS traversal
+
+<br><br>
+
+<b>Module 10: Fast Record Searching System</b>
+<br>
+Data Structure Used: Hash Table
+
+<br>
+Implementation:
+<br>
+- Create hash table
+<br>
+- Apply hash function H(K)=K mod m
+<br>
+- Resolve collision using linear probing
+
+<br><br>
+
+<b>Project Requirements:</b>
+
+<br>
+- Develop menu-driven C application
+<br>
+- Use appropriate data structures for each module
+<br>
+- Implement functions for every operation
+<br>
+- Provide proper input and output demonstration
+
+<br><br>
+
+<b>Final Deliverables:</b>
+
+<br>
+1. C Source Code
+<br>
+2. Algorithm
+<br>
+3. Flowchart
+<br>
+4. Sample Input and Output
+<br>
+5. Project Report
+<br>
+6. Presentation (PPT)
+<br>
+7. Viva Questions and Answers
+
+<br><br>
+
+<b>Expected Outcome:</b>
+
+<br>
+After completing this project, students will be able to:
+
+<br>
+- Apply data structures to real-time applications.
+<br>
+- Implement dynamic memory concepts.
+<br>
+- Develop efficient searching and processing techniques.
+<br>
+- Design menu-driven applications using C.
+<br>
+- Analyze the performance of different data structures.
+
+<br><br>
+
+<b>Project Duration:</b> 4–6 Weeks
+
+<br>
+<b>Team Size:</b> 2–3 Students
+
+<br>
+<b>Technology:</b> C Programming Language and Data Structures
+
+  </p>
+</div>
+<script>
+function showExercise1() {
+    document.getElementById("exercise1").style.display = "block";
+}
+</script>
+
+
+</body>
+</html>
+</td>
+    </tr>
+<!-- end here  -->
+</body>
+</html>

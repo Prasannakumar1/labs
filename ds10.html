@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>BST Animation Using C</title>
+
+
+<style>
+
+
+body{
+
+font-family:Segoe UI,Arial;
+background:#eaf2f8;
+padding:20px;
+
+}
+
+
+h1{
+
+text-align:center;
+color:#003366;
+
+}
+
+
+
+.container{
+
+background:white;
+border:4px solid #003366;
+border-radius:15px;
+padding:15px;
+
+}
+
+
+
+button{
+
+background:#0066cc;
+color:white;
+padding:10px 15px;
+margin:5px;
+border:none;
+border-radius:6px;
+
+}
+
+
+input{
+
+padding:8px;
+
+}
+
+
+
+.main{
+
+display:grid;
+grid-template-columns:45% 55%;
+gap:15px;
+
+}
+
+
+
+
+/* CODE PANEL */
+
+
+.code{
+
+background:#111;
+color:white;
+height:600px;
+overflow:auto;
+padding:15px;
+font-family:Consolas;
+
+}
+
+
+
+.line{
+
+padding:5px;
+
+}
+
+
+.highlight{
+
+background:#ffd54f;
+color:black;
+font-weight:bold;
+
+}
+
+
+
+
+
+/* TREE */
+
+
+.treePanel{
+
+border:3px solid #555;
+padding:20px;
+text-align:center;
+
+}
+
+
+.node{
+
+display:inline-block;
+background:#3498db;
+color:white;
+width:45px;
+height:45px;
+line-height:45px;
+border-radius:50%;
+margin:8px;
+font-weight:bold;
+animation:zoom .5s;
+
+}
+
+
+.activeNode{
+
+background:red;
+
+}
+
+
+
+.level{
+
+margin:15px;
+
+}
+
+
+
+.arrow{
+
+font-size:25px;
+color:red;
+
+}
+
+
+
+@keyframes zoom{
+
+from{
+
+transform:scale(0);
+
+}
+
+to{
+
+transform:scale(1);
+
+}
+
+}
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<h1>
+BINARY SEARCH TREE USING C
+</h1>
+
+
+
+<div class="container">
+
+
+
+<button onclick="createBST()">
+Create BST
+</button>
+
+
+<button onclick="inorder()">
+Inorder
+</button>
+
+
+<button onclick="preorder()">
+Preorder
+</button>
+
+
+<button onclick="postorder()">
+Postorder
+</button>
+
+
+<input id="key" placeholder="Search Key">
+
+
+<button onclick="search()">
+Search
+</button>
+
+
+<button onclick="reset()">
+Exit / Reset
+</button>
+
+
+
+
+
+<div class="main">
+
+
+
+
+
+<!-- C PROGRAM -->
+
+
+<div class="code">
+
+
+<h2>C PROGRAM</h2>
+
+
+
+<div class="line" id="c1">
+struct node
+</div>
+
+
+<div class="line" id="c2">
+{
+</div>
+
+
+<div class="line" id="c3">
+int data;
+</div>
+
+
+<div class="line" id="c4">
+struct node *left,*right;
+</div>
+
+
+<div class="line" id="c5">
+};
+</div>
+
+
+
+<br>
+
+
+
+<div class="line" id="c6">
+createBST()
+</div>
+
+
+<div class="line" id="c7">
+if(root==NULL)
+</div>
+
+
+<div class="line" id="c8">
+create new node
+</div>
+
+
+
+<div class="line" id="c9">
+if(item < root->data)
+</div>
+
+
+<div class="line" id="c10">
+insert left subtree
+</div>
+
+
+
+<div class="line" id="c11">
+else
+</div>
+
+
+<div class="line" id="c12">
+insert right subtree
+</div>
+
+
+
+
+<br>
+
+
+<div class="line" id="c13">
+void inorder(root)
+</div>
+
+
+<div class="line" id="c14">
+left - root - right
+</div>
+
+
+
+<br>
+
+
+<div class="line" id="c15">
+void preorder(root)
+</div>
+
+
+<div class="line" id="c16">
+root - left - right
+</div>
+
+
+
+
+<br>
+
+
+<div class="line" id="c17">
+void postorder(root)
+</div>
+
+
+<div class="line" id="c18">
+left - right - root
+</div>
+
+
+
+<br>
+
+
+
+<div class="line" id="c19">
+Search KEY
+</div>
+
+
+<div class="line" id="c20">
+Compare node data
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- TREE PANEL -->
+
+
+<div class="treePanel">
+
+
+<h2>BST Visualization</h2>
+
+
+<div id="tree"></div>
+
+
+<h3 id="output"></h3>
+
+
+</div>
+
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<script>
+
+
+let values=[6,9,5,2,8,15,24,14,7,8,5,2];
+
+
+let bst=[];
+
+
+
+function highlight(lines,msg)
+{
+
+
+document.querySelectorAll(".line")
+.forEach(e=>e.className="line");
+
+
+
+lines.forEach((x,i)=>{
+
+
+setTimeout(()=>{
+
+
+document.getElementById(x)
+.className="line highlight";
+
+
+},i*400);
+
+
+});
+
+
+
+document.getElementById("output")
+.innerHTML=msg;
+
+
+}
+
+
+
+
+
+
+function createBST()
+{
+
+
+highlight(
+
+["c6","c7","c8","c9","c10","c12"],
+
+"Creating Binary Search Tree"
+
+);
+
+
+
+bst=[];
+
+
+values.forEach(x=>{
+
+bst.push(x);
+
+});
+
+
+draw();
+
+
+
+}
+
+
+
+
+
+
+
+function inorder()
+{
+
+
+highlight(
+
+["c13","c14"],
+
+"Inorder Traversal : Left Root Right"
+
+);
+
+
+
+let arr=[...bst].sort((a,b)=>a-b);
+
+
+document.getElementById("output")
+.innerHTML=
+
+"Inorder : "+arr;
+
+
+
+}
+
+
+
+
+function preorder()
+{
+
+
+highlight(
+
+["c15","c16"],
+
+"Preorder Traversal : Root Left Right"
+
+);
+
+
+document.getElementById("output")
+.innerHTML=
+
+"Preorder : "+bst;
+
+
+}
+
+
+
+
+
+
+function postorder()
+{
+
+
+highlight(
+
+["c17","c18"],
+
+"Postorder Traversal : Left Right Root"
+
+);
+
+
+
+let arr=[...bst].reverse();
+
+
+document.getElementById("output")
+.innerHTML=
+
+"Postorder : "+arr;
+
+
+}
+
+
+
+
+
+
+
+function search()
+{
+
+
+let key=
+
+Number(document.getElementById("key").value);
+
+
+
+highlight(
+
+["c19","c20"],
+
+"Searching KEY = "+key
+
+);
+
+
+
+if(bst.includes(key))
+
+document.getElementById("output")
+.innerHTML=
+
+"Element Found : "+key;
+
+
+else
+
+document.getElementById("output")
+.innerHTML=
+
+"Element Not Found";
+
+
+}
+
+
+
+
+
+function draw()
+{
+
+
+let tree=document.getElementById("tree");
+
+tree.innerHTML="";
+
+
+
+let levels=[
+
+[6],
+
+[5,9],
+
+[2,8,15],
+
+[7,14,24]
+
+];
+
+
+
+levels.forEach(level=>{
+
+
+let div=document.createElement("div");
+
+div.className="level";
+
+
+level.forEach(n=>{
+
+
+let node=document.createElement("span");
+
+node.className="node";
+
+node.innerHTML=n;
+
+
+div.appendChild(node);
+
+
+
+});
+
+
+tree.appendChild(div);
+
+
+});
+
+
+
+}
+
+
+
+
+function reset()
+{
+
+bst=[];
+
+document.getElementById("tree").innerHTML="";
+
+document.getElementById("output").innerHTML="";
+
+}
+
+
+
+
+</script>
+
+
+</body>
+
+</html>

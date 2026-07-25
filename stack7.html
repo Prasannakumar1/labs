@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Stack Visualization Using C Code</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Segoe UI,Arial;
+    background:#eaf2f8;
+}
+
+h1{
+    text-align:center;
+    color:#003366;
+}
+
+
+.container{
+
+border:4px solid #003366;
+border-radius:15px;
+background:white;
+padding:15px;
+
+}
+
+
+.controls{
+
+text-align:center;
+margin:20px;
+
+}
+
+
+input{
+
+padding:10px;
+font-size:18px;
+width:150px;
+
+}
+
+
+button{
+
+padding:10px 18px;
+margin:5px;
+border:none;
+border-radius:6px;
+background:#0066cc;
+color:white;
+font-size:16px;
+cursor:pointer;
+
+}
+
+
+button:hover{
+
+background:#003366;
+
+}
+
+
+/* PUSH ARROW BUTTON */
+
+.arrowBtn{
+
+width:55px;
+height:45px;
+font-size:28px;
+font-weight:bold;
+background:#28a745;
+border-radius:50%;
+
+}
+
+
+.arrowBtn:hover{
+
+background:#1e7e34;
+
+}
+
+
+
+.content{
+
+display:grid;
+grid-template-columns:45% 55%;
+gap:15px;
+
+}
+
+
+/* C CODE */
+
+.codePanel{
+
+border:3px solid #555;
+padding:15px;
+background:#111;
+color:white;
+height:430px;
+overflow:auto;
+font-family:Consolas;
+
+}
+
+
+.codeLine{
+
+padding:5px;
+
+}
+
+
+.active{
+
+background:#ffd54f;
+color:black;
+
+}
+
+
+
+/* STACK */
+
+
+.stackPanel{
+
+border:3px solid #555;
+padding:15px;
+text-align:center;
+
+}
+
+
+.stackArea{
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+}
+
+
+
+#arrow{
+
+font-size:28px;
+font-weight:bold;
+color:red;
+
+height:40px;
+
+animation:move 1s infinite alternate;
+
+}
+
+
+
+@keyframes move{
+
+from{
+transform:translateY(0);
+}
+
+to{
+transform:translateY(10px);
+}
+
+}
+
+
+
+.stack{
+
+width:220px;
+height:350px;
+
+border:5px solid #003366;
+
+display:flex;
+flex-direction:column-reverse;
+
+align-items:center;
+
+padding:10px;
+
+background:#e3f2fd;
+
+border-radius:10px;
+
+}
+
+
+
+.block{
+
+width:170px;
+height:45px;
+
+margin:5px;
+
+background:linear-gradient(
+90deg,
+#00c6ff,
+#0072ff
+);
+
+color:white;
+
+font-size:20px;
+font-weight:bold;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+border-radius:8px;
+
+box-shadow:0px 5px 10px gray;
+
+animation:push .5s;
+
+}
+
+
+
+@keyframes push{
+
+from{
+transform:translateY(-150px);
+opacity:0;
+}
+
+to{
+transform:translateY(0);
+opacity:1;
+}
+
+}
+
+
+
+.algorithm{
+
+margin-top:20px;
+
+border:3px solid #003366;
+
+padding:15px;
+
+font-size:20px;
+
+background:#f8f9fa;
+
+}
+
+
+</style>
+
+</head>
+
+
+
+<body>
+
+
+<h1>
+STACK VISUALIZATION USING C CODE
+</h1>
+
+
+<div class="container">
+
+
+
+<div class="controls">
+
+
+Enter Stack Element :
+
+
+<input id="value" type="number" placeholder="Enter value">
+
+
+<button onclick="push()">Push
+</button>
+
+
+<button onclick="pop()">
+Pop
+</button>
+
+
+<button onclick="peek()">
+Peek
+</button>
+
+
+<button onclick="display()">
+Display
+</button>
+
+
+<button onclick="reset()">
+Reset
+</button>
+
+
+</div>
+
+
+
+
+
+<div class="content">
+
+<!-- C PROGRAM -->
+
+
+<div class="codePanel">
+
+
+<h2>C PROGRAM</h2>
+
+
+<div class="codeLine" id="c1">
+void push()
+</div>
+
+<div class="codeLine" id="c2">
+{
+</div>
+
+
+<div class="codeLine" id="c3">
+if(top==MAX-1)
+</div>
+
+
+<div class="codeLine" id="c4">
+Stack Overflow
+</div>
+
+
+<div class="codeLine" id="c5">
+else
+</div>
+
+
+<div class="codeLine" id="c6">
+top++;
+</div>
+
+
+<div class="codeLine" id="c7">
+stack[top]=x;
+</div>
+
+
+
+<br>
+
+
+<div class="codeLine" id="p1">
+
+void pop()
+
+</div>
+
+
+<div class="codeLine" id="p2">
+
+x=stack[top];
+
+</div>
+
+
+<div class="codeLine" id="p3">
+
+top--;
+
+</div>
+
+
+
+<br>
+
+
+<div class="codeLine" id="d1">
+void display() {<br>
+    if (top == -1) {<br>
+        printf("\nStack is Empty");
+    } 
+</div>
+
+
+<div class="codeLine" id="d2">
+else {<br>
+        printf("\nStack Array");<br>
+        for (int i = 0; i <= top; i++) {<br>
+            printf("%d ", stack[i]);<br>
+        }<br>
+        printf("\n");<br>
+    }<br>
+}<br>
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- STACK -->
+
+
+<div class="stackPanel">
+
+
+<h2>
+STACK ANIMATION
+</h2>
+
+
+
+<div class="stackArea">
+
+
+<div id="arrow">
+TOP ?
+</div>
+
+
+
+<div class="stack" id="stack">
+
+</div>
+
+
+</div>
+
+
+
+
+<h3>
+
+top = <span id="top">-1</span>
+
+</h3>
+
+
+
+<h3>
+
+Stack Array :
+<span id="array">[]</span>
+
+</h3>
+
+
+
+<h3 id="output">
+
+</h3>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="algorithm">
+
+
+<h2>
+Algorithm Steps
+</h2>
+
+
+<div id="step">
+
+Current Step:
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<script>
+
+
+let stack=[];
+
+let MAX=5;
+
+
+
+function highlight(lines,text){
+
+
+document.querySelectorAll(".codeLine")
+.forEach(e=>e.className="codeLine");
+
+
+lines.forEach((id,i)=>{
+
+
+setTimeout(()=>{
+
+document.getElementById(id)
+.className="active";
+
+},i*500);
+
+
+});
+
+
+document.getElementById("step").innerHTML=
+"Current Step : "+text;
+
+
+}
+
+
+
+
+
+
+function draw(){
+
+
+let box=document.getElementById("stack");
+
+box.innerHTML="";
+
+
+stack.forEach((value,index)=>{
+
+
+let div=document.createElement("div");
+
+div.className="block";
+
+
+
+if(index==stack.length-1)
+
+{
+
+div.innerHTML="TOP "+value;
+
+div.style.border="5px solid red";
+
+}
+
+else
+
+{
+
+div.innerHTML=value;
+
+}
+
+
+
+box.appendChild(div);
+
+
+});
+
+
+
+
+if(stack.length>0)
+
+document.getElementById("arrow").innerHTML="TOP ?";
+
+else
+
+document.getElementById("arrow").innerHTML="TOP ?";
+
+
+
+document.getElementById("top").innerHTML=
+stack.length-1;
+
+
+document.getElementById("array").innerHTML=
+JSON.stringify(stack);
+
+
+
+}
+
+
+
+
+
+
+function push(){
+
+
+let x=document.getElementById("value").value;
+
+
+if(x=="")
+return;
+
+
+
+highlight(
+["c3","c5","c6","c7"],
+"Increase TOP and insert element"
+);
+
+
+
+setTimeout(()=>{
+
+
+if(stack.length<MAX)
+
+{
+
+stack.push(Number(x));
+
+output.innerHTML=
+"? "+x+" inserted";
+
+}
+
+else
+
+{
+
+output.innerHTML=
+"Stack Overflow";
+
+}
+
+
+
+draw();
+
+
+document.getElementById("value").value="";
+
+
+},2000);
+
+
+}
+
+
+
+
+
+
+function pop(){
+
+
+if(stack.length==0)
+
+{
+
+output.innerHTML="Stack Underflow";
+
+return;
+
+}
+
+
+
+highlight(
+["p1","p2","p3"],
+"Delete TOP element"
+);
+
+
+
+setTimeout(()=>{
+
+
+let x=stack.pop();
+
+
+output.innerHTML=
+x+" deleted";
+
+
+draw();
+
+
+},1500);
+
+
+
+}
+
+
+
+
+
+
+function peek(){
+
+
+if(stack.length)
+
+output.innerHTML=
+"TOP Element = "+stack[stack.length-1];
+
+
+}
+
+
+
+
+function display(){
+
+
+highlight(
+["d1","d2"],
+"Traverse Stack from TOP"
+);
+
+
+
+output.innerHTML=
+"Display : "+[...stack].reverse().join(" ");
+
+
+}
+
+
+
+
+function reset(){
+
+
+stack=[];
+
+draw();
+
+output.innerHTML="Stack Empty";
+
+step.innerHTML="Current Step:";
+
+
+}
+
+
+
+
+draw();
+
+
+</script>
+
+
+</body>
+</html>

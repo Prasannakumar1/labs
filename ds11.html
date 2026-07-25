@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Graph Cities DFS BFS Animation</title>
+
+
+<style>
+
+body{
+font-family:Segoe UI,Arial;
+background:#eaf2f8;
+padding:20px;
+}
+
+
+h1{
+text-align:center;
+color:#003366;
+}
+
+
+
+.container{
+
+background:white;
+border:4px solid #003366;
+border-radius:15px;
+padding:15px;
+
+}
+
+
+button{
+
+background:#0066cc;
+color:white;
+padding:10px 15px;
+margin:5px;
+border:none;
+border-radius:6px;
+
+}
+
+
+.main{
+
+display:grid;
+grid-template-columns:45% 55%;
+gap:15px;
+
+}
+
+
+
+
+/* C CODE */
+
+
+.code{
+
+background:#111;
+color:white;
+height:600px;
+overflow:auto;
+padding:15px;
+font-family:Consolas;
+
+}
+
+
+
+.line{
+
+padding:6px;
+
+}
+
+
+
+.active{
+
+background:#ffd54f;
+color:black;
+font-weight:bold;
+
+}
+
+
+
+.active::before{
+
+content:"? ";
+color:red;
+font-size:22px;
+
+}
+
+
+
+
+
+/* GRAPH */
+
+
+.graph{
+
+border:3px solid #555;
+padding:20px;
+text-align:center;
+
+}
+
+
+
+.city{
+
+display:inline-block;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#3498db;
+color:white;
+line-height:55px;
+margin:20px;
+font-weight:bold;
+border:3px solid #003366;
+
+}
+
+
+
+.visit{
+
+background:red;
+
+}
+
+
+.done{
+
+background:green;
+
+}
+
+
+
+table{
+
+margin:auto;
+border-collapse:collapse;
+
+}
+
+
+
+td{
+
+border:1px solid black;
+padding:8px;
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+<h1>
+GRAPH OF CITIES USING DFS / BFS
+</h1>
+
+
+
+<div class="container">
+
+
+<button onclick="createGraph()">
+Create Graph
+</button>
+
+
+<button onclick="dfs()">
+DFS Traversal
+</button>
+
+
+<button onclick="bfs()">
+BFS Traversal
+</button>
+
+
+<button onclick="reset()">
+Reset
+</button>
+
+
+
+
+<div class="main">
+
+
+
+<!-- C PROGRAM -->
+
+
+<div class="code">
+
+
+<h2>C PROGRAM</h2>
+
+
+<div class="line" id="c1">
+struct graph
+</div>
+
+
+<div class="line" id="c2">
+int adj[MAX][MAX];
+</div>
+
+
+<div class="line" id="c3">
+Create Adjacency Matrix
+</div>
+
+
+
+<div class="line" id="c4">
+read number of cities
+</div>
+
+
+<div class="line" id="c5">
+store edges in matrix
+</div>
+
+
+
+<br>
+
+
+
+<div class="line" id="c6">
+void DFS(int v)
+</div>
+
+
+<div class="line" id="c7">
+visited[v]=1;
+</div>
+
+
+<div class="line" id="c8">
+print vertex v
+</div>
+
+
+<div class="line" id="c9">
+visit adjacent nodes
+</div>
+
+
+
+
+<br>
+
+
+
+<div class="line" id="c10">
+void BFS(int start)
+</div>
+
+
+<div class="line" id="c11">
+insert start into queue
+</div>
+
+
+<div class="line" id="c12">
+delete queue element
+</div>
+
+
+<div class="line" id="c13">
+visit adjacent cities
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- GRAPH PANEL -->
+
+
+<div class="graph">
+
+
+<h2>City Graph</h2>
+
+
+<div id="cities"></div>
+
+
+<h3 id="output"></h3>
+
+
+<h3>Adjacency Matrix</h3>
+
+
+<table id="matrix"></table>
+
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<script>
+
+
+let cities=["A","B","C","D","E"];
+
+
+
+let matrix=[
+
+[0,1,1,0,0],
+
+[1,0,1,1,0],
+
+[1,1,0,0,1],
+
+[0,1,0,0,1],
+
+[0,0,1,1,0]
+
+];
+
+
+
+function execute(line,text)
+{
+
+
+document.querySelectorAll(".line")
+.forEach(e=>{
+
+e.className="line";
+
+});
+
+
+document.getElementById(line)
+.className="line active";
+
+
+document.getElementById("output")
+.innerHTML=text;
+
+
+}
+
+
+
+
+
+function createGraph()
+{
+
+
+execute(
+"c3",
+"Creating Graph using Adjacency Matrix"
+);
+
+
+
+drawGraph();
+
+
+displayMatrix();
+
+
+}
+
+
+
+
+
+
+
+function drawGraph()
+{
+
+
+let box=document.getElementById("cities");
+
+
+box.innerHTML="";
+
+
+
+cities.forEach((c,i)=>{
+
+
+box.innerHTML+=
+
+`
+<span class="city" id="city${i}">
+${c}
+</span>
+`;
+
+
+
+});
+
+
+}
+
+
+
+
+
+function displayMatrix()
+{
+
+
+let table=document.getElementById("matrix");
+
+
+table.innerHTML="";
+
+
+let row="<tr><td></td>";
+
+
+
+cities.forEach(c=>{
+
+row+="<td>"+c+"</td>";
+
+});
+
+
+row+="</tr>";
+
+
+table.innerHTML+=row;
+
+
+
+matrix.forEach((r,i)=>{
+
+
+let row="<tr>";
+
+row+="<td>"+cities[i]+"</td>";
+
+
+r.forEach(x=>{
+
+
+row+="<td>"+x+"</td>";
+
+
+});
+
+
+row+="</tr>";
+
+
+table.innerHTML+=row;
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+function visitNode(i)
+{
+
+
+document.querySelectorAll(".city")
+.forEach(n=>{
+
+n.classList.remove("visit");
+
+});
+
+
+document.getElementById("city"+i)
+.classList.add("visit");
+
+
+}
+
+
+
+
+
+function dfs()
+{
+
+
+execute(
+"c6",
+"DFS Traversal Started"
+);
+
+
+
+let order=[0,1,2,4,3];
+
+
+
+let i=0;
+
+
+let timer=setInterval(()=>{
+
+
+if(i>=order.length)
+{
+
+clearInterval(timer);
+
+return;
+
+}
+
+
+
+execute(
+"c8",
+"DFS Visiting City : "+cities[order[i]]
+);
+
+
+
+visitNode(order[i]);
+
+
+i++;
+
+
+},1200);
+
+
+
+}
+
+
+
+
+
+
+
+function bfs()
+{
+
+
+execute(
+"c10",
+"BFS Traversal Started"
+);
+
+
+
+let order=[0,1,2,3,4];
+
+
+let i=0;
+
+
+let timer=setInterval(()=>{
+
+
+if(i>=order.length)
+{
+
+clearInterval(timer);
+
+return;
+
+}
+
+
+
+execute(
+"c13",
+"BFS Visiting City : "+cities[order[i]]
+);
+
+
+
+visitNode(order[i]);
+
+
+
+i++;
+
+
+},1200);
+
+
+
+}
+
+
+
+
+
+
+
+function reset()
+{
+
+document.getElementById("cities")
+.innerHTML="";
+
+
+document.getElementById("matrix")
+.innerHTML="";
+
+
+document.getElementById("output")
+.innerHTML="";
+
+
+}
+
+
+
+</script>
+
+
+
+</body>
+
+</html>

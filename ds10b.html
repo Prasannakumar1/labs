@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>BST Animation with C Code Highlight</title>
+
+
+<style>
+
+body{
+font-family:Segoe UI,Arial;
+background:#eaf2f8;
+padding:20px;
+}
+
+
+h1{
+text-align:center;
+color:#003366;
+}
+
+
+.container{
+
+background:white;
+border:4px solid #003366;
+border-radius:15px;
+padding:15px;
+
+}
+
+
+button{
+
+background:#0066cc;
+color:white;
+padding:10px 15px;
+margin:5px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+
+}
+
+
+button:hover{
+
+background:#003366;
+
+}
+
+
+input{
+
+padding:8px;
+
+}
+
+
+.main{
+
+display:grid;
+grid-template-columns:45% 55%;
+gap:15px;
+
+}
+
+
+/* C CODE */
+
+.code{
+
+background:#111;
+color:white;
+height:600px;
+overflow:auto;
+padding:15px;
+font-family:Consolas;
+
+}
+
+
+.codeLine{
+
+padding:6px;
+
+}
+
+
+
+.active{
+
+background:#ffd54f;
+color:black;
+font-weight:bold;
+
+}
+
+
+
+.active::before{
+
+content:"? ";
+color:red;
+font-size:22px;
+
+}
+
+
+
+
+
+/* TREE */
+
+.treePanel{
+
+border:3px solid #555;
+padding:20px;
+text-align:center;
+
+}
+
+
+
+.treeNode{
+
+display:inline-block;
+width:50px;
+height:50px;
+border-radius:50%;
+background:#3498db;
+color:white;
+line-height:50px;
+font-weight:bold;
+margin:10px;
+border:3px solid #003366;
+
+}
+
+
+
+.visit{
+
+background:red;
+transform:scale(1.3);
+
+}
+
+
+
+.branch{
+
+font-size:30px;
+color:red;
+
+}
+
+
+
+.level{
+
+margin:20px;
+
+}
+
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<h1>
+BINARY SEARCH TREE USING C PROGRAM
+</h1>
+
+
+
+<div class="container">
+
+
+<button onclick="createBST()">
+Create BST
+</button>
+
+
+<button onclick="inorder()">
+Inorder
+</button>
+
+
+<button onclick="preorder()">
+Preorder
+</button>
+
+
+<button onclick="postorder()">
+Postorder
+</button>
+
+
+<input id="key" placeholder="Enter KEY">
+
+
+<button onclick="search()">
+Search
+</button>
+
+
+<button onclick="reset()">
+Exit
+</button>
+
+
+
+
+
+<div class="main">
+
+
+
+<!-- C PROGRAM -->
+
+
+<div class="code">
+
+
+<h2>C PROGRAM</h2>
+
+
+
+<div class="codeLine" id="c1">
+struct node
+</div>
+
+
+<div class="codeLine" id="c2">
+{
+</div>
+
+
+<div class="codeLine" id="c3">
+int data;
+</div>
+
+
+<div class="codeLine" id="c4">
+struct node *left,*right;
+</div>
+
+
+<div class="codeLine" id="c5">
+Create New Node
+</div>
+
+
+<div class="codeLine" id="c6">
+if(root==NULL)
+</div>
+
+
+<div class="codeLine" id="c7">
+create root node
+</div>
+
+
+
+<div class="codeLine" id="c8">
+if(item &lt; root->data)
+</div>
+
+
+<div class="codeLine" id="c9">
+Insert Left Subtree
+</div>
+
+
+
+<div class="codeLine" id="c10">
+else
+</div>
+
+
+<div class="codeLine" id="c11">
+Insert Right Subtree
+</div>
+
+
+
+<br>
+
+
+
+<div class="codeLine" id="c12">
+void inorder(root)
+</div>
+
+
+<div class="codeLine" id="c13">
+Left - Root - Right
+</div>
+
+
+
+
+<div class="codeLine" id="c14">
+void preorder(root)
+</div>
+
+
+<div class="codeLine" id="c15">
+Root - Left - Right
+</div>
+
+
+
+<div class="codeLine" id="c16">
+void postorder(root)
+</div>
+
+
+<div class="codeLine" id="c17">
+Left - Right - Root
+</div>
+
+
+
+<br>
+
+
+<div class="codeLine" id="c18">
+Search KEY
+</div>
+
+
+<div class="codeLine" id="c19">
+Compare node data
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- TREE -->
+
+<div class="treePanel">
+
+
+<h2>BST Visualization</h2>
+
+
+<div id="tree"></div>
+
+
+<h3 id="output"></h3>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<script>
+
+
+
+let values=[6,9,5,2,8,15,24,14,7,8,5,2];
+
+
+let bst=[];
+
+
+
+function execute(line,text)
+{
+
+
+document.querySelectorAll(".codeLine")
+.forEach(e=>{
+
+e.className="codeLine";
+
+});
+
+
+
+document.getElementById(line)
+.className="codeLine active";
+
+
+
+document.getElementById("output")
+.innerHTML=text;
+
+
+}
+
+
+
+
+
+
+function createBST()
+{
+
+
+bst=[];
+
+
+let i=0;
+
+
+let timer=setInterval(()=>{
+
+
+if(i>=values.length)
+{
+
+clearInterval(timer);
+
+return;
+
+}
+
+
+
+execute(
+"c5",
+"Creating Node : "+values[i]
+);
+
+
+
+setTimeout(()=>{
+
+
+execute(
+"c8",
+"Comparing "+values[i]
+);
+
+
+},500);
+
+
+
+bst.push(values[i]);
+
+
+draw();
+
+
+i++;
+
+
+},1500);
+
+
+}
+
+
+
+
+
+
+function inorder()
+{
+
+
+execute(
+"c12",
+"Inorder Traversal : Left Root Right"
+);
+
+
+
+setTimeout(()=>{
+
+
+execute(
+"c13",
+"Sorted Order : "+
+
+[...bst].sort((a,b)=>a-b)
+
+);
+
+
+},1000);
+
+
+}
+
+
+
+
+
+function preorder()
+{
+
+
+execute(
+"c14",
+"Preorder Traversal : Root Left Right"
+);
+
+
+
+setTimeout(()=>{
+
+
+execute(
+"c15",
+bst
+
+);
+
+
+},1000);
+
+
+
+}
+
+
+
+
+
+
+function postorder()
+{
+
+
+execute(
+"c16",
+"Postorder Traversal"
+);
+
+
+
+setTimeout(()=>{
+
+
+execute(
+"c17",
+[...bst].reverse()
+
+);
+
+
+},1000);
+
+
+}
+
+
+
+
+
+
+
+function search()
+{
+
+
+let key=
+
+Number(document.getElementById("key").value);
+
+
+
+let i=0;
+
+
+
+let timer=setInterval(()=>{
+
+
+if(i>=bst.length)
+{
+
+clearInterval(timer);
+
+
+execute(
+"c19",
+"KEY Not Found"
+);
+
+
+return;
+
+}
+
+
+
+execute(
+
+"c18",
+
+"Searching Node : "+bst[i]
+
+);
+
+
+
+highlightNode(i);
+
+
+
+if(bst[i]==key)
+{
+
+
+clearInterval(timer);
+
+
+
+execute(
+
+"c19",
+
+"KEY FOUND : "+key
+
+);
+
+
+}
+
+
+
+i++;
+
+
+},1200);
+
+
+
+}
+
+
+
+
+
+
+function highlightNode(i)
+{
+
+let nodes=document.querySelectorAll(".treeNode");
+
+
+nodes.forEach(n=>{
+
+n.classList.remove("visit");
+
+});
+
+
+if(nodes[i])
+
+nodes[i].classList.add("visit");
+
+
+}
+
+
+
+
+
+function draw()
+{
+
+
+let tree=document.getElementById("tree");
+
+
+tree.innerHTML="";
+
+
+
+tree.innerHTML=
+
+
+`
+
+<div class="level">
+
+<span class="treeNode">6</span>
+
+</div>
+
+
+
+<div class="branch">
+
+? &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ?
+
+</div>
+
+
+
+<div class="level">
+
+
+<span class="treeNode">5</span>
+
+<span class="treeNode">9</span>
+
+
+</div>
+
+
+
+<div class="branch">
+
+? ? &nbsp;&nbsp;&nbsp;&nbsp; ? ?
+
+</div>
+
+
+
+<div class="level">
+
+
+<span class="treeNode">2</span>
+
+<span class="treeNode">8</span>
+
+<span class="treeNode">15</span>
+
+<span class="treeNode">24</span>
+
+
+</div>
+
+
+
+`;
+
+
+
+}
+
+
+
+
+function reset()
+{
+
+bst=[];
+
+document.getElementById("tree").innerHTML="";
+
+document.getElementById("output").innerHTML="";
+
+}
+
+
+
+</script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Singly Linked List Visualization</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#eef2f7;
+    margin:20px;
+}
+
+h2{
+    text-align:center;
+    color:#003366;
+}
+
+.controls{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+button{
+    padding:8px 12px;
+    margin:4px;
+    background:#0066cc;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#004a99;
+}
+
+#list{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    min-height:120px;
+    border:2px solid #003366;
+    padding:20px;
+    background:white;
+}
+
+.node{
+    background:#4CAF50;
+    color:white;
+    border-radius:10px;
+    padding:10px;
+    width:120px;
+    text-align:center;
+    margin:10px;
+    animation:show .5s;
+}
+
+.arrow{
+    font-size:30px;
+    margin-right:10px;
+    color:red;
+}
+
+.head{
+    font-weight:bold;
+    color:blue;
+    margin-right:20px;
+}
+
+#status{
+    margin-top:20px;
+    padding:10px;
+    background:white;
+    border:2px solid #003366;
+    font-weight:bold;
+}
+
+@keyframes show{
+from{
+transform:scale(0);
+opacity:0;
+}
+to{
+transform:scale(1);
+opacity:1;
+}
+}
+</style>
+
+</head>
+<body>
+
+<h2>Singly Linked List Visualization</h2>
+
+<div class="controls">
+
+<button onclick="createFront()">Create (Front)</button>
+
+<button onclick="displayList()">Display</button>
+
+<button onclick="insertEnd()">Insert End</button>
+
+<button onclick="deleteEnd()">Delete End</button>
+
+<button onclick="insertFront()">Insert Front</button>
+
+<button onclick="deleteFront()">Delete Front</button>
+
+</div>
+
+<div id="list"></div>
+
+<div id="status">
+Status
+</div>
+
+<script>
+
+let list=[];
+
+function render(){
+
+let html="<span class='head'>HEAD ? </span>";
+
+for(let i=0;i<list.length;i++){
+
+html+="<div class='node'>"+
+"<b>"+list[i].usn+"</b><br>"+
+list[i].name+"<br>"+
+list[i].prog+"<br>Sem "+list[i].sem+
+"</div>";
+
+if(i!=list.length-1)
+html+="<div class='arrow'>?</div>";
+
+}
+
+if(list.length==0)
+html+="NULL";
+
+document.getElementById("list").innerHTML=html;
+
+}
+
+function student(){
+
+return{
+
+usn:prompt("USN"),
+
+name:prompt("Name"),
+
+prog:prompt("Programme"),
+
+sem:prompt("Semester"),
+
+phone:prompt("Phone")
+
+};
+
+}
+
+function createFront(){
+
+let n=parseInt(prompt("Number of Students"));
+
+list=[];
+
+for(let i=0;i<n;i++){
+
+list.unshift(student());
+
+}
+
+render();
+
+document.getElementById("status").innerHTML=
+"SLL Created<br>Total Nodes : "+list.length;
+
+}
+
+function displayList(){
+
+render();
+
+document.getElementById("status").innerHTML=
+"Displaying List<br>Total Nodes : "+list.length;
+
+}
+
+function insertFront(){
+
+list.unshift(student());
+
+render();
+
+document.getElementById("status").innerHTML=
+"Inserted at Front (Stack Push)<br>Total Nodes : "+list.length;
+
+}
+
+function insertEnd(){
+
+list.push(student());
+
+render();
+
+document.getElementById("status").innerHTML=
+"Inserted at End<br>Total Nodes : "+list.length;
+
+}
+
+function deleteFront(){
+
+if(list.length==0){
+
+alert("List Empty");
+
+return;
+
+}
+
+list.shift();
+
+render();
+
+document.getElementById("status").innerHTML=
+"Deleted from Front (Stack Pop)<br>Total Nodes : "+list.length;
+
+}
+
+function deleteEnd(){
+
+if(list.length==0){
+
+alert("List Empty");
+
+return;
+
+}
+
+list.pop();
+
+render();
+
+document.getElementById("status").innerHTML=
+"Deleted from End<br>Total Nodes : "+list.length;
+
+}
+
+render();
+
+</script>
+
+</body>
+</html>

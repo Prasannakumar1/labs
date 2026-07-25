@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Infix To Postfix C Code Animation</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#eaf2f8;
+padding:20px;
+}
+
+h1{
+text-align:center;
+color:#003366;
+}
+
+
+.container{
+
+background:white;
+border:4px solid #003366;
+border-radius:15px;
+padding:15px;
+
+}
+
+
+.controls{
+
+text-align:center;
+margin:20px;
+
+}
+
+
+input{
+
+font-size:20px;
+padding:8px;
+width:250px;
+
+}
+
+
+button{
+
+padding:10px 20px;
+font-size:18px;
+background:#0066cc;
+color:white;
+border:none;
+border-radius:6px;
+
+}
+
+
+
+.main{
+
+display:grid;
+grid-template-columns:45% 55%;
+gap:15px;
+
+}
+
+
+/* SOURCE CODE */
+
+.code{
+
+background:#111;
+color:white;
+height:500px;
+overflow:auto;
+padding:15px;
+font-family:Consolas;
+
+}
+
+
+.line{
+
+padding:5px;
+
+}
+
+
+.active{
+
+background:#ffd54f;
+color:black;
+
+}
+
+
+
+/* ANIMATION */
+
+.animation{
+
+border:3px solid #555;
+padding:15px;
+text-align:center;
+
+}
+
+
+
+.char{
+
+font-size:45px;
+color:red;
+font-weight:bold;
+
+}
+
+
+
+.stack{
+
+width:200px;
+height:250px;
+border:5px solid #003366;
+
+margin:auto;
+
+display:flex;
+flex-direction:column-reverse;
+
+align-items:center;
+
+background:#e3f2fd;
+
+}
+
+
+
+.box{
+
+width:130px;
+height:40px;
+
+background:#e91e63;
+
+color:white;
+
+margin:5px;
+
+font-size:22px;
+
+font-weight:bold;
+
+border-radius:5px;
+
+}
+
+
+
+.post{
+
+font-size:30px;
+font-weight:bold;
+color:#003366;
+
+}
+
+
+
+.step{
+
+margin-top:20px;
+border:3px solid #003366;
+padding:15px;
+font-size:20px;
+
+}
+
+</style>
+
+</head>
+
+
+
+<body>
+
+
+<h1>
+INFIX TO POSTFIX CONVERSION USING STACK
+</h1>
+
+
+
+<div class="container">
+
+
+
+<div class="controls">
+
+Infix Expression :
+
+<input id="expr" value="A+B*C">
+
+
+<button onclick="start()">
+START
+</button>
+
+<button onclick="reset()">
+RESET
+</button>
+
+
+</div>
+
+
+
+
+
+<div class="main">
+
+
+
+
+
+<!-- C SOURCE -->
+
+<div class="code">
+
+
+<h2>C PROGRAM</h2>
+
+
+<div class="line" id="l1">
+push('#');
+</div>
+
+
+<div class="line" id="l2">
+while((ch=infix[i++])!='\0')
+</div>
+
+
+<div class="line" id="l3">
+if(isalnum(ch))
+</div>
+
+
+<div class="line" id="l4">
+postfix[k++]=ch;
+</div>
+
+
+<div class="line" id="l5">
+else if(ch=='(')
+</div>
+
+
+<div class="line" id="l6">
+push(ch);
+</div>
+
+
+<div class="line" id="l7">
+else if(ch==')')
+</div>
+
+
+<div class="line" id="l8">
+postfix[k++]=pop();
+</div>
+
+
+<div class="line" id="l9">
+else
+</div>
+
+
+<div class="line" id="l10">
+while(precedence(s[top])>=precedence(ch))
+</div>
+
+
+<div class="line" id="l11">
+postfix[k++]=pop();
+</div>
+
+
+<div class="line" id="l12">
+push(ch);
+</div>
+
+
+<div class="line" id="l13">
+while(s[top]!='#')
+</div>
+
+
+<div class="line" id="l14">
+postfix[k++]=pop();
+</div>
+
+
+<div class="line" id="l15">
+printf(postfix);
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- ANIMATION -->
+
+<div class="animation">
+
+
+<h2>
+Current Character
+</h2>
+
+
+<div id="current" class="char">
+-
+</div>
+
+
+
+
+<h2>
+STACK
+</h2>
+
+
+<div>
+TOP ?
+</div>
+
+
+<div class="stack" id="stack">
+
+</div>
+
+
+
+<h2>
+POSTFIX
+</h2>
+
+
+<div id="postfix" class="post">
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+<div class="step" id="step">
+
+Current Step:
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<script>
+
+
+let infix="";
+let i=0;
+
+let stack=[];
+
+let postfix="";
+
+
+
+
+function highlight(id,text)
+{
+
+
+document.querySelectorAll(".line")
+.forEach(e=>e.className="line");
+
+
+document.getElementById(id)
+.className="active";
+
+
+step.innerHTML=
+"Current Step : "+text;
+
+
+}
+
+
+
+
+
+function precedence(x)
+{
+
+if(x=="+"||x=="-")
+return 2;
+
+
+if(x=="*"||x=="/"||x=="%")
+return 3;
+
+
+if(x=="^")
+return 4;
+
+
+if(x=="#")
+return 0;
+
+
+return 1;
+
+}
+
+
+
+
+function draw()
+{
+
+let html="";
+
+
+stack.forEach(x=>{
+
+html+="<div class='box'>"+x+"</div>";
+
+});
+
+
+document.getElementById("stack").innerHTML=html;
+
+
+}
+
+
+
+
+
+
+
+function start()
+{
+
+infix=
+document.getElementById("expr").value;
+
+
+stack=[];
+
+postfix="";
+
+i=0;
+
+
+stack.push("#");
+
+
+highlight(
+"l1",
+"Initialize stack with #"
+);
+
+
+draw();
+
+
+setTimeout(readChar,1000);
+
+
+}
+
+
+
+
+
+
+function readChar()
+{
+
+
+if(i>=infix.length)
+{
+
+
+finish();
+
+return;
+
+}
+
+
+
+let ch=infix[i++];
+
+current.innerHTML=ch;
+
+
+
+highlight(
+"l2",
+"Read character : "+ch
+);
+
+
+
+setTimeout(()=>process(ch),1000);
+
+
+
+}
+
+
+
+
+
+
+
+function process(ch)
+{
+
+
+if(/[a-zA-Z0-9]/.test(ch))
+{
+
+
+highlight(
+"l3",
+"Operand found"
+);
+
+
+postfix+=ch;
+
+
+highlight(
+"l4",
+"Add operand to postfix"
+);
+
+
+}
+
+
+
+
+
+else if(ch=="(")
+{
+
+
+highlight(
+"l5",
+"Opening bracket"
+);
+
+
+stack.push(ch);
+
+
+highlight(
+"l6",
+"Push ( into stack"
+);
+
+
+}
+
+
+
+
+
+
+else
+{
+
+
+highlight(
+"l9",
+"Operator processing"
+);
+
+
+
+while(
+precedence(stack[stack.length-1])
+>=precedence(ch)
+)
+
+{
+
+postfix+=stack.pop();
+
+
+highlight(
+"l11",
+"Pop higher precedence operator"
+);
+
+
+draw();
+
+}
+
+
+
+
+stack.push(ch);
+
+
+highlight(
+"l12",
+"Push operator"
+);
+
+
+}
+
+
+
+
+
+postfixDiv();
+
+
+draw();
+
+
+setTimeout(readChar,1500);
+
+
+}
+
+
+
+
+
+
+function postfixDiv()
+{
+
+document.getElementById("postfix")
+.innerHTML=postfix;
+
+}
+
+
+
+
+
+function finish()
+{
+
+
+while(stack[stack.length-1]!="#")
+{
+
+postfix+=stack.pop();
+
+highlight(
+"l14",
+"Remove remaining operators"
+);
+
+
+draw();
+
+}
+
+
+
+postfixDiv();
+
+
+highlight(
+"l15",
+"Display Postfix Expression"
+);
+
+
+}
+
+
+
+
+
+function reset()
+{
+
+location.reload();
+
+}
+
+
+</script>
+
+
+</body>
+</html>

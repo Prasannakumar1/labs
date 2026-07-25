@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Stack Applications Animation</title>
+
+<style>
+
+body{
+    font-family: Arial;
+    background:#eaf2f8;
+    padding:20px;
+}
+
+h1,h2{
+    text-align:center;
+    color:#003366;
+}
+
+.container{
+    background:white;
+    border:3px solid #003366;
+    border-radius:15px;
+    padding:20px;
+    margin-bottom:30px;
+}
+
+
+/* Stack */
+
+.stack{
+    width:120px;
+    min-height:250px;
+    border:4px solid black;
+    margin:auto;
+    display:flex;
+    flex-direction:column-reverse;
+    justify-content:flex-start;
+}
+
+
+.item{
+    width:100px;
+    height:35px;
+    background:#3498db;
+    color:white;
+    text-align:center;
+    margin:5px;
+    line-height:35px;
+    font-weight:bold;
+    animation:push .5s;
+}
+
+@keyframes push{
+from{
+transform:translateY(-50px);
+opacity:0;
+}
+}
+
+
+/* Hanoi */
+
+.hanoi{
+display:flex;
+justify-content:space-around;
+height:350px;
+}
+
+
+.rod{
+width:20px;
+height:250px;
+background:#555;
+position:relative;
+margin-top:40px;
+}
+
+
+.disk{
+height:25px;
+border-radius:10px;
+color:white;
+text-align:center;
+line-height:25px;
+position:absolute;
+left:-60px;
+transition:1s;
+}
+
+
+button{
+
+padding:10px 20px;
+background:#003366;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+
+}
+
+button:hover{
+background:red;
+}
+
+
+pre{
+background:#222;
+color:#00ff00;
+padding:15px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+
+<h2>2. Tower of Hanoi Animation</h2>
+
+
+<p>
+Number of Disks:
+<input id="diskCount" value="3">
+<button onclick="startHanoi()">Start</button>
+</p>
+
+
+<div class="hanoi">
+
+<div>
+<h3>A</h3>
+<div class="rod" id="A"></div>
+</div>
+
+
+<div>
+<h3>B</h3>
+<div class="rod" id="B"></div>
+</div>
+
+
+<div>
+<h3>C</h3>
+<div class="rod" id="C"></div>
+</div>
+
+
+</div>
+
+
+<h3>C Program Logic</h3>
+
+
+<pre>
+
+void tower(int n,char source,
+           char temp,char destination)
+{
+
+ if(n==1)
+ {
+   printf("Move Disk");
+   return;
+ }
+
+ tower(n-1,source,destination,temp);
+
+ printf("Move disk %d",n);
+
+ tower(n-1,temp,source,destination);
+
+}
+
+</pre>
+
+
+</div>
+
+
+
+
+<script>
+
+
+// POSTFIX
+
+
+let stack=[];
+
+
+function evaluatePostfix()
+{
+
+let exp=document.getElementById("exp").value;
+
+stack=[];
+
+
+let box=document.getElementById("stack");
+
+box.innerHTML="";
+
+
+for(let ch of exp)
+{
+
+if(!isNaN(ch))
+{
+
+stack.push(parseInt(ch));
+displayStack();
+
+}
+
+else
+{
+
+let a=stack.pop();
+
+let b=stack.pop();
+
+let r;
+
+
+switch(ch)
+{
+
+case '+':
+r=b+a;
+break;
+
+case '-':
+r=b-a;
+break;
+
+case '*':
+r=b*a;
+break;
+
+case '/':
+r=b/a;
+break;
+
+case '%':
+r=b%a;
+break;
+
+case '^':
+r=Math.pow(b,a);
+break;
+
+}
+
+stack.push(r);
+
+displayStack();
+
+}
+
+
+}
+
+
+document.getElementById("result").innerHTML=
+"Result = "+stack[0];
+
+
+}
+
+
+
+function displayStack()
+{
+
+let box=document.getElementById("stack");
+
+box.innerHTML="";
+
+
+stack.forEach(x=>{
+
+let d=document.createElement("div");
+
+d.className="item";
+
+d.innerHTML=x;
+
+box.appendChild(d);
+
+});
+
+
+}
+
+
+
+
+
+
+
+// TOWER OF HANOI
+
+
+let rods={
+A:[],
+B:[],
+C:[]
+};
+
+
+let moves=[];
+
+
+function createDisks(n)
+{
+
+for(let r of ["A","B","C"])
+document.getElementById(r).innerHTML="";
+
+
+rods.A=[];
+rods.B=[];
+rods.C=[];
+
+
+for(let i=n;i>=1;i--)
+{
+
+let disk=document.createElement("div");
+
+disk.className="disk";
+
+disk.style.width=(40+i*25)+"px";
+
+disk.style.background=
+"hsl("+i*50+",70%,40%)";
+
+disk.innerHTML=i;
+
+
+rods.A.push(disk);
+
+document.getElementById("A").appendChild(disk);
+
+}
+
+
+}
+
+
+
+
+function hanoi(n,from,aux,to)
+{
+
+if(n==1)
+{
+
+moves.push([from,to]);
+
+}
+
+else
+{
+
+hanoi(n-1,from,to,aux);
+
+moves.push([from,to]);
+
+hanoi(n-1,aux,from,to);
+
+}
+
+}
+
+
+
+function startHanoi()
+{
+
+let n=parseInt(
+document.getElementById("diskCount").value
+);
+
+
+createDisks(n);
+
+moves=[];
+
+hanoi(n,"A","B","C");
+
+
+let i=0;
+
+
+let timer=setInterval(()=>{
+
+
+if(i>=moves.length)
+{
+
+clearInterval(timer);
+return;
+
+}
+
+
+let m=moves[i];
+
+
+let disk=rods[m[0]].pop();
+
+
+rods[m[1]].push(disk);
+
+
+document.getElementById(m[1])
+.appendChild(disk);
+
+
+i++;
+
+
+},1200);
+
+
+}
+
+
+</script>
+
+
+</body>
+</html>

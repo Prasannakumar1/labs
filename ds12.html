@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Hashing Linear Probing Animation</title>
+
+
+<style>
+
+body{
+
+font-family:Segoe UI,Arial;
+background:#eaf2f8;
+padding:20px;
+
+}
+
+
+h1{
+
+text-align:center;
+color:#003366;
+
+}
+
+
+
+.container{
+
+background:white;
+border:4px solid #003366;
+border-radius:15px;
+padding:15px;
+
+}
+
+
+
+button{
+
+background:#0066cc;
+color:white;
+padding:10px 15px;
+margin:5px;
+border:none;
+border-radius:6px;
+
+}
+
+
+input{
+
+padding:8px;
+
+}
+
+
+
+.main{
+
+display:grid;
+grid-template-columns:45% 55%;
+gap:15px;
+
+}
+
+
+
+
+/* C CODE */
+
+
+.code{
+
+background:#111;
+color:white;
+height:600px;
+overflow:auto;
+padding:15px;
+font-family:Consolas;
+
+}
+
+
+
+.line{
+
+padding:6px;
+
+}
+
+
+
+.active{
+
+background:#ffd54f;
+color:black;
+font-weight:bold;
+
+}
+
+
+
+.active::before{
+
+content:"? ";
+color:red;
+font-size:22px;
+
+}
+
+
+
+
+
+
+/* HASH TABLE */
+
+
+.visual{
+
+border:3px solid #555;
+padding:20px;
+text-align:center;
+
+}
+
+
+
+table{
+
+margin:auto;
+border-collapse:collapse;
+
+}
+
+
+
+td,th{
+
+border:2px solid #003366;
+padding:12px;
+
+}
+
+
+
+.hash{
+
+background:#3498db;
+color:white;
+font-weight:bold;
+
+}
+
+
+
+.collision{
+
+background:red;
+color:white;
+
+}
+
+
+
+.inserted{
+
+background:green;
+color:white;
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+<h1>
+HASHING USING LINEAR PROBING IN C
+</h1>
+
+
+
+
+<div class="container">
+
+
+<button onclick="createTable()">
+Create Hash Table
+</button>
+
+
+<input id="key" placeholder="Enter 4 Digit Key">
+
+
+<button onclick="insert()">
+Insert Key
+</button>
+
+
+<button onclick="search()">
+Search Key
+</button>
+
+
+<button onclick="reset()">
+Reset
+</button>
+
+
+
+
+
+<div class="main">
+
+
+
+
+
+<!-- C PROGRAM -->
+
+
+<div class="code">
+
+
+<h2>C PROGRAM</h2>
+
+
+
+<div class="line" id="c1">
+#define SIZE 10
+</div>
+
+
+
+<div class="line" id="c2">
+int HT[SIZE];
+</div>
+
+
+
+<div class="line" id="c3">
+Hash Function
+</div>
+
+
+
+<div class="line" id="c4">
+H(K)=K mod m
+</div>
+
+
+
+<br>
+
+
+
+<div class="line" id="c5">
+index=key%size
+</div>
+
+
+
+<div class="line" id="c6">
+if(HT[index]==EMPTY)
+</div>
+
+
+
+<div class="line" id="c7">
+Insert key
+</div>
+
+
+
+<div class="line" id="c8">
+else collision occurs
+</div>
+
+
+
+<div class="line" id="c9">
+index=(index+1)%size
+</div>
+
+
+
+<div class="line" id="c10">
+Linear Probing
+</div>
+
+
+
+
+<br>
+
+
+
+<div class="line" id="c11">
+Search key
+</div>
+
+
+
+<div class="line" id="c12">
+Compare HT[index]
+</div>
+
+
+
+<div class="line" id="c13">
+Record Found
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<!-- HASH TABLE -->
+
+<div class="visual">
+
+
+<h2>HASH TABLE</h2>
+
+
+<table id="table"></table>
+
+
+<h3 id="output"></h3>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<script>
+
+
+let size=10;
+
+
+let HT=[];
+
+
+
+function execute(line,text)
+{
+
+
+document.querySelectorAll(".line")
+.forEach(e=>{
+
+e.className="line";
+
+});
+
+
+document.getElementById(line)
+.className="line active";
+
+
+document.getElementById("output")
+.innerHTML=text;
+
+
+}
+
+
+
+
+
+
+
+function createTable()
+{
+
+
+execute(
+"c2",
+"Creating Hash Table"
+);
+
+
+
+HT=new Array(size).fill("-");
+
+
+draw();
+
+
+}
+
+
+
+
+
+
+
+function hash(k)
+{
+
+return k%size;
+
+}
+
+
+
+
+
+function insert()
+{
+
+
+let key=
+
+Number(document.getElementById("key").value);
+
+
+
+let index=hash(key);
+
+
+
+execute(
+"c5",
+"H(K)= "+key+" mod "+size+" = "+index
+);
+
+
+
+
+setTimeout(()=>{
+
+
+if(HT[index]=="-")
+{
+
+
+execute(
+"c7",
+"Inserted Key at Address "+index
+);
+
+
+HT[index]=key;
+
+
+}
+
+else
+{
+
+
+execute(
+"c8",
+"Collision at Address "+index
+);
+
+
+
+let start=index;
+
+
+while(HT[index]!="-")
+{
+
+
+execute(
+"c9",
+"Linear probing : Checking "+index
+);
+
+
+
+index=(index+1)%size;
+
+
+
+if(index==start)
+return;
+
+
+}
+
+
+
+HT[index]=key;
+
+
+execute(
+"c10",
+"Inserted using Linear Probing at "+index
+);
+
+
+
+}
+
+
+
+draw();
+
+
+},1000);
+
+
+
+
+}
+
+
+
+
+
+
+
+function search()
+{
+
+
+let key=
+
+Number(document.getElementById("key").value);
+
+
+
+let index=hash(key);
+
+
+execute(
+"c11",
+"Searching Key "+key
+);
+
+
+
+let count=0;
+
+
+
+let timer=setInterval(()=>{
+
+
+execute(
+"c12",
+"Checking Address "+index
+);
+
+
+
+if(HT[index]==key)
+{
+
+
+clearInterval(timer);
+
+
+execute(
+"c13",
+"Record Found at "+index
+);
+
+
+highlight(index);
+
+
+}
+
+
+else
+{
+
+
+index=(index+1)%size;
+
+
+count++;
+
+
+if(count==size)
+{
+
+clearInterval(timer);
+
+
+execute(
+"c13",
+"Record Not Found"
+);
+
+
+}
+
+
+
+}
+
+
+
+},1000);
+
+
+
+}
+
+
+
+
+
+
+
+function draw()
+{
+
+
+let t=document.getElementById("table");
+
+
+t.innerHTML=
+
+`
+
+<tr>
+
+<th>Address</th>
+
+<th>Key</th>
+
+</tr>
+
+`;
+
+
+
+HT.forEach((x,i)=>{
+
+
+t.innerHTML+=
+
+`
+
+<tr>
+
+<td>${i}</td>
+
+<td id="cell${i}">
+${x}
+</td>
+
+</tr>
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+function highlight(i)
+{
+
+document.querySelectorAll("td")
+.forEach(e=>{
+
+e.className="";
+
+});
+
+
+document.getElementById("cell"+i)
+.className="inserted";
+
+
+}
+
+
+
+
+
+
+
+function reset()
+{
+
+HT=[];
+
+
+document.getElementById("table")
+.innerHTML="";
+
+
+document.getElementById("output")
+.innerHTML="";
+
+
+}
+
+
+
+</script>
+
+
+</body>
+
+</html>

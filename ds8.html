@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>DLL Employee Animation With C Code</title>
+
+<style>
+
+body{
+font-family:Segoe UI,Arial;
+background:#eaf2f8;
+padding:20px;
+}
+
+
+h1{
+text-align:center;
+color:#003366;
+}
+
+
+.container{
+
+border:4px solid #003366;
+background:white;
+border-radius:15px;
+padding:15px;
+
+}
+
+
+.controls{
+
+text-align:center;
+margin:15px;
+
+}
+
+
+input{
+
+padding:8px;
+margin:4px;
+
+}
+
+
+button{
+
+padding:10px;
+background:#0066cc;
+color:white;
+border:none;
+border-radius:6px;
+margin:4px;
+
+}
+
+
+.main{
+
+display:grid;
+grid-template-columns:45% 55%;
+gap:15px;
+
+}
+
+
+
+/* C CODE */
+
+.code{
+
+background:#111;
+color:white;
+height:600px;
+overflow:auto;
+padding:15px;
+font-family:Consolas;
+
+}
+
+
+.line{
+
+padding:5px;
+
+}
+
+
+.highlight{
+
+background:#ffd54f;
+color:black;
+font-weight:bold;
+
+}
+
+
+
+
+/* DLL */
+
+
+.visual{
+
+border:3px solid #555;
+padding:20px;
+text-align:center;
+
+}
+
+
+
+.node{
+
+display:inline-block;
+width:160px;
+background:#e3f2fd;
+border:3px solid #003366;
+border-radius:10px;
+padding:10px;
+margin:10px;
+animation:show .5s;
+
+}
+
+
+
+.arrow{
+
+font-size:30px;
+color:red;
+
+}
+
+
+
+@keyframes show{
+
+from{
+
+transform:scale(0);
+
+}
+
+to{
+
+transform:scale(1);
+
+}
+
+}
+
+
+
+.head{
+
+background:green;
+color:white;
+padding:4px;
+
+}
+
+
+.tail{
+
+background:red;
+color:white;
+padding:4px;
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+<h1>
+DOUBLY LINKED LIST EMPLOYEE DATA USING C
+</h1>
+
+
+
+<div class="container">
+
+
+
+<div class="controls">
+
+
+SSN
+<input id="ssn">
+
+
+Name
+<input id="name">
+
+
+Dept
+<input id="dept">
+
+
+Designation
+<input id="desig">
+
+
+Salary
+<input id="sal">
+
+
+Phone
+<input id="phone">
+
+
+<br>
+
+
+<button onclick="insertEnd()">Insert End</button>
+
+<button onclick="insertFront()">Insert Front</button>
+
+<button onclick="deleteEnd()">Delete End</button>
+
+<button onclick="deleteFront()">Delete Front</button>
+
+<button onclick="display()">Display</button>
+
+<button onclick="deque()">DEQUE</button>
+
+</div>
+
+
+
+
+
+<div class="main">
+
+
+
+<!-- C PROGRAM -->
+
+
+<div class="code">
+
+<h2>C PROGRAM</h2>
+
+
+<div class="line" id="c1">
+struct Employee
+</div>
+
+
+<div class="line" id="c2">
+{
+</div>
+
+
+<div class="line" id="c3">
+int SSN;
+</div>
+
+
+<div class="line" id="c4">
+char Name[20];
+</div>
+
+
+<div class="line" id="c5">
+char Dept[20];
+</div>
+
+
+<div class="line" id="c6">
+float Sal;
+</div>
+
+
+<div class="line" id="c7">
+struct Employee *prev,*next;
+</div>
+
+
+<br>
+
+
+<div class="line" id="c8">
+newnode=createNode();
+</div>
+
+
+<div class="line" id="c9">
+newnode->next=head;
+</div>
+
+
+<div class="line" id="c10">
+head->prev=newnode;
+</div>
+
+
+<br>
+
+
+<div class="line" id="c11">
+temp=head;
+</div>
+
+
+<div class="line" id="c12">
+while(temp->next!=NULL)
+</div>
+
+
+<div class="line" id="c13">
+temp=temp->next;
+</div>
+
+
+<div class="line" id="c14">
+temp->next=newnode;
+</div>
+
+
+<br>
+
+
+<div class="line" id="c15">
+free(temp);
+</div>
+
+
+<div class="line" id="c16">
+head=head->next;
+</div>
+
+
+<br>
+
+
+<div class="line" id="c17">
+Traverse DLL and count nodes
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<!-- ANIMATION -->
+
+<div class="visual">
+
+
+<h2>DLL Animation</h2>
+
+
+<div id="dll"></div>
+
+
+<h3 id="msg"></h3>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<script>
+
+
+let dll=[];
+
+
+
+function highlight(lines,text)
+{
+
+
+document.querySelectorAll(".line")
+.forEach(x=>x.className="line");
+
+
+lines.forEach((l,i)=>{
+
+
+setTimeout(()=>{
+
+
+document.getElementById(l)
+.className="line highlight";
+
+
+},i*500);
+
+
+});
+
+
+document.getElementById("msg")
+.innerHTML=text;
+
+
+}
+
+
+
+
+
+function getData()
+{
+
+
+return{
+
+
+ssn:ssn.value,
+
+name:name.value,
+
+dept:dept.value,
+
+desig:desig.value,
+
+sal:sal.value,
+
+phone:phone.value
+
+
+};
+
+}
+
+
+
+
+
+function insertEnd()
+{
+
+
+highlight(
+
+["c11","c12","c13","c14"],
+
+"Insert Employee at END"
+
+);
+
+
+
+dll.push(getData());
+
+
+draw();
+
+
+}
+
+
+
+
+
+function insertFront()
+{
+
+
+highlight(
+
+["c8","c9","c10"],
+
+"Insert Employee at FRONT"
+
+);
+
+
+
+dll.unshift(getData());
+
+
+draw();
+
+
+}
+
+
+
+
+
+
+
+function deleteEnd()
+{
+
+
+if(dll.length==0)
+return;
+
+
+highlight(
+
+["c11","c12","c15"],
+
+"Delete Employee from END"
+
+);
+
+
+
+dll.pop();
+
+
+draw();
+
+
+}
+
+
+
+
+
+function deleteFront()
+{
+
+
+if(dll.length==0)
+return;
+
+
+
+highlight(
+
+["c16","c15"],
+
+"Delete Employee from FRONT"
+
+);
+
+
+
+dll.shift();
+
+
+draw();
+
+
+}
+
+
+
+
+
+function display()
+{
+
+
+highlight(
+
+["c17"],
+
+"Display DLL and Count Nodes = "+dll.length
+
+);
+
+
+draw();
+
+
+}
+
+
+
+
+
+function deque()
+{
+
+
+highlight(
+
+["c8","c15"],
+
+"DLL acts as Double Ended Queue"
+
+);
+
+
+}
+
+
+
+
+
+function draw()
+{
+
+
+let box=document.getElementById("dll");
+
+box.innerHTML="";
+
+
+
+dll.forEach((e,i)=>{
+
+
+if(i==0)
+box.innerHTML+="<span class='head'>HEAD</span><br>";
+
+
+
+box.innerHTML+=`
+
+<div class="node">
+
+
+<b>${e.name}</b>
+
+<br>
+
+SSN:${e.ssn}
+
+<br>
+
+Dept:${e.dept}
+
+<br>
+
+${e.desig}
+
+<br>
+
+Salary:${e.sal}
+
+<br>
+
+Phone:${e.phone}
+
+
+</div>
+
+
+`;
+
+
+
+if(i<dll.length-1)
+
+box.innerHTML+="<span class='arrow'> ? </span>";
+
+
+
+if(i==dll.length-1)
+
+box.innerHTML+="<br><span class='tail'>TAIL</span>";
+
+
+
+});
+
+
+
+}
+
+
+
+</script>
+
+
+</body>
+</html>
