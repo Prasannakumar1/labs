@@ -1,596 +1,495 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-<title>Calendar Structure Visualization Using C</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar Structure in C - Interactive Visualizer</title>
 
 <style>
-
-body{
-margin:0;
-padding:20px;
-font-family:Segoe UI,Arial;
-background:#eaf2f8;
-}
-
-h1{
-text-align:center;
-color:#003366;
-}
-
-.container{
-
-border:4px solid #003366;
-border-radius:15px;
-background:white;
-padding:15px;
-
-}
-
-
-.controls{
-
-text-align:center;
-margin:20px;
-
-}
-
-
-input,textarea{
-
-padding:10px;
-font-size:16px;
-margin:5px;
-
-}
-
-
-textarea{
-width:250px;
-height:50px;
-}
-
-
-button{
-
-padding:10px 18px;
-margin:5px;
-background:#0066cc;
-color:white;
-border:none;
-border-radius:6px;
-font-size:16px;
-cursor:pointer;
-
-}
-
-button:hover{
-
-background:#003366;
-
-}
-
-
-
-.content{
-
-display:grid;
-grid-template-columns:45% 55%;
-gap:15px;
-
-}
-
-
-/* C Code */
-
-.codePanel{
-
-border:3px solid #555;
-background:#111;
-color:white;
-padding:15px;
-height:500px;
-overflow:auto;
-font-family:Consolas;
-
-}
-
-
-.codeLine{
-
-padding:5px;
-
-}
-
-
-.active{
-
-background:#ffd54f;
-color:black;
-
-}
-
-
-
-/* Calendar */
-
-.calendarPanel{
-
-border:3px solid #555;
-padding:15px;
-text-align:center;
-
-}
-
-
-
-.calendar{
-
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-
-}
-
-
-.day{
-
-border:3px solid #003366;
-padding:10px;
-border-radius:10px;
-background:#e3f2fd;
-animation:show .5s;
-
-}
-
-
-
-@keyframes show{
-
-from{
-transform:scale(0);
-}
-
-to{
-transform:scale(1);
-}
-
-}
-
-
-
-.algorithm{
-
-margin-top:20px;
-border:3px solid #003366;
-padding:15px;
-font-size:18px;
-
-}
-
-
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #eaf2f8;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .container {
+    border: 3px solid #003366;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* CONTROLS & ACTION BUTTONS */
+  .controls {
+    text-align: center;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+  }
+
+  input, textarea {
+    padding: 8px 12px;
+    font-size: 14px;
+    margin: 5px;
+    border: 2px solid #0066cc;
+    border-radius: 4px;
+    outline: none;
+  }
+
+  input:focus, textarea:focus {
+    border-color: #003366;
+  }
+
+  button {
+    padding: 8px 16px;
+    margin: 4px;
+    border: none;
+    border-radius: 5px;
+    background: #0066cc;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button:hover { background: #003366; }
+  .btn-accent { background: #28a745; }
+  .btn-accent:hover { background: #1e7e34; }
+  .btn-warning { background: #ff9800; color: #fff; }
+  .btn-warning:hover { background: #e65100; }
+  .btn-purple { background: #6f42c1; color: #fff; }
+  .btn-purple:hover { background: #59359a; }
+  .btn-danger { background: #dc3545; }
+  .btn-danger:hover { background: #bd2130; }
+
+  /* CONTENT LAYOUT */
+  .content {
+    display: grid;
+    grid-template-columns: 48% 50%;
+    gap: 2%;
+  }
+
+  /* C CODE PANEL */
+  .codePanel {
+    border: 2px solid #333;
+    padding: 12px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    height: 420px;
+    overflow: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-radius: 6px;
+  }
+
+  .codePanel h3 {
+    margin-top: 0;
+    color: #61dafb;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+  }
+
+  .codeLine {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    white-space: pre;
+  }
+
+  .active {
+    background: #ffd54f !important;
+    color: #000 !important;
+    font-weight: bold;
+  }
+
+  .code-highlight {
+    border: 3px solid #28a745 !important;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.5);
+  }
+
+  /* VISUALIZATION PANEL */
+  .vizPanel {
+    border: 2px solid #ccc;
+    padding: 15px;
+    text-align: center;
+    background: #fafafa;
+    border-radius: 6px;
+    min-height: 420px;
+    box-sizing: border-box;
+  }
+
+  .vizPanel h3 {
+    margin-top: 0;
+    color: #003366;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .day-card {
+    border: 2px solid #0066cc;
+    padding: 10px;
+    border-radius: 6px;
+    background: #e3f2fd;
+    text-align: left;
+    font-size: 13px;
+    animation: fadeIn 0.4s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ALGORITHM TRACKER & SNAPSHOT PANELS */
+  .algorithm {
+    margin-top: 15px;
+    border: 2px solid #003366;
+    padding: 10px;
+    background: #f0f4f8;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #003366;
+  }
+
+  .snapshot-panel {
+    margin-top: 15px;
+    background: #0c0c0c;
+    color: #00ff00;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    box-shadow: inset 0 0 10px #000;
+  }
+
+  .snapshot-title {
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  /* MODAL STYLES FOR SOURCE CODE POPUP */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: #fff;
+    width: 60%;
+    max-height: 80vh;
+    padding: 20px;
+    border-radius: 8px;
+    overflow: auto;
+    font-family: Consolas, monospace;
+  }
+
+  .close-btn {
+    float: right;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+  }
 </style>
-
 </head>
-
 
 <body>
 
-
-<h1>
-CALENDAR USING STRUCTURE IN C PROGRAM
-</h1>
-
-
+<h1>CALENDAR STRUCTURE IN C (VISUALIZER)</h1>
 
 <div class="container">
 
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button onclick="createCalendar()">1. create()</button>
+    <input id="dayName" placeholder="Day (e.g., mon)">
+    <input id="dayDate" type="number" placeholder="Date (e.g., 01)">
+    <input id="dayAct" placeholder="Activity (e.g., dancing)">
+    <button onclick="readData()">2. read()</button>
+    <button onclick="displayData()">3. display()</button>
+    <button class="btn-danger" onclick="resetAll()">Reset</button>
+    <br><br>
+    <button class="btn-warning" onclick="toggleHighlight()">Highlight Code Panel</button>
+    <button class="btn-purple" onclick="openModal()">📄 View Full Source Code</button>
+    <button class="btn-accent" onclick="openCompiler()">🚀 Run on OnlineGDB</button>
+  </div>
 
+  <div class="content">
+    <!-- C SOURCE CODE DISPLAY -->
+    <div class="codePanel" id="codeBox">
+      <h3>C SOURCE CODE</h3>
+<div class="codeLine" id="c1">#include &lt;stdio.h&gt;</div>
+<div class="codeLine" id="c2">#include &lt;stdlib.h&gt;</div>
+<div class="codeLine" id="c3">struct calendar {</div>
+<div class="codeLine" id="c4">    char *dayName; int date; char *description;</div>
+<div class="codeLine" id="c5">} week[7];</div>
+<div class="codeLine" id="c6">void create() {</div>
+<div class="codeLine" id="c7">    for(int i=0; i&lt;7; i++) {</div>
+<div class="codeLine" id="c8">        week[i].dayName = (char*)malloc(20 * sizeof(char));</div>
+<div class="codeLine" id="c9">        week[i].description = (char*)malloc(50 * sizeof(char));</div>
+<div class="codeLine" id="c10">    }</div>
+<div class="codeLine" id="c11">}</div>
+<div class="codeLine" id="c12">void read() {</div>
+<div class="codeLine" id="c13">    scanf("%s %d %s", week[i].dayName, &week[i].date, week[i].description);</div>
+<div class="codeLine" id="c14">}</div>
+<div class="codeLine" id="c15">void display() {</div>
+<div class="codeLine" id="c16">    printf("%s %d %s", week[i].dayName, week[i].date, week[i].description);</div>
+<div class="codeLine" id="c17">}</div>
+    </div>
 
-<div class="controls">
+    <!-- VISUAL OUTPUT SNAPSHOT -->
+    <div class="vizPanel">
+      <h3>WEEK ACTIVITY REPORT SNAPSHOT</h3>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <p id="statusMsg" style="color:#0066cc; font-weight:bold; margin-top:15px;">Click '1. create()' to allocate memory.</p>
+    </div>
+  </div>
 
+  <!-- ALGORITHM TRACKER -->
+  <div class="algorithm">
+    <span id="stepText">Current Step: Ready to execute operations.</span>
+  </div>
 
-<button onclick="createCalendar()">
-Create Calendar
-</button>
-
-
-<br>
-
-
-Day Name :
-
-<input id="day" placeholder="Monday">
-
-
-Date :
-
-<input id="date" type="number">
-
-
-<br>
-
-
-Activity :
-
-<textarea id="activity"></textarea>
-
-
-<br>
-
-
-<button onclick="readData()">
-Read Data
-</button>
-
-
-<button onclick="displayData()">
-Display
-</button>
-
-
-<button onclick="reset()">
-Reset
-</button>
-
+  <!-- TERMINAL CONSOLE SIMULATION -->
+  <div class="snapshot-panel">
+    <div class="snapshot-title">📷 Output Snapshot (Terminal Output Simulation)</div>
+    <div id="consoleLog">
+      $ gcc calendar.c -o calendar<br>
+      $ ./calendar<br>
+      [System]: Calendar structure program ready.<br>
+      &gt; Awaiting user operation...
+    </div>
+  </div>
 
 </div>
 
+<!-- SOURCE CODE MODAL POPUP -->
+<div class="modal" id="codeModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">X</button>
+    <h3>Full C Source Code</h3>
+    <pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
 
-
-
-<div class="content">
-
-
-<!-- C PROGRAM -->
-
-
-<div class="codePanel">
-
-
-<h2>C PROGRAM</h2>
-
-
-<div class="codeLine" id="c1">
-struct Calendar
-</div>
-
-<div class="codeLine" id="c2">
+struct calendar
 {
-</div>
+    char *dayName;
+    int date;
+    char *description;
+} week[7];
 
-<div class="codeLine" id="c3">
-char *day;
-</div>
-
-<div class="codeLine" id="c4">
-int date;
-</div>
-
-<div class="codeLine" id="c5">
-char *activity;
-</div>
-
-<div class="codeLine" id="c6">
-};
-</div>
-
-
-<br>
-
-
-<div class="codeLine" id="c7">
 void create()
-</div>
+{
+    int i;
+    for (i = 0; i &lt; 7; i++)
+    {
+        week[i].dayName = (char *)malloc(20 * sizeof(char));
+        week[i].description = (char *)malloc(50 * sizeof(char));
+    }
+}
 
-<div class="codeLine" id="c8">
-calendar=(struct Calendar*)
-malloc(7*sizeof(struct Calendar));
-</div>
-
-
-<br>
-
-
-<div class="codeLine" id="c9">
 void read()
-</div>
+{
+    int i;
+    for (i = 0; i &lt; 7; i++)
+    {
+        printf("\n Enter the name of the day: ");
+        scanf("%s", week[i].dayName);
+        printf(" Enter the date of the day: ");
+        scanf("%d", &week[i].date);
+        printf(" Enter description of activity: ");
+        scanf("%s", week[i].description);
+    }
+}
 
-<div class="codeLine" id="c10">
-scanf("%s",day);
-</div>
-
-<div class="codeLine" id="c11">
-scanf("%d",&date);
-</div>
-
-<div class="codeLine" id="c12">
-gets(activity);
-</div>
-
-
-<br>
-
-
-<div class="codeLine" id="c13">
 void display()
+{
+    int i;
+    for (i = 0; i &lt; 7; i++)
+    {
+        printf("\n Name of the day: %s", week[i].dayName);
+        printf("\n Date of the day: %d", week[i].date);
+        printf("\n Activity of the day: %s\n", week[i].description);
+    }
+}
+
+int main()
+{
+    create();
+    read();
+    display();
+    return 0;
+}
+    </pre>
+  </div>
 </div>
-
-<div class="codeLine" id="c14">
-printf(day,date,activity);
-</div>
-
-
-
-</div>
-
-
-
-
-<!-- Calendar -->
-
-
-<div class="calendarPanel">
-
-
-<h2>WEEK ACTIVITY REPORT</h2>
-
-
-<div class="calendar" id="calendar">
-
-</div>
-
-
-
-<h3 id="output"></h3>
-
-
-</div>
-
-
-
-</div>
-
-
-
-<div class="algorithm">
-
-<h2>Algorithm Steps</h2>
-
-<div id="step">
-
-Current Step :
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
 
 <script>
+let weekData = [];
 
-
-let calendar=[];
-
-
-function highlight(lines,text){
-
-
-document.querySelectorAll(".codeLine")
-.forEach(e=>e.className="codeLine");
-
-
-lines.forEach((x,i)=>{
-
-setTimeout(()=>{
-
-document.getElementById(x)
-.className="codeLine active";
-
-},i*500);
-
-
-});
-
-
-document.getElementById("step").innerHTML=
-"Current Step : <br>"+text;
-
-
+function highlightLines(lines, stepMsg) {
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  lines.forEach(id => {
+    let el = document.getElementById(id);
+    if(el) el.classList.add("active");
+  });
+  document.getElementById("stepText").innerHTML = "Current Step: " + stepMsg;
 }
 
-
-
-
-function createCalendar(){
-
-
-highlight(
-["c7","c8"],
-"Dynamic memory allocated for 7 days"
-);
-
-
-
-setTimeout(()=>{
-
-
-calendar=[];
-
-
-let days=[
-"Monday",
-"Tuesday",
-"Wednesday",
-"Thursday",
-"Friday",
-"Saturday",
-"Sunday"
-];
-
-
-days.forEach(d=>{
-
-
-calendar.push({
-
-day:d,
-
-date:"",
-
-activity:""
-
-});
-
-
-});
-
-
-
-document.getElementById("output").innerHTML=
-"Calendar Created Successfully";
-
-
-},2000);
-
-
-
+function appendLog(text) {
+  const consoleLog = document.getElementById("consoleLog");
+  consoleLog.innerHTML += `<br>&gt; ${text}`;
 }
 
+function createCalendar() {
+  highlightLines(["c6", "c7", "c8", "c9", "c10", "c11"], "Allocating dynamic memory using malloc() for 7 days.");
+  
+  weekData = [
+    {day: "mon", date: "", act: ""},
+    {day: "tue", date: "", act: ""},
+    {day: "wed", date: "", act: ""},
+    {day: "thu", date: "", act: ""},
+    {day: "fri", date: "", act: ""},
+    {day: "sat", date: "", act: ""},
+    {day: "sun", date: "", act: ""}
+  ];
 
-
-
-
-function readData(){
-
-
-let d=document.getElementById("day").value;
-
-let dt=document.getElementById("date").value;
-
-let act=document.getElementById("activity").value;
-
-
-
-highlight(
-["c9","c10","c11","c12"],
-"Reading day, date and activity details"
-);
-
-
-
-let obj=calendar.find(x=>x.day==d);
-
-
-if(obj)
-
-{
-
-obj.date=dt;
-
-obj.activity=act;
-
-document.getElementById("output").innerHTML=
-"Data Inserted";
-
+  document.getElementById("statusMsg").innerText = "Dynamic memory allocated for 7 days (20 bytes for name, 50 bytes for description).";
+  appendLog("create(): Memory allocated successfully for 7 structure instances.");
 }
 
-else
+function readData() {
+  let day = document.getElementById("dayName").value.trim().toLowerCase();
+  let date = document.getElementById("dayDate").value.trim();
+  let act = document.getElementById("dayAct").value.trim();
 
-{
+  if (!day || !date || !act) {
+    alert("Please enter Day Name, Date, and Activity!");
+    return;
+  }
 
-document.getElementById("output").innerHTML=
-"Day Not Found";
+  highlightLines(["c12", "c13", "c14"], `Reading input details for '${day}'...`);
 
+  let target = weekData.find(x => x.day === day);
+  if (target) {
+    target.date = date;
+    target.act = act;
+    document.getElementById("statusMsg").innerText = `Recorded data for ${day.toUpperCase()}. Click '3. display()' to view.`;
+    appendLog(`read(): Entered Name=${day}, Date=${date}, Activity=${act}`);
+  } else {
+    document.getElementById("statusMsg").innerText = "Error: Use valid 3-letter day names (mon, tue, wed, thu, fri, sat, sun).";
+  }
 }
 
+function displayData() {
+  highlightLines(["c15", "c16", "c17"], "Printing week activity report on screen...");
 
+  let grid = document.getElementById("calendarGrid");
+  grid.innerHTML = "";
+  let count = 0;
 
+  weekData.forEach(x => {
+    if (x.date !== "") {
+      count++;
+      grid.innerHTML += `
+        <div class="day-card">
+          <strong>Day:</strong> ${x.day.toUpperCase()}<br>
+          <strong>Date:</strong> ${x.date}<br>
+          <strong>Activity:</strong> ${x.act}
+        </div>
+      `;
+    }
+  });
+
+  if (count === 0) {
+    document.getElementById("statusMsg").innerText = "No entries recorded yet! Use read() first.";
+  } else {
+    document.getElementById("statusMsg").innerText = `Displayed ${count} activity record(s).`;
+    appendLog("display(): Displayed full week activity report.");
+  }
 }
 
-
-
-
-
-function displayData(){
-
-
-highlight(
-["c13","c14"],
-"Displaying complete weekly activity report"
-);
-
-
-
-let box=document.getElementById("calendar");
-
-
-box.innerHTML="";
-
-
-calendar.forEach(x=>{
-
-
-if(x.date!="")
-
-{
-
-box.innerHTML+=
-
-`
-<div class="day">
-
-<h3>${x.day}</h3>
-
-Date : ${x.date}
-
-<br><br>
-
-Activity :
-
-${x.activity}
-
-</div>
-
-`;
-
+function toggleHighlight() {
+  let box = document.getElementById("codeBox");
+  box.classList.toggle("code-highlight");
+  document.getElementById("stepText").innerHTML = "Current Step: Source code area highlighted.";
 }
 
-
-});
-
-
+function resetAll() {
+  weekData = [];
+  document.getElementById("calendarGrid").innerHTML = "";
+  document.getElementById("statusMsg").innerText = "Calendar reset completed.";
+  document.getElementById("stepText").innerText = "Current Step: Reset complete.";
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  document.getElementById("codeBox").classList.remove("code-highlight");
+  appendLog("System: Reset completed.");
 }
 
-
-
-
-function reset(){
-
-
-calendar=[];
-
-document.getElementById("calendar").innerHTML="";
-
-document.getElementById("output").innerHTML=
-"Calendar Empty";
-
-
-document.getElementById("step").innerHTML=
-"Current Step :";
-
-
+function openModal() {
+  document.getElementById("codeModal").style.display = "flex";
 }
 
+function closeModal() {
+  document.getElementById("codeModal").style.display = "none";
+}
 
+function openCompiler() {
+  window.open("https://onlinegdb.com/dLJqQgc7H", "_blank");
+}
 
+ // Disable right-click menu
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Disable F12 and Ctrl+U / Ctrl+Shift+I / Ctrl+Shift+C
+    document.addEventListener('keydown', (e) => {
+      // F12 or Ctrl+U
+      if (e.keyCode === 123 || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
+        e.preventDefault();
+      }
+      
+      // Ctrl+Shift+I or Ctrl+Shift+C (Inspect Element shortcuts)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+      }
+    });
 </script>
-
 
 </body>
 </html>
