@@ -1,708 +1,491 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-<title>String Pattern Matching Visualization</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>String Pattern Match & Replace in C - Visualizer</title>
 
 <style>
-
-body{
-    margin:0;
-    padding:20px;
-    font-family:Segoe UI,Arial;
-    background:#eaf2f8;
-}
-
-h1{
-    text-align:center;
-    color:#003366;
-}
-
-
-.container{
-
-border:4px solid #003366;
-border-radius:15px;
-background:white;
-padding:15px;
-
-}
-
-
-/* Input */
-
-.controls{
-
-text-align:center;
-margin:20px;
-
-}
-
-
-input{
-
-padding:10px;
-font-size:18px;
-margin:5px;
-width:180px;
-
-}
-
-
-button{
-
-padding:10px 18px;
-margin:5px;
-border:none;
-border-radius:6px;
-background:#0066cc;
-color:white;
-font-size:16px;
-cursor:pointer;
-
-}
-
-
-button:hover{
-
-background:#003366;
-
-}
-
-
-
-/* Columns */
-
-
-.content{
-
-display:grid;
-grid-template-columns:45% 55%;
-gap:15px;
-
-}
-
-
-
-/* C Code */
-
-
-.codePanel{
-
-background:#111;
-
-color:white;
-
-height:450px;
-
-overflow:auto;
-
-padding:15px;
-
-border:3px solid #555;
-
-font-family:Consolas;
-
-}
-
-
-
-.line{
-
-padding:6px;
-
-}
-
-
-
-.active{
-
-background:#ffd54f;
-
-color:black;
-
-}
-
-
-
-/* Animation */
-
-
-.animation{
-
-border:3px solid #555;
-
-padding:20px;
-
-text-align:center;
-
-}
-
-
-
-.stringBox{
-
-font-size:25px;
-
-margin:15px;
-
-}
-
-
-.char{
-
-display:inline-block;
-
-padding:10px;
-
-margin:3px;
-
-border:2px solid #003366;
-
-border-radius:5px;
-
-background:#e3f2fd;
-
-font-weight:bold;
-
-}
-
-
-
-.check{
-
-background:#ffeb3b;
-
-}
-
-
-
-.match{
-
-background:#2ecc71;
-
-color:white;
-
-}
-
-
-
-.replace{
-
-background:#ff9800;
-
-color:white;
-
-}
-
-
-
-
-
-.algorithm{
-
-margin-top:20px;
-
-border:3px solid #003366;
-
-padding:15px;
-
-font-size:18px;
-
-background:#f8f9fa;
-
-}
-
-
-
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #eaf2f8;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .container {
+    border: 3px solid #003366;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* CONTROLS & ACTION BUTTONS */
+  .controls {
+    text-align: center;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+  }
+
+  input {
+    padding: 8px 12px;
+    font-size: 14px;
+    margin: 5px;
+    border: 2px solid #0066cc;
+    border-radius: 4px;
+    outline: none;
+    width: 220px;
+  }
+
+  input:focus {
+    border-color: #003366;
+  }
+
+  button {
+    padding: 8px 16px;
+    margin: 4px;
+    border: none;
+    border-radius: 5px;
+    background: #0066cc;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button:hover { background: #003366; }
+  .btn-accent { background: #28a745; }
+  .btn-accent:hover { background: #1e7e34; }
+  .btn-warning { background: #ff9800; color: #fff; }
+  .btn-warning:hover { background: #e65100; }
+  .btn-purple { background: #6f42c1; color: #fff; }
+  .btn-purple:hover { background: #59359a; }
+  .btn-danger { background: #dc3545; }
+  .btn-danger:hover { background: #bd2130; }
+
+  /* CONTENT LAYOUT */
+  .content {
+    display: grid;
+    grid-template-columns: 48% 50%;
+    gap: 2%;
+  }
+
+  /* C CODE PANEL */
+  .codePanel {
+    border: 2px solid #333;
+    padding: 12px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    height: 420px;
+    overflow: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-radius: 6px;
+  }
+
+  .codePanel h3 {
+    margin-top: 0;
+    color: #61dafb;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+  }
+
+  .codeLine {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    white-space: pre;
+  }
+
+  .active {
+    background: #ffd54f !important;
+    color: #000 !important;
+    font-weight: bold;
+  }
+
+  .code-highlight {
+    border: 3px solid #28a745 !important;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.5);
+  }
+
+  /* VISUALIZATION PANEL */
+  .vizPanel {
+    border: 2px solid #ccc;
+    padding: 15px;
+    text-align: center;
+    background: #fafafa;
+    border-radius: 6px;
+    min-height: 420px;
+    box-sizing: border-box;
+  }
+
+  .vizPanel h3 {
+    margin-top: 0;
+    color: #003366;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
+
+  .str-box-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin: 12px 0;
+    min-height: 40px;
+  }
+
+  .char-box {
+    width: 32px;
+    height: 32px;
+    border: 2px solid #003366;
+    background: #e3f2fd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 15px;
+    border-radius: 4px;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .char-box.replaced {
+    background: #28a745;
+    color: #fff;
+    border-color: #1e7e34;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ALGORITHM TRACKER & SNAPSHOT PANELS */
+  .algorithm {
+    margin-top: 15px;
+    border: 2px solid #003366;
+    padding: 10px;
+    background: #f0f4f8;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #003366;
+  }
+
+  .snapshot-panel {
+    margin-top: 15px;
+    background: #0c0c0c;
+    color: #00ff00;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    box-shadow: inset 0 0 10px #000;
+  }
+
+  .snapshot-title {
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  /* MODAL STYLES FOR SOURCE CODE POPUP */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: #fff;
+    width: 60%;
+    max-height: 80vh;
+    padding: 20px;
+    border-radius: 8px;
+    overflow: auto;
+    font-family: Consolas, monospace;
+  }
+
+  .close-btn {
+    float: right;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+  }
 </style>
-
 </head>
-
-
 
 <body>
 
-
-<h1>
-STRING PATTERN MATCHING & REPLACEMENT
-</h1>
-
-
+<h1>PATTERN MATCH & REPLACE IN C (VISUALIZER)</h1>
 
 <div class="container">
 
+  <!-- CONTROLS -->
+  <div class="controls">
+    <input id="mainStr" value="when she can she will" placeholder="Main String (STR)">
+    <input id="patStr" value="she" placeholder="Pattern String (PAT)">
+    <input id="repStr" value="he" placeholder="Replace String (REP)">
+    <br>
+    <button class="btn-accent" onclick="runSearchReplace()">Run Pattern Match & Replace</button>
+    <button class="btn-danger" onclick="resetAll()">Reset</button>
+    <br><br>
+    <button class="btn-warning" onclick="toggleHighlight()">Highlight Code Panel</button>
+    <button class="btn-purple" onclick="openModal()">📄 View Full Source Code</button>
+    <button class="btn-accent" onclick="openCompiler()">🚀 Run on OnlineGDB</button>
+  </div>
 
+  <div class="content">
+    <!-- C SOURCE CODE DISPLAY -->
+    <div class="codePanel" id="codeBox">
+      <h3>C SOURCE CODE</h3>
+<div class="codeLine" id="c1">#include &lt;stdio.h&gt;</div>
+<div class="codeLine" id="c2">char str[100], pat[100], rep[100], ans[100];</div>
+<div class="codeLine" id="c3">int s1, s2, j, c, k, flag = 0;</div>
+<div class="codeLine" id="c4">void search() {</div>
+<div class="codeLine" id="c5">    s1 = s2 = c = j = 0;</div>
+<div class="codeLine" id="c6">    while (str[c] != '\0') {</div>
+<div class="codeLine" id="c7">        if (str[s1] == pat[s2]) {</div>
+<div class="codeLine" id="c8">            s1++; s2++;</div>
+<div class="codeLine" id="c9">            if (pat[s2] == '\0') {</div>
+<div class="codeLine" id="c10">                for (k = 0; rep[k] != '\0'; k++, j++) ans[j] = rep[k];</div>
+<div class="codeLine" id="c11">                s2 = 0; c = s1; flag = 1;</div>
+<div class="codeLine" id="c12">            }</div>
+<div class="codeLine" id="c13">        } else {</div>
+<div class="codeLine" id="c14">            ans[j] = str[c]; j++; c++;</div>
+<div class="codeLine" id="c15">            s1 = c; s2 = 0;</div>
+<div class="codeLine" id="c16">        }</div>
+<div class="codeLine" id="c17">    }</div>
+<div class="codeLine" id="c18">    ans[j] = '\0';</div>
+<div class="codeLine" id="c19">}</div>
+    </div>
 
-<div class="controls">
+    <!-- VISUAL OUTPUT SNAPSHOT -->
+    <div class="vizPanel">
+      <h3>STRING TRANSFORMATION VISUALIZER</h3>
+      <p><strong>Original String (STR):</strong></p>
+      <div class="str-box-container" id="origBox"></div>
+      
+      <p><strong>Resultant String (ANS):</strong></p>
+      <div class="str-box-container" id="ansBox"></div>
 
+      <p id="statusMsg" style="color:#0066cc; font-weight:bold; margin-top:15px;">Click 'Run Pattern Match & Replace' to start.</p>
+    </div>
+  </div>
 
-MAIN STRING :
+  <!-- ALGORITHM TRACKER -->
+  <div class="algorithm">
+    <span id="stepText">Current Step: Ready to perform operations.</span>
+  </div>
 
-<input id="str" value="computer">
-
-
-PATTERN :
-
-<input id="pat" value="put">
-
-
-REPLACE :
-
-<input id="rep" value="science">
-
-
-<br>
-
-
-<button onclick="start()">
-Start
-</button>
-
-
-<button onclick="reset()">
-Reset
-</button>
-
-
+  <!-- TERMINAL CONSOLE SIMULATION -->
+  <div class="snapshot-panel">
+    <div class="snapshot-title">📷 Output Snapshot (Terminal Output Simulation)</div>
+    <div id="consoleLog">
+      $ gcc pattern_match.c -o pattern_match<br>
+      $ ./pattern_match<br>
+      [System]: Pattern matching module ready.<br>
+      &gt; Awaiting user execution...
+    </div>
+  </div>
 
 </div>
 
+<!-- SOURCE CODE MODAL POPUP -->
+<div class="modal" id="codeModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">X</button>
+    <h3>Full C Source Code</h3>
+    <pre>
+#include &lt;stdio.h&gt;
 
+char str[100], pat[100], rep[100], ans[100];
+int s1, s2, j, c, k, flag = 0;
 
-
-
-
-
-<div class="content">
-
-
-
-
-
-<!-- C CODE -->
-
-
-<div class="codePanel">
-
-
-<h2>C PROGRAM</h2>
-
-
-<div class="line" id="c1">
 void read()
+{
+    printf("\nEnter a string \n");
+    gets(str);
+    printf("\nEnter a pattern string to search \n");
+    gets(pat);
+    printf("\nEnter a replace string \n");
+    gets(rep);
+}
+
+void search()
+{
+    s1 = s2 = c = j = 0;
+    while (str[c] != '\0')
+    {
+        if (str[s1] == pat[s2])
+        {
+            s1++;
+            s2++;
+            if (pat[s2] == '\0')
+            {
+                for (k = 0; rep[k] != '\0'; k++, j++)
+                    ans[j] = rep[k];
+                s2 = 0;
+                c = s1;
+                flag = 1;
+            }
+        }
+        else
+        {
+            ans[j] = str[c];
+            j++;
+            c++;
+            s1 = c;
+            s2 = 0;
+        }
+    }
+    if (flag == 0)
+    {
+        printf("OOPS!!!Pattern Not found!!!!!\n");
+    }
+    else
+    {
+        ans[j] = '\0';
+        printf("\nThe resultant string is\n%s", ans);
+    }
+}
+
+void main()
+{
+    read();
+    search();
+}
+    </pre>
+  </div>
 </div>
-
-
-<div class="line" id="c2">
-scanf STR PAT REP
-</div>
-
-
-<div class="line" id="c3">
-void replace()
-</div>
-
-
-<div class="line" id="c4">
-while(STR[s]!='\0')
-</div>
-
-
-<div class="line" id="c5">
-if(STR[s]==PAT[p])
-</div>
-
-
-<div class="line" id="c6">
-p++; s++;
-</div>
-
-
-<div class="line" id="c7">
-if(PAT[p]=='\0')
-</div>
-
-
-<div class="line" id="c8">
-ANS[a]=REP[r]
-</div>
-
-
-<div class="line" id="c9">
-printf Pattern not found
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-<!-- Animation -->
-
-
-<div class="animation">
-
-
-<h2>
-String Animation
-</h2>
-
-
-<h3>
-MAIN STRING
-</h3>
-
-
-<div id="main" class="stringBox">
-
-</div>
-
-
-
-
-<h3>
-PATTERN STRING
-</h3>
-
-
-<div id="pattern" class="stringBox">
-
-</div>
-
-
-
-
-<h3>
-RESULT STRING
-</h3>
-
-
-<div id="result" class="stringBox">
-
-</div>
-
-
-
-<h3 id="msg">
-
-</h3>
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="algorithm">
-
-
-<h2>
-Algorithm Execution
-</h2>
-
-
-<div id="step">
-
-Current Step :
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
 
 <script>
-
-
-let STR="";
-let PAT="";
-let REP="";
-
-
-
-
-
-function code(id,text){
-
-
-document.querySelectorAll(".line")
-.forEach(e=>e.className="line");
-
-
-document.getElementById(id)
-.className="line active";
-
-
-document.getElementById("step")
-.innerHTML=
-"Current Step : "+text;
-
-
+function highlightLines(lines, stepMsg) {
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  lines.forEach(id => {
+    let el = document.getElementById(id);
+    if(el) el.classList.add("active");
+  });
+  document.getElementById("stepText").innerHTML = "Current Step: " + stepMsg;
 }
 
-
-
-
-
-function showStrings(){
-
-
-let html="";
-
-
-for(let i=0;i<STR.length;i++)
-
-{
-
-html+=
-"<span class='char' id='c"+i+"'>"+
-STR[i]+
-"</span>";
-
+function appendLog(text) {
+  const consoleLog = document.getElementById("consoleLog");
+  consoleLog.innerHTML += `<br>&gt; ${text}`;
 }
 
-
-main.innerHTML=html;
-
-
-
-let p="";
-
-
-for(let x of PAT)
-
-{
-
-p+=
-"<span class='char'>"+
-x+
-"</span>";
-
+function renderStringBoxes(str, containerId, highlightClass = "") {
+  let box = document.getElementById(containerId);
+  box.innerHTML = "";
+  for(let char of str) {
+    let div = document.createElement("div");
+    div.className = `char-box ${highlightClass}`;
+    div.innerText = char === ' ' ? '␣' : char;
+    box.appendChild(div);
+  }
 }
 
+function runSearchReplace() {
+  let str = document.getElementById("mainStr").value;
+  let pat = document.getElementById("patStr").value;
+  let rep = document.getElementById("repStr").value;
 
-pattern.innerHTML=p;
+  if (!str || !pat) {
+    alert("Please enter both Main String and Pattern String!");
+    return;
+  }
 
+  renderStringBoxes(str, "origBox");
+  highlightLines(["c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18"], 
+                 `Searching for PAT="${pat}" and replacing with REP="${rep}"...`);
 
+  appendLog(`read(): Main STR="${str}", PAT="${pat}", REP="${rep}"`);
+
+  if (str.includes(pat)) {
+    let result = str.split(pat).join(rep);
+    renderStringBoxes(result, "ansBox", "replaced");
+    document.getElementById("statusMsg").innerText = "Pattern Matched & Replaced Successfully!";
+    appendLog(`search(): Pattern found! Resultant string = "${result}"`);
+  } else {
+    document.getElementById("ansBox").innerHTML = "";
+    document.getElementById("statusMsg").innerText = "OOPS!!! Pattern Not found!!!!!";
+    appendLog("search(): OOPS!!! Pattern Not found!!!!!");
+  }
 }
 
-
-
-
-
-
-
-function start(){
-
-
-STR=document.getElementById("str").value;
-
-PAT=document.getElementById("pat").value;
-
-REP=document.getElementById("rep").value;
-
-
-
-showStrings();
-
-
-let pos=0;
-
-let found=false;
-
-
-
-
-function search(){
-
-
-if(pos>STR.length-PAT.length)
-
-{
-
-
-if(!found)
-
-{
-
-code(
-"c9",
-"Pattern does not exist"
-);
-
-
-msg.innerHTML=
-"? PATTERN NOT FOUND";
-
+function toggleHighlight() {
+  let box = document.getElementById("codeBox");
+  box.classList.toggle("code-highlight");
+  document.getElementById("stepText").innerHTML = "Current Step: Code panel highlighted.";
 }
 
-return;
-
+function resetAll() {
+  document.getElementById("origBox").innerHTML = "";
+  document.getElementById("ansBox").innerHTML = "";
+  document.getElementById("statusMsg").innerText = "Ready to perform operations.";
+  document.getElementById("stepText").innerText = "Current Step: Reset complete.";
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  document.getElementById("codeBox").classList.remove("code-highlight");
+  appendLog("System: Program reset completed.");
 }
 
-
-
-code(
-"c5",
-"Comparing PAT at position "+pos
-);
-
-
-
-
-let ok=true;
-
-
-
-for(let j=0;j<PAT.length;j++)
-
-{
-
-
-let c=
-document.getElementById("c"+(pos+j));
-
-
-c.className="char check";
-
-
-if(STR[pos+j]!=PAT[j])
-
-ok=false;
-
-
+function openModal() {
+  document.getElementById("codeModal").style.display = "flex";
 }
 
-
-
-
-
-setTimeout(()=>{
-
-
-if(ok)
-
-{
-
-
-found=true;
-
-
-for(let j=0;j<PAT.length;j++)
-
-{
-
-document.getElementById("c"+(pos+j))
-.className="char match";
-
+function closeModal() {
+  document.getElementById("codeModal").style.display = "none";
 }
 
-
-
-code(
-"c8",
-"Replacing PAT with REP"
-);
-
-
-
-result.innerHTML=
-
-STR.substring(0,pos)+
-
-"<span class='replace'>"+
-REP+
-"</span>"+
-
-STR.substring(pos+PAT.length);
-
-
-
-msg.innerHTML=
-"? Pattern Found and Replaced";
-
-
+function openCompiler() {
+  window.open("https://onlinegdb.com/h99bW5NX9", "_blank");
 }
 
-else
+// Initial render
+renderStringBoxes(document.getElementById("mainStr").value, "origBox");
 
-{
+ // Disable right-click menu
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-pos++;
-
-search();
-
-}
-
-
-
-},1500);
-
-
-
-}
-
-
-search();
-
-
-
-}
-
-
-
-
-
-
-
-
-function reset(){
-
-
-main.innerHTML="";
-
-pattern.innerHTML="";
-
-result.innerHTML="";
-
-msg.innerHTML="";
-
-
-step.innerHTML=
-"Current Step :";
-
-
-}
-
-
-
+    // Disable F12 and Ctrl+U / Ctrl+Shift+I / Ctrl+Shift+C
+    document.addEventListener('keydown', (e) => {
+      // F12 or Ctrl+U
+      if (e.keyCode === 123 || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
+        e.preventDefault();
+      }
+      
+      // Ctrl+Shift+I or Ctrl+Shift+C (Inspect Element shortcuts)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+      }
+    });
 </script>
-
-
 
 </body>
 </html>

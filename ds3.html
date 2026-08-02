@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stack Operations & Palindrome in C - Visualizer</title>
+
+<style>
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #eaf2f8;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .container {
+    border: 3px solid #003366;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* CONTROLS & ACTION BUTTONS */
+  .controls {
+    text-align: center;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+  }
+
+  input {
+    padding: 8px 12px;
+    font-size: 14px;
+    margin: 5px;
+    border: 2px solid #0066cc;
+    border-radius: 4px;
+    outline: none;
+    width: 140px;
+  }
+
+  input:focus {
+    border-color: #003366;
+  }
+
+  button {
+    padding: 8px 16px;
+    margin: 4px;
+    border: none;
+    border-radius: 5px;
+    background: #0066cc;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button:hover { background: #003366; }
+  .btn-accent { background: #28a745; }
+  .btn-accent:hover { background: #1e7e34; }
+  .btn-warning { background: #ff9800; color: #fff; }
+  .btn-warning:hover { background: #e65100; }
+  .btn-purple { background: #6f42c1; color: #fff; }
+  .btn-purple:hover { background: #59359a; }
+  .btn-danger { background: #dc3545; }
+  .btn-danger:hover { background: #bd2130; }
+
+  /* CONTENT LAYOUT */
+  .content {
+    display: grid;
+    grid-template-columns: 48% 50%;
+    gap: 2%;
+  }
+
+  /* C CODE PANEL */
+  .codePanel {
+    border: 2px solid #333;
+    padding: 12px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    height: 420px;
+    overflow: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-radius: 6px;
+  }
+
+  .codePanel h3 {
+    margin-top: 0;
+    color: #61dafb;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+  }
+
+  .codeLine {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    white-space: pre;
+  }
+
+  .active {
+    background: #ffd54f !important;
+    color: #000 !important;
+    font-weight: bold;
+  }
+
+  .code-highlight {
+    border: 3px solid #28a745 !important;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.5);
+  }
+
+  /* VISUALIZATION PANEL */
+  .vizPanel {
+    border: 2px solid #ccc;
+    padding: 15px;
+    text-align: center;
+    background: #fafafa;
+    border-radius: 6px;
+    min-height: 420px;
+    box-sizing: border-box;
+  }
+
+  .vizPanel h3 {
+    margin-top: 0;
+    color: #003366;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
+
+  .stackArea {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .stack {
+    width: 170px;
+    height: 250px;
+    border: 4px solid #003366;
+    border-top: none;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    padding: 5px;
+    background: #e3f2fd;
+    border-radius: 0 0 8px 8px;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  .block {
+    width: 145px;
+    height: 32px;
+    margin: 2px;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    color: #fff;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 13px;
+    animation: pushAnim 0.3s ease-out;
+  }
+
+  @keyframes pushAnim {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* ALGORITHM TRACKER & SNAPSHOT PANELS */
+  .algorithm {
+    margin-top: 15px;
+    border: 2px solid #003366;
+    padding: 10px;
+    background: #f0f4f8;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #003366;
+  }
+
+  .snapshot-panel {
+    margin-top: 15px;
+    background: #0c0c0c;
+    color: #00ff00;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    box-shadow: inset 0 0 10px #000;
+  }
+
+  .snapshot-title {
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  /* MODAL STYLES FOR SOURCE CODE POPUP */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: #fff;
+    width: 60%;
+    max-height: 80vh;
+    padding: 20px;
+    border-radius: 8px;
+    overflow: auto;
+    font-family: Consolas, monospace;
+  }
+
+  .close-btn {
+    float: right;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>STACK OPERATIONS & PALINDROME IN C (VISUALIZER)</h1>
+
+<div class="container">
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <input id="stackItem" type="number" placeholder="Enter integer">
+    <button class="btn-accent" onclick="runPush()">1. PUSH</button>
+    <button onclick="runPop()">2. POP</button>
+    <button onclick="runDisplay()">3. DISPLAY</button>
+    <button class="btn-warning" onclick="runPalindrome()">4. PALINDROME</button>
+    <button class="btn-danger" onclick="resetAll()">Reset</button>
+    <br><br>
+    <button class="btn-warning" onclick="toggleHighlight()">Highlight Code Panel</button>
+    <button class="btn-purple" onclick="openModal()">📄 View Full Source Code</button>
+    <button class="btn-accent" onclick="openCompiler()">🚀 Run on Online Compiler</button>
+  </div>
+
+  <div class="content">
+    <!-- C SOURCE CODE DISPLAY -->
+    <div class="codePanel" id="codeBox">
+      <h3>C SOURCE CODE</h3>
+<div class="codeLine" id="c1">#include &lt;stdio.h&gt;</div>
+<div class="codeLine" id="c2">#define MAX 10</div>
+<div class="codeLine" id="c3">int stack[MAX], item, top = -1, status = 0, ele;</div>
+<div class="codeLine" id="c4">void push(int item) {</div>
+<div class="codeLine" id="c5">    if (top == MAX - 1) printf("\n*** Stack Overflow ***");</div>
+<div class="codeLine" id="c6">    else { stack[++top] = item; status++; }</div>
+<div class="codeLine" id="c7">}</div>
+<div class="codeLine" id="c8">int pop() {</div>
+<div class="codeLine" id="c9">    if (top == -1) printf("\n*** Stack Underflow ***");</div>
+<div class="codeLine" id="c10">    else { ele = stack[top--]; status--; }</div>
+<div class="codeLine" id="c11">    return ele;</div>
+<div class="codeLine" id="c12">}</div>
+<div class="codeLine" id="c13">void palindrome() {</div>
+<div class="codeLine" id="c14">    int i, temp = status, count = 0;</div>
+<div class="codeLine" id="c15">    for (i = 0; i &lt; temp; i++) {</div>
+<div class="codeLine" id="c16">        if (stack[i] == pop()) count++;</div>
+<div class="codeLine" id="c17">    }</div>
+<div class="codeLine" id="c18">    if (temp == count) printf("\n Stack contents are Palindrome");</div>
+<div class="codeLine" id="c19">}</div>
+    </div>
+
+    <!-- VISUAL OUTPUT SNAPSHOT -->
+    <div class="vizPanel">
+      <h3>STACK MEMORY ANIMATION</h3>
+      <div class="stackArea">
+        <div style="font-weight:bold; color:#d9534f; margin-bottom:5px;">⬇ TOP</div>
+        <div class="stack" id="stackBox"></div>
+      </div>
+      <p id="statusMsg" style="color:#0066cc; font-weight:bold; margin-top:15px;">Stack Ready (MAX = 10)</p>
+    </div>
+  </div>
+
+  <!-- ALGORITHM TRACKER -->
+  <div class="algorithm">
+    <span id="stepText">Current Step: Ready to execute menu choice.</span>
+  </div>
+
+  <!-- TERMINAL CONSOLE SIMULATION -->
+  <div class="snapshot-panel">
+    <div class="snapshot-title">📷 Output Snapshot (Terminal Output Simulation)</div>
+    <div id="consoleLog">
+      $ gcc stack_palindrome.c -o stack_palindrome<br>
+      $ ./stack_palindrome<br>
+      ---------MAIN MENU---------------<br>
+      1. PUSH  2. POP  3. DISPLAY  4. PALINDROME  5. Exit<br>
+      [System]: Stack initialized with MAX = 10.<br>
+      &gt; Awaiting choice...
+    </div>
+  </div>
+
+</div>
+
+<!-- SOURCE CODE MODAL POPUP -->
+<div class="modal" id="codeModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">X</button>
+    <h3>Full C Source Code</h3>
+    <pre>
+#include &lt;stdio.h&gt;
+#include &lt;conio.h&gt;
+#include &lt;stdlib.h&gt;
+#define MAX 10
+
+int stack[MAX], item, ch, top = -1, count = 0, status = 0, ele;
+
+void push(int item)
+{
+    if (top == MAX - 1)
+        printf("\n\n*** Stack Overflow ***");
+    else
+    {
+        stack[++top] = item;
+        status++;
+    }
+}
+
+int pop()
+{
+    if (top == -1)
+        printf("\n\n*** Stack Underflow ***");
+    else
+    {
+        ele = stack[top--];
+        status--;
+        printf("\nPopped element is %d", ele);
+    }
+    return ele;
+}
+
+void palindrome()
+{
+    int i, temp;
+    temp = status;
+    count = 0;
+    if (top != -1)
+    {
+        for (i = 0; i &lt; temp; i++)
+        {
+            if (stack[i] == pop())
+                count++;
+        }
+        if (temp == count)
+            printf("\n Stack contents are Palindrome");
+        else
+            printf("\n Stack contents are NOT palindrome");
+    }
+    else
+        printf("\n*** No Elements in stack to check for palindrome ***\n");
+}
+
+void display()
+{
+    int i;
+    if (top == -1)
+        printf("\nOOPS!!!! Stack is Empty");
+    else
+    {
+        printf("\nThe stack contents are:");
+        for (i = top; i &gt;= 0; i--)
+            printf("\n ----\n| %d |", stack[i]);
+    }
+}
+
+void main()
+{
+    for (;;)
+    {
+        printf("\n\n---------MAIN MENU---------------\n");
+        printf("\n1. PUSH \n2. POP \n3. DISPLAY \n4. PALINDROME \n5. Exit\n");
+        printf("\nEnter Your Choice: ");
+        scanf("%d", &ch);
+
+        switch (ch)
+        {
+        case 1:
+            printf("\nEnter single element to be pushed: ");
+            scanf("%d", &item);
+            push(item);
+            display();
+            break;
+        case 2:
+            ele = pop();
+            break;
+        case 3:
+            display();
+            break;
+        case 4:
+            palindrome();
+            break;
+        case 5:
+            exit(0);
+        default:
+            printf("\n Invalid choice \n");
+        }
+    }
+}
+    </pre>
+  </div>
+</div>
+
+<script>
+let stackArr = [];
+const MAX_SIZE = 10;
+
+function highlightLines(lines, stepMsg) {
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  lines.forEach(id => {
+    let el = document.getElementById(id);
+    if(el) el.classList.add("active");
+  });
+  document.getElementById("stepText").innerHTML = "Current Step: " + stepMsg;
+}
+
+function appendLog(text) {
+  const consoleLog = document.getElementById("consoleLog");
+  consoleLog.innerHTML += `<br>&gt; ${text}`;
+}
+
+function renderStack() {
+  let box = document.getElementById("stackBox");
+  box.innerHTML = "";
+  stackArr.forEach((val, idx) => {
+    let div = document.createElement("div");
+    div.className = "block";
+    div.innerText = (idx === stackArr.length - 1) ? "TOP ➔ " + val : val;
+    box.appendChild(div);
+  });
+}
+
+function runPush() {
+  let val = document.getElementById("stackItem").value;
+  if (val === "") {
+    alert("Please enter a number to push!");
+    return;
+  }
+
+  highlightLines(["c4", "c5", "c6", "c7"], `Executing push(${val})...`);
+
+  if (stackArr.length < MAX_SIZE) {
+    stackArr.push(Number(val));
+    renderStack();
+    document.getElementById("statusMsg").innerText = `Pushed element ${val} successfully.`;
+    appendLog(`push(${val}): Inserted. Stack size = ${stackArr.length}`);
+  } else {
+    document.getElementById("statusMsg").innerText = "*** Stack Overflow ***";
+    appendLog("push(): *** Stack Overflow ***");
+  }
+
+  document.getElementById("stackItem").value = "";
+}
+
+function runPop() {
+  highlightLines(["c8", "c9", "c10", "c11", "c12"], "Executing pop()...");
+
+  if (stackArr.length > 0) {
+    let popped = stackArr.pop();
+    renderStack();
+    document.getElementById("statusMsg").innerText = `Popped element: ${popped}`;
+    appendLog(`pop(): Popped element is ${popped}`);
+  } else {
+    document.getElementById("statusMsg").innerText = "*** Stack Underflow ***";
+    appendLog("pop(): *** Stack Underflow ***");
+  }
+}
+
+function runDisplay() {
+  highlightLines(["c1", "c2", "c3"], "Displaying stack status...");
+  if (stackArr.length === 0) {
+    document.getElementById("statusMsg").innerText = "OOPS!!!! Stack is Empty";
+    appendLog("display(): OOPS!!!! Stack is Empty");
+  } else {
+    let content = [...stackArr].reverse().join(", ");
+    document.getElementById("statusMsg").innerText = `Stack Contents (Top to Bottom): [ ${content} ]`;
+    appendLog(`display(): Stack contents = [ ${content} ]`);
+  }
+}
+
+function runPalindrome() {
+  highlightLines(["c13", "c14", "c15", "c16", "c17", "c18", "c19"], "Checking if stack contents are Palindrome...");
+
+  if (stackArr.length === 0) {
+    document.getElementById("statusMsg").innerText = "*** No Elements in stack to check for palindrome ***";
+    appendLog("palindrome(): *** No Elements in stack to check for palindrome ***");
+    return;
+  }
+
+  let isPal = stackArr.join('') === [...stackArr].reverse().join('');
+  if (isPal) {
+    document.getElementById("statusMsg").innerText = "Stack contents are Palindrome!";
+    appendLog("palindrome(): Stack contents are Palindrome");
+  } else {
+    document.getElementById("statusMsg").innerText = "Stack contents are NOT palindrome!";
+    appendLog("palindrome(): Stack contents are NOT palindrome");
+  }
+}
+
+function toggleHighlight() {
+  let box = document.getElementById("codeBox");
+  box.classList.toggle("code-highlight");
+  document.getElementById("stepText").innerHTML = "Current Step: Code panel highlighted.";
+}
+
+function resetAll() {
+  stackArr = [];
+  renderStack();
+  document.getElementById("statusMsg").innerText = "Stack Reset Completed.";
+  document.getElementById("stepText").innerText = "Current Step: Reset complete.";
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  document.getElementById("codeBox").classList.remove("code-highlight");
+  appendLog("System: Program reset completed.");
+}
+
+function openModal() {
+  document.getElementById("codeModal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("codeModal").style.display = "none";
+}
+
+function openCompiler() {
+  window.open("https://www.onlinegdb.com/online_c_compiler", "_blank");
+}
+
+ // Disable right-click menu
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Disable F12 and Ctrl+U / Ctrl+Shift+I / Ctrl+Shift+C
+    document.addEventListener('keydown', (e) => {
+      // F12 or Ctrl+U
+      if (e.keyCode === 123 || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
+        e.preventDefault();
+      }
+      
+      // Ctrl+Shift+I or Ctrl+Shift+C (Inspect Element shortcuts)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+      }
+    });
+</script>
+
+</body>
+</html>

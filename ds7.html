@@ -1,256 +1,756 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Singly Linked List Visualization</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Singly Linked List of Student Data in C - Visualizer</title>
 
 <style>
-body{
-    font-family:Arial;
-    background:#eef2f7;
-    margin:20px;
-}
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #eaf2f8;
+    color: #333;
+  }
 
-h2{
-    text-align:center;
-    color:#003366;
-}
+  h1 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
 
-.controls{
-    text-align:center;
-    margin-bottom:20px;
-}
+  .container {
+    border: 3px solid #003366;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
-button{
-    padding:8px 12px;
-    margin:4px;
-    background:#0066cc;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
+  /* CONTROLS & ACTION BUTTONS */
+  .controls {
+    text-align: center;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+  }
 
-button:hover{
-    background:#004a99;
-}
+  .form-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
 
-#list{
-    display:flex;
-    align-items:center;
-    flex-wrap:wrap;
-    min-height:120px;
-    border:2px solid #003366;
-    padding:20px;
-    background:white;
-}
+  input {
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 2px solid #0066cc;
+    border-radius: 4px;
+    outline: none;
+    width: 130px;
+    font-family: Consolas, monospace;
+  }
 
-.node{
-    background:#4CAF50;
-    color:white;
-    border-radius:10px;
-    padding:10px;
-    width:120px;
-    text-align:center;
-    margin:10px;
-    animation:show .5s;
-}
+  input:focus {
+    border-color: #003366;
+  }
 
-.arrow{
-    font-size:30px;
-    margin-right:10px;
-    color:red;
-}
+  button {
+    padding: 8px 14px;
+    margin: 3px;
+    border: none;
+    border-radius: 5px;
+    background: #0066cc;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
 
-.head{
-    font-weight:bold;
-    color:blue;
-    margin-right:20px;
-}
+  button:hover { background: #003366; }
+  .btn-accent { background: #28a745; }
+  .btn-accent:hover { background: #1e7e34; }
+  .btn-warning { background: #ff9800; color: #fff; }
+  .btn-warning:hover { background: #e65100; }
+  .btn-purple { background: #6f42c1; color: #fff; }
+  .btn-purple:hover { background: #59359a; }
+  .btn-danger { background: #dc3545; }
+  .btn-danger:hover { background: #bd2130; }
 
-#status{
-    margin-top:20px;
-    padding:10px;
-    background:white;
-    border:2px solid #003366;
-    font-weight:bold;
-}
+  /* CONTENT LAYOUT */
+  .content {
+    display: grid;
+    grid-template-columns: 48% 50%;
+    gap: 2%;
+  }
 
-@keyframes show{
-from{
-transform:scale(0);
-opacity:0;
-}
-to{
-transform:scale(1);
-opacity:1;
-}
-}
+  /* C CODE PANEL */
+  .codePanel {
+    border: 2px solid #333;
+    padding: 12px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    height: 420px;
+    overflow: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-radius: 6px;
+  }
+
+  .codePanel h3 {
+    margin-top: 0;
+    color: #61dafb;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+  }
+
+  .codeLine {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    white-space: pre;
+  }
+
+  .active {
+    background: #ffd54f !important;
+    color: #000 !important;
+    font-weight: bold;
+  }
+
+  .code-highlight {
+    border: 3px solid #28a745 !important;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.5);
+  }
+
+  /* VISUALIZATION PANEL */
+  .vizPanel {
+    border: 2px solid #ccc;
+    padding: 15px;
+    text-align: center;
+    background: #fafafa;
+    border-radius: 6px;
+    min-height: 420px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .vizPanel h3 {
+    margin-top: 0;
+    color: #003366;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
+
+  /* LINKED LIST GRAPHIC VISUALIZER */
+  .list-container {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    padding: 15px 10px;
+    min-height: 180px;
+  }
+
+  .head-pointer {
+    font-size: 13px;
+    font-weight: bold;
+    color: #dc3545;
+    background: #f8d7da;
+    border: 2px solid #dc3545;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-right: 10px;
+    white-space: nowrap;
+  }
+
+  .sll-node {
+    display: flex;
+    border: 2px solid #003366;
+    border-radius: 8px;
+    background: #e3f2fd;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    animation: fadeIn 0.4s ease-in-out;
+  }
+
+  .node-data {
+    padding: 8px;
+    font-size: 11px;
+    text-align: left;
+    border-right: 2px solid #003366;
+    min-width: 110px;
+  }
+
+  .node-data strong {
+    color: #003366;
+  }
+
+  .node-link {
+    background: #bbdefb;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Consolas, monospace;
+    font-weight: bold;
+    font-size: 11px;
+    color: #003366;
+  }
+
+  .arrow {
+    font-size: 20px;
+    font-weight: bold;
+    color: #003366;
+    margin: 0 8px;
+  }
+
+  .null-pointer {
+    font-weight: bold;
+    color: #6c757d;
+    background: #e2e3e5;
+    border: 2px dashed #6c757d;
+    padding: 6px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  .status-bar {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* ALGORITHM TRACKER & SNAPSHOT PANELS */
+  .algorithm {
+    margin-top: 15px;
+    border: 2px solid #003366;
+    padding: 10px;
+    background: #f0f4f8;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #003366;
+  }
+
+  .snapshot-panel {
+    margin-top: 15px;
+    background: #0c0c0c;
+    color: #00ff00;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    box-shadow: inset 0 0 10px #000;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .snapshot-title {
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  /* MODAL STYLES FOR SOURCE CODE POPUP */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: #fff;
+    width: 60%;
+    max-height: 80vh;
+    padding: 20px;
+    border-radius: 8px;
+    overflow: auto;
+    font-family: Consolas, monospace;
+  }
+
+  .close-btn {
+    float: right;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+  }
 </style>
-
 </head>
+
 <body>
 
-<h2>Singly Linked List Visualization</h2>
+<h1>SINGLY LINKED LIST OF STUDENT DATA IN C (VISUALIZER)</h1>
 
-<div class="controls">
+<div class="container">
 
-<button onclick="createFront()">Create (Front)</button>
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="form-grid">
+      <input id="stuUsn" placeholder="USN (e.g. 1RV21CS01)">
+      <input id="stuName" placeholder="Name (e.g. Rahul)">
+      <input id="stuBranch" placeholder="Branch (e.g. CSE)">
+      <input id="stuSem" type="number" placeholder="Sem (e.g. 3)">
+      <input id="stuPhno" placeholder="Ph No (e.g. 9876543210)">
+    </div>
+    
+    <button class="btn-accent" onclick="runInsertFront()">1. Insert Front (PUSH)</button>
+    <button class="btn-accent" onclick="runInsertRear()">2. Insert Rear (ENQUEUE)</button>
+    <button class="btn-warning" onclick="runDeleteFront()">3. Delete Front (POP/DEQUEUE)</button>
+    <button class="btn-warning" onclick="runDeleteRear()">4. Delete Rear</button>
+    <button onclick="runDisplay()">5. Display & Count</button>
+    <button class="btn-danger" onclick="resetAll()">Reset List</button>
+    <br><br>
+    <button class="btn-warning" onclick="toggleHighlight()">Highlight Code Panel</button>
+    <button class="btn-purple" onclick="openModal()">📄 View Full Source Code</button>
+    <button class="btn-accent" onclick="openCompiler()">🚀 Run on Online Compiler</button>
+  </div>
 
-<button onclick="displayList()">Display</button>
+  <div class="content">
+    <!-- C SOURCE CODE DISPLAY -->
+    <div class="codePanel" id="codeBox">
+      <h3>C SOURCE CODE</h3>
+<div class="codeLine" id="c1">#include &lt;stdio.h&gt;</div>
+<div class="codeLine" id="c2">#include &lt;stdlib.h&gt;</div>
+<div class="codeLine" id="c3">struct node {</div>
+<div class="codeLine" id="c4">    char usn[20], name[50], branch[25], phno[13];</div>
+<div class="codeLine" id="c5">    int sem; struct node *link;</div>
+<div class="codeLine" id="c6">}; typedef struct node *NODE; NODE first = NULL, temp, cur, prev;</div>
+<div class="codeLine" id="c7">void insertFrontSLL() {</div>
+<div class="codeLine" id="c8">    create(); temp-&gt;link = first; first = temp;</div>
+<div class="codeLine" id="c9">}</div>
+<div class="codeLine" id="c10">void insertRearSLL() {</div>
+<div class="codeLine" id="c11">    create(); if (first == NULL) { first = temp; return; }</div>
+<div class="codeLine" id="c12">    cur = first; while (cur-&gt;link != NULL) cur = cur-&gt;link;</div>
+<div class="codeLine" id="c13">    cur-&gt;link = temp;</div>
+<div class="codeLine" id="c14">}</div>
+<div class="codeLine" id="c15">void deleteFrontSLL() {</div>
+<div class="codeLine" id="c16">    if (first == NULL) { printf("List Empty"); return; }</div>
+<div class="codeLine" id="c17">    cur = first; first = first-&gt;link; free(cur);</div>
+<div class="codeLine" id="c18">}</div>
+<div class="codeLine" id="c19">void deleteRearSLL() {</div>
+<div class="codeLine" id="c20">    if (first == NULL) { printf("List Empty"); return; }</div>
+<div class="codeLine" id="c21">    if (first-&gt;link == NULL) { free(first); first = NULL; return; }</div>
+<div class="codeLine" id="c22">    cur = first; while (cur-&gt;link != NULL) { prev = cur; cur = cur-&gt;link; }</div>
+<div class="codeLine" id="c23">    free(cur); prev-&gt;link = NULL;</div>
+<div class="codeLine" id="c24">}</div>
+    </div>
 
-<button onclick="insertEnd()">Insert End</button>
+    <!-- VISUAL OUTPUT SNAPSHOT -->
+    <div class="vizPanel">
+      <h3>SLL GRAPHICAL NODE DIAGRAM</h3>
+      
+      <div class="list-container" id="listContainer">
+        <div class="head-pointer">first ➔</div>
+        <div class="null-pointer">NULL</div>
+      </div>
 
-<button onclick="deleteEnd()">Delete End</button>
+      <div class="status-bar">
+        <strong>Total Nodes Count:</strong> <span id="nodeCount">0</span>
+      </div>
 
-<button onclick="insertFront()">Insert Front</button>
+      <p id="statusMsg" style="color:#0066cc; font-weight:bold; margin-top:15px;">List is initialized to NULL. Enter student details above.</p>
+    </div>
+  </div>
 
-<button onclick="deleteFront()">Delete Front</button>
+  <!-- ALGORITHM TRACKER -->
+  <div class="algorithm">
+    <span id="stepText">Current Step: Ready to execute operations.</span>
+  </div>
+
+  <!-- TERMINAL CONSOLE SNAPSHOT -->
+  <div class="snapshot-panel">
+    <div class="snapshot-title">📷 Output Snapshot (Terminal Output Simulation)</div>
+    <div id="consoleLog">
+      $ gcc student_sll.c -o student_sll<br>
+      $ ./student_sll<br>
+      -------MAIN MENU-------------<br>
+      1: Insert front  2: Insert Rear  3: Delete front  4: Delete Rear  5: Display<br>
+      [System]: Singly Linked List initialized.<br>
+      &gt; Awaiting choice...
+    </div>
+  </div>
 
 </div>
 
-<div id="list"></div>
+<!-- SOURCE CODE MODAL POPUP -->
+<div class="modal" id="codeModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">X</button>
+    <h3>Full C Source Code</h3>
+    <pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
 
-<div id="status">
-Status
+struct node
+{
+    char usn[20];
+    char name[50];
+    char branch[25];
+    int sem;
+    char phno[13];
+    struct node *link;
+};
+
+typedef struct node *NODE;
+NODE first, temp, cur, prev;
+
+void create()
+{
+    temp = (struct node *)malloc(sizeof(struct node));
+    printf("\n Enter the Name:");
+    scanf("%s", temp-&gt;name);
+    printf("\n Enter the USN:");
+    scanf("%s", temp-&gt;usn);
+    printf("\n Enter the Semester:");
+    scanf("%d", &amp;temp-&gt;sem);
+    printf("\n Enter the Branch:");
+    scanf("%s", temp-&gt;branch);
+    printf("\n Enter the Contact Number:");
+    scanf("%s", temp-&gt;phno);
+    temp-&gt;link = NULL;
+}
+
+void insertFrontSLL()
+{
+    create();
+    temp-&gt;link = first;
+    first = temp;
+}
+
+void insertRearSLL()
+{
+    create();
+    if (first == NULL)
+    {
+        first = temp;
+        return;
+    }
+    cur = first;
+    while (cur-&gt;link != NULL)
+        cur = cur-&gt;link;
+    cur-&gt;link = temp;
+}
+
+void displaySLL()
+{
+    int count = 0;
+    if (first == NULL)
+    {
+        printf("****List is empty****\n");
+        return;
+    }
+    printf("\n The contents of the list are\n");
+    printf("|----USN----|----Name----|--Branch--|-Sem-|---Phone NO---|\n");
+    cur = first;
+    while (cur != NULL)
+    {
+        printf("%s\t%s\t\t%s\t%d\t%s\n", cur-&gt;usn, cur-&gt;name, cur-&gt;branch, cur-&gt;sem, cur-&gt;phno);
+        cur = cur-&gt;link;
+        count++;
+    }
+    printf("\nTotal number of student nodes = %d\n", count);
+}
+
+void deleteFrontSLL()
+{
+    if (first == NULL)
+    {
+        printf("\n ***List is Empty\n***");
+        return;
+    }
+    cur = first;
+    first = first-&gt;link;
+    printf("\n***Record Deleted with USN: %s ***", cur-&gt;usn);
+    free(cur);
+}
+
+void deleteRearSLL()
+{
+    if (first == NULL)
+    {
+        printf("\n***List is Empty***");
+        return;
+    }
+    if (first-&gt;link == NULL)
+    {
+        printf("\n***Record Deleted with USN: %s ***", first-&gt;usn);
+        free(first);
+        first = NULL;
+        return;
+    }
+    cur = first;
+    while (cur-&gt;link != NULL)
+    {
+        prev = cur;
+        cur = cur-&gt;link;
+    }
+    printf("\n***Record deleted with USN: %s ***", cur-&gt;usn);
+    free(cur);
+    prev-&gt;link = NULL;
+}
+
+void main()
+{
+    first = NULL;
+    int ch;
+    for (;;)
+    {
+        printf("\n-------MAIN MENU-------------\n");
+        printf("1: Insert front\n2: Insert Rear\n3: Delete front\n4: Delete Rear\n5: Display\n6: Exit\n");
+        printf("Enter your choice----- &gt;");
+        scanf("%d", &amp;ch);
+        switch (ch)
+        {
+        case 1:
+            insertFrontSLL();
+            break;
+        case 2:
+            insertRearSLL();
+            break;
+        case 3:
+            deleteFrontSLL();
+            break;
+        case 4:
+            deleteRearSLL();
+            break;
+        case 5:
+            displaySLL();
+            break;
+        case 6:
+            exit(0);
+        default:
+            printf("\nInvalid Choice\n");
+        }
+    }
+}
+    </pre>
+  </div>
 </div>
 
 <script>
+let sllNodes = [];
 
-let list=[];
-
-function render(){
-
-let html="<span class='head'>HEAD ? </span>";
-
-for(let i=0;i<list.length;i++){
-
-html+="<div class='node'>"+
-"<b>"+list[i].usn+"</b><br>"+
-list[i].name+"<br>"+
-list[i].prog+"<br>Sem "+list[i].sem+
-"</div>";
-
-if(i!=list.length-1)
-html+="<div class='arrow'>?</div>";
-
+function highlightLines(lines, stepMsg) {
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  lines.forEach(id => {
+    let el = document.getElementById(id);
+    if(el) el.classList.add("active");
+  });
+  document.getElementById("stepText").innerHTML = "Current Step: " + stepMsg;
 }
 
-if(list.length==0)
-html+="NULL";
-
-document.getElementById("list").innerHTML=html;
-
+function appendLog(text) {
+  const consoleLog = document.getElementById("consoleLog");
+  consoleLog.innerHTML += `<br>${text}`;
+  consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-function student(){
+function getFormData() {
+  let usn = document.getElementById("stuUsn").value.trim();
+  let name = document.getElementById("stuName").value.trim();
+  let branch = document.getElementById("stuBranch").value.trim();
+  let sem = document.getElementById("stuSem").value.trim();
+  let phno = document.getElementById("stuPhno").value.trim();
 
-return{
+  if (!usn || !name) {
+    alert("Please enter at least USN and Name!");
+    return null;
+  }
 
-usn:prompt("USN"),
-
-name:prompt("Name"),
-
-prog:prompt("Programme"),
-
-sem:prompt("Semester"),
-
-phone:prompt("Phone")
-
-};
-
+  return {
+    usn: usn,
+    name: name,
+    branch: branch || "CSE",
+    sem: sem || "3",
+    phno: phno || "9876543210"
+  };
 }
 
-function createFront(){
-
-let n=parseInt(prompt("Number of Students"));
-
-list=[];
-
-for(let i=0;i<n;i++){
-
-list.unshift(student());
-
+function clearInputs() {
+  document.getElementById("stuUsn").value = "";
+  document.getElementById("stuName").value = "";
+  document.getElementById("stuBranch").value = "";
+  document.getElementById("stuSem").value = "";
+  document.getElementById("stuPhno").value = "";
 }
 
-render();
+function renderList() {
+  let container = document.getElementById("listContainer");
+  container.innerHTML = `<div class="head-pointer">first ➔</div>`;
 
-document.getElementById("status").innerHTML=
-"SLL Created<br>Total Nodes : "+list.length;
+  sllNodes.forEach((node, idx) => {
+    container.innerHTML += `
+      <div class="sll-node">
+        <div class="node-data">
+          <strong>USN:</strong> ${node.usn}<br>
+          <strong>Name:</strong> ${node.name}<br>
+          <strong>Br:</strong> ${node.branch} | <strong>Sem:</strong> ${node.sem}<br>
+          <strong>Ph:</strong> ${node.phno}
+        </div>
+        <div class="node-link">PTR</div>
+      </div>
+      <div class="arrow">➔</div>
+    `;
+  });
 
+  container.innerHTML += `<div class="null-pointer">NULL</div>`;
+  document.getElementById("nodeCount").innerText = sllNodes.length;
 }
 
-function displayList(){
+function runInsertFront() {
+  let data = getFormData();
+  if (!data) return;
 
-render();
-
-document.getElementById("status").innerHTML=
-"Displaying List<br>Total Nodes : "+list.length;
-
+  sllNodes.unshift(data);
+  highlightLines(["c7", "c8", "c9"], `Creating node & placing at FRONT. Updated 'first' pointer.`);
+  renderList();
+  
+  document.getElementById("statusMsg").innerText = `Inserted student record ${data.usn} at FRONT.`;
+  appendLog(`&gt; insertFrontSLL(): Created record with USN: ${data.usn}`);
+  clearInputs();
 }
 
-function insertFront(){
+function runInsertRear() {
+  let data = getFormData();
+  if (!data) return;
 
-list.unshift(student());
+  sllNodes.push(data);
+  highlightLines(["c10", "c11", "c12", "c13", "c14"], `Creating node & linking at REAR end of list.`);
+  renderList();
 
-render();
-
-document.getElementById("status").innerHTML=
-"Inserted at Front (Stack Push)<br>Total Nodes : "+list.length;
-
+  document.getElementById("statusMsg").innerText = `Inserted student record ${data.usn} at REAR.`;
+  appendLog(`&gt; insertRearSLL(): Created record with USN: ${data.usn}`);
+  clearInputs();
 }
 
-function insertEnd(){
+function runDeleteFront() {
+  if (sllNodes.length === 0) {
+    highlightLines(["c16"], "List is Empty! Deletion not possible.");
+    document.getElementById("statusMsg").innerText = "*** List is Empty ***";
+    appendLog("&gt; deleteFrontSLL(): *** List is Empty ***");
+    return;
+  }
 
-list.push(student());
+  let deleted = sllNodes.shift();
+  highlightLines(["c15", "c17", "c18"], `Deleting record at FRONT with USN: ${deleted.usn}. Calling free().`);
+  renderList();
 
-render();
-
-document.getElementById("status").innerHTML=
-"Inserted at End<br>Total Nodes : "+list.length;
-
+  document.getElementById("statusMsg").innerText = `*** Record Deleted with USN: ${deleted.usn} ***`;
+  appendLog(`&gt; deleteFrontSLL(): *** Record Deleted with USN: ${deleted.usn} ***`);
 }
 
-function deleteFront(){
+function runDeleteRear() {
+  if (sllNodes.length === 0) {
+    highlightLines(["c20"], "List is Empty! Deletion not possible.");
+    document.getElementById("statusMsg").innerText = "*** List is Empty ***";
+    appendLog("&gt; deleteRearSLL(): *** List is Empty ***");
+    return;
+  }
 
-if(list.length==0){
+  let deleted = sllNodes.pop();
+  highlightLines(["c19", "c21", "c22", "c23", "c24"], `Traversing to REAR node. Deleting record with USN: ${deleted.usn}.`);
+  renderList();
 
-alert("List Empty");
-
-return;
-
+  document.getElementById("statusMsg").innerText = `*** Record Deleted with USN: ${deleted.usn} ***`;
+  appendLog(`&gt; deleteRearSLL(): *** Record Deleted with USN: ${deleted.usn} ***`);
 }
 
-list.shift();
-
-render();
-
-document.getElementById("status").innerHTML=
-"Deleted from Front (Stack Pop)<br>Total Nodes : "+list.length;
-
+function runDisplay() {
+  if (sllNodes.length === 0) {
+    highlightLines(["c16"], "Displaying status: List is empty.");
+    document.getElementById("statusMsg").innerText = "**** List is empty ****";
+    appendLog("&gt; displaySLL(): **** List is empty ****");
+  } else {
+    highlightLines(["c7", "c10"], "Traversing and displaying SLL nodes status.");
+    let msg = `List contains ${sllNodes.length} student record(s).`;
+    document.getElementById("statusMsg").innerText = msg;
+    
+    // Print Both Table Records AND Node Count in Console Snapshot
+    let consoleOutput = `&gt; displaySLL():<br>The contents of the list are:<br>`;
+    consoleOutput += `|----USN----|----Name----|--Branch--|-Sem-|---Phone NO---|<br>`;
+    sllNodes.forEach(node => {
+      consoleOutput += `${node.usn} &nbsp;&nbsp; ${node.name} &nbsp;&nbsp; ${node.branch} &nbsp;&nbsp; ${node.sem} &nbsp;&nbsp; ${node.phno}<br>`;
+    });
+    consoleOutput += `Total number of student nodes = ${sllNodes.length}`;
+    
+    appendLog(consoleOutput);
+  }
 }
 
-function deleteEnd(){
-
-if(list.length==0){
-
-alert("List Empty");
-
-return;
-
+function toggleHighlight() {
+  let box = document.getElementById("codeBox");
+  box.classList.toggle("code-highlight");
+  document.getElementById("stepText").innerHTML = "Current Step: Code panel highlighted.";
 }
 
-list.pop();
-
-render();
-
-document.getElementById("status").innerHTML=
-"Deleted from End<br>Total Nodes : "+list.length;
-
+function resetAll() {
+  sllNodes = [];
+  renderList();
+  document.getElementById("statusMsg").innerText = "Singly Linked List Reset Completed.";
+  document.getElementById("stepText").innerText = "Current Step: Reset complete.";
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  document.getElementById("codeBox").classList.remove("code-highlight");
+  appendLog("&gt; System: Singly Linked List reset.");
 }
 
-render();
+function openModal() {
+  document.getElementById("codeModal").style.display = "flex";
+}
 
+function closeModal() {
+  document.getElementById("codeModal").style.display = "none";
+}
+
+function openCompiler() {
+  window.open("https://www.onlinegdb.com/online_c_compiler", "_blank");
+}
+
+// Initial UI Render
+renderList();
+
+ // Disable right-click menu
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Disable F12 and Ctrl+U / Ctrl+Shift+I / Ctrl+Shift+C
+    document.addEventListener('keydown', (e) => {
+      // F12 or Ctrl+U
+      if (e.keyCode === 123 || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
+        e.preventDefault();
+      }
+      
+      // Ctrl+Shift+I or Ctrl+Shift+C (Inspect Element shortcuts)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+      }
+    });
 </script>
 
 </body>

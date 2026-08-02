@@ -1,745 +1,730 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-
-<title>Hashing Linear Probing Animation</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graph Operations (BFS & DFS) in C - Visualizer</title>
 
 <style>
-
-body{
-
-font-family:Segoe UI,Arial;
-background:#eaf2f8;
-padding:20px;
-
-}
-
-
-h1{
-
-text-align:center;
-color:#003366;
-
-}
-
-
-
-.container{
-
-background:white;
-border:4px solid #003366;
-border-radius:15px;
-padding:15px;
-
-}
-
-
-
-button{
-
-background:#0066cc;
-color:white;
-padding:10px 15px;
-margin:5px;
-border:none;
-border-radius:6px;
-
-}
-
-
-input{
-
-padding:8px;
-
-}
-
-
-
-.main{
-
-display:grid;
-grid-template-columns:45% 55%;
-gap:15px;
-
-}
-
-
-
-
-/* C CODE */
-
-
-.code{
-
-background:#111;
-color:white;
-height:600px;
-overflow:auto;
-padding:15px;
-font-family:Consolas;
-
-}
-
-
-
-.line{
-
-padding:6px;
-
-}
-
-
-
-.active{
-
-background:#ffd54f;
-color:black;
-font-weight:bold;
-
-}
-
-
-
-.active::before{
-
-content:"? ";
-color:red;
-font-size:22px;
-
-}
-
-
-
-
-
-
-/* HASH TABLE */
-
-
-.visual{
-
-border:3px solid #555;
-padding:20px;
-text-align:center;
-
-}
-
-
-
-table{
-
-margin:auto;
-border-collapse:collapse;
-
-}
-
-
-
-td,th{
-
-border:2px solid #003366;
-padding:12px;
-
-}
-
-
-
-.hash{
-
-background:#3498db;
-color:white;
-font-weight:bold;
-
-}
-
-
-
-.collision{
-
-background:red;
-color:white;
-
-}
-
-
-
-.inserted{
-
-background:green;
-color:white;
-
-}
-
-
-
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #eaf2f8;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .container {
+    border: 3px solid #003366;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* CONTROLS & ACTION BUTTONS */
+  .controls {
+    text-align: center;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+  }
+
+  .form-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  input {
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 2px solid #0066cc;
+    border-radius: 4px;
+    outline: none;
+    width: 140px;
+    font-family: Consolas, monospace;
+  }
+
+  input:focus {
+    border-color: #003366;
+  }
+
+  button {
+    padding: 8px 14px;
+    margin: 3px;
+    border: none;
+    border-radius: 5px;
+    background: #0066cc;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button:hover { background: #003366; }
+  .btn-accent { background: #28a745; }
+  .btn-accent:hover { background: #1e7e34; }
+  .btn-warning { background: #ff9800; color: #fff; }
+  .btn-warning:hover { background: #e65100; }
+  .btn-purple { background: #6f42c1; color: #fff; }
+  .btn-purple:hover { background: #59359a; }
+  .btn-danger { background: #dc3545; }
+  .btn-danger:hover { background: #bd2130; }
+
+  /* CONTENT LAYOUT */
+  .content {
+    display: grid;
+    grid-template-columns: 48% 50%;
+    gap: 2%;
+  }
+
+  /* C CODE PANEL */
+  .codePanel {
+    border: 2px solid #333;
+    padding: 12px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    height: 420px;
+    overflow: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-radius: 6px;
+  }
+
+  .codePanel h3 {
+    margin-top: 0;
+    color: #61dafb;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+  }
+
+  .codeLine {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    white-space: pre;
+  }
+
+  .active {
+    background: #ffd54f !important;
+    color: #000 !important;
+    font-weight: bold;
+  }
+
+  .code-highlight {
+    border: 3px solid #28a745 !important;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.5);
+  }
+
+  /* VISUALIZATION PANEL */
+  .vizPanel {
+    border: 2px solid #ccc;
+    padding: 15px;
+    text-align: center;
+    background: #fafafa;
+    border-radius: 6px;
+    min-height: 420px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .vizPanel h3 {
+    margin-top: 0;
+    color: #003366;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
+
+  /* GRAPH CANVAS / SVG */
+  .graph-canvas {
+    width: 100%;
+    height: 240px;
+    border: 1px dashed #0066cc;
+    border-radius: 8px;
+    background: #f0f8ff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .matrix-table {
+    margin: 10px auto 0;
+    border-collapse: collapse;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+  }
+
+  .matrix-table td, .matrix-table th {
+    border: 1px solid #003366;
+    padding: 4px 8px;
+    text-align: center;
+  }
+
+  .matrix-table th {
+    background: #003366;
+    color: #fff;
+  }
+
+  .status-bar {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 13px;
+    margin-top: 10px;
+    font-family: Consolas, monospace;
+    text-align: left;
+  }
+
+  /* ALGORITHM TRACKER & SNAPSHOT PANELS */
+  .algorithm {
+    margin-top: 15px;
+    border: 2px solid #003366;
+    padding: 10px;
+    background: #f0f4f8;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #003366;
+  }
+
+  .snapshot-panel {
+    margin-top: 15px;
+    background: #0c0c0c;
+    color: #00ff00;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    box-shadow: inset 0 0 10px #000;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .snapshot-title {
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  /* MODAL STYLES FOR SOURCE CODE POPUP */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: #fff;
+    width: 60%;
+    max-height: 80vh;
+    padding: 20px;
+    border-radius: 8px;
+    overflow: auto;
+    font-family: Consolas, monospace;
+  }
+
+  .close-btn {
+    float: right;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+  }
 </style>
-
-
 </head>
-
-
 
 <body>
 
-
-<h1>
-HASHING USING LINEAR PROBING IN C
-</h1>
-
-
-
+<h1>GRAPH OPERATIONS (BFS & DFS) IN C (VISUALIZER)</h1>
 
 <div class="container">
 
-
-<button onclick="createTable()">
-Create Hash Table
-</button>
-
-
-<input id="key" placeholder="Enter 4 Digit Key">
-
-
-<button onclick="insert()">
-Insert Key
-</button>
-
-
-<button onclick="search()">
-Search Key
-</button>
-
-
-<button onclick="reset()">
-Reset
-</button>
-
-
-
-
-
-<div class="main">
-
-
-
-
-
-<!-- C PROGRAM -->
-
-
-<div class="code">
-
-
-<h2>C PROGRAM</h2>
-
-
-
-<div class="line" id="c1">
-#define SIZE 10
-</div>
-
-
-
-<div class="line" id="c2">
-int HT[SIZE];
-</div>
-
-
-
-<div class="line" id="c3">
-Hash Function
-</div>
-
-
-
-<div class="line" id="c4">
-H(K)=K mod m
-</div>
-
-
-
-<br>
-
-
-
-<div class="line" id="c5">
-index=key%size
-</div>
-
-
-
-<div class="line" id="c6">
-if(HT[index]==EMPTY)
-</div>
-
-
-
-<div class="line" id="c7">
-Insert key
-</div>
-
-
-
-<div class="line" id="c8">
-else collision occurs
-</div>
-
-
-
-<div class="line" id="c9">
-index=(index+1)%size
-</div>
-
-
-
-<div class="line" id="c10">
-Linear Probing
-</div>
-
-
-
-
-<br>
-
-
-
-<div class="line" id="c11">
-Search key
-</div>
-
-
-
-<div class="line" id="c12">
-Compare HT[index]
-</div>
-
-
-
-<div class="line" id="c13">
-Record Found
-</div>
-
-
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="form-grid">
+      <input id="numNodes" type="number" min="2" max="6" value="4" placeholder="Nodes N (1-6)">
+      <input id="srcNode" type="number" min="1" max="6" value="1" placeholder="Source Vertex">
+      <button class="btn-purple" onclick="loadSampleConnected()">Connected Graph Matrix</button>
+      <button class="btn-warning" onclick="loadSampleDisconnected()">Disconnected Graph Matrix</button>
+    </div>
+    
+    <button class="btn-accent" onclick="runBFS()">1. Reachability (BFS)</button>
+    <button class="btn-accent" onclick="runDFS()">2. Check Connectivity (DFS)</button>
+    <button class="btn-danger" onclick="resetAll()">Reset Graph</button>
+    <br><br>
+    <button class="btn-warning" onclick="toggleHighlight()">Highlight Code Panel</button>
+    <button class="btn-purple" onclick="openModal()">📄 View Full Source Code</button>
+    <button class="btn-accent" onclick="openCompiler()">🚀 Run on Online Compiler</button>
+  </div>
+
+  <div class="content">
+    <!-- C SOURCE CODE DISPLAY -->
+    <div class="codePanel" id="codeBox">
+      <h3>C SOURCE CODE</h3>
+<div class="codeLine" id="c1">#include &lt;stdio.h&gt;</div>
+<div class="codeLine" id="c2">#include &lt;stdlib.h&gt;</div>
+<div class="codeLine" id="c3">void bfs(int n, int a[10][10], int src) {</div>
+<div class="codeLine" id="c4">    int i, visited[10], q[10], front = 0, rear = -1, u, v;</div>
+<div class="codeLine" id="c5">    for (i = 1; i &lt;= n; i++) visited[i] = 0;</div>
+<div class="codeLine" id="c6">    visited[src] = 1; q[++rear] = src;</div>
+<div class="codeLine" id="c7">    while (front &lt;= rear) {</div>
+<div class="codeLine" id="c8">        u = q[front++];</div>
+<div class="codeLine" id="c9">        for (v = 1; v &lt;= n; v++) {</div>
+<div class="codeLine" id="c10">            if (a[u][v] == 1 &amp;&amp; visited[v] == 0) {</div>
+<div class="codeLine" id="c11">                visited[v] = 1; q[++rear] = v;</div>
+<div class="codeLine" id="c12">            }</div>
+<div class="codeLine" id="c13">        }</div>
+<div class="codeLine" id="c14">    }</div>
+<div class="codeLine" id="c15">    for (i = 1; i &lt;= n; i++) {</div>
+<div class="codeLine" id="c16">        if (visited[i] == 0) printf("%d is not reachable\n", i);</div>
+<div class="codeLine" id="c17">        else printf("%d is reachable\n", i);</div>
+<div class="codeLine" id="c18">    }</div>
+<div class="codeLine" id="c19">}</div>
+<div class="codeLine" id="c20">void dfs(int n, int a[10][10], int u, int visited[10]) {</div>
+<div class="codeLine" id="c21">    int v; visited[u] = 1;</div>
+<div class="codeLine" id="c22">    for (v = 1; v &lt;= n; v++) {</div>
+<div class="codeLine" id="c23">        if (a[u][v] == 1 &amp;&amp; visited[v] == 0) dfs(n, a, v, visited);</div>
+<div class="codeLine" id="c24">    }</div>
+<div class="codeLine" id="c25">}</div>
+    </div>
+
+    <!-- VISUAL OUTPUT SNAPSHOT -->
+    <div class="vizPanel">
+      <h3>GRAPH VISUALIZER & ADJACENCY MATRIX</h3>
+      
+      <div class="graph-canvas">
+        <svg id="svgGraph" width="100%" height="100%"></svg>
+      </div>
+
+      <div id="matrixContainer"></div>
+
+      <div class="status-bar" id="statusDisplay">
+        <strong>Source Node:</strong> 1<br>
+        <strong>BFS Reachability:</strong> --<br>
+        <strong>DFS Connectivity:</strong> --
+      </div>
+
+      <p id="statusMsg" style="color:#0066cc; font-weight:bold; margin-top:10px;">Graph loaded. Choose BFS or DFS operation.</p>
+    </div>
+  </div>
+
+  <!-- ALGORITHM TRACKER -->
+  <div class="algorithm">
+    <span id="stepText">Current Step: Ready to execute graph algorithms.</span>
+  </div>
+
+  <!-- TERMINAL CONSOLE SNAPSHOT -->
+  <div class="snapshot-panel">
+    <div class="snapshot-title">📷 Output Snapshot (Terminal Output Simulation)</div>
+    <div id="consoleLog">
+      $ gcc graph_bfs_dfs.c -o graph_bfs_dfs<br>
+      $ ./graph_bfs_dfs<br>
+      Enter the no. of nodes in graph: 4<br>
+      [System]: Graph Adjacency Matrix loaded.<br>
+      &gt; Awaiting operation...
+    </div>
+  </div>
 
 </div>
 
+<!-- SOURCE CODE MODAL POPUP -->
+<div class="modal" id="codeModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">X</button>
+    <h3>Full C Source Code</h3>
+    <pre>
+#include &lt;stdio.h&gt;
+#include &lt;conio.h&gt;
+#include &lt;stdlib.h&gt;
 
+void bfs(int n, int a[10][10], int src)
+{
+    int i, visited[10], q[10], front, rear, u, v;
+    for (i = 1; i &lt;= n; i++)
+    {
+        visited[i] = 0;
+    }
+    visited[src] = 1;
+    front = 0;
+    rear = -1;
+    q[++rear] = src;
 
+    while (front &lt;= rear)
+    {
+        u = q[front++];
+        for (v = 1; v &lt;= n; v++)
+        {
+            if (a[u][v] == 1 &amp;&amp; visited[v] == 0)
+            {
+                visited[v] = 1;
+                q[++rear] = v;
+            }
+        }
+    }
 
+    for (i = 1; i &lt;= n; i++)
+    {
+        if (visited[i] == 0)
+            printf("%d is not reachable \n", i);
+        else
+            printf("%d is reachable\n", i);
+    }
+}
 
+void dfs(int n, int a[10][10], int u, int visited[10])
+{
+    int v;
+    visited[u] = 1;
+    for (v = 1; v &lt;= n; v++)
+    {
+        if (a[u][v] == 1 &amp;&amp; visited[v] == 0)
+        {
+            dfs(n, a, v, visited);
+        }
+    }
+}
 
+void main()
+{
+    int n, i, j, src, a[10][10], visited[10];
+    printf("Enter the no. of nodes in graph: ");
+    scanf("%d", &amp;n);
 
+    printf("\nEnter the adj. matrix\n");
+    for (i = 1; i &lt;= n; i++)
+    {
+        for (j = 1; j &lt;= n; j++)
+        {
+            scanf("%d", &amp;a[i][j]);
+        }
+    }
 
+    printf("\nEnter the source vertex: ");
+    scanf("%d", &amp;src);
 
+    printf("\n--- BFS Reachability ---\n");
+    bfs(n, a, src);
 
-<!-- HASH TABLE -->
+    for (i = 1; i &lt;= n; i++)
+        visited[i] = 0;
 
-<div class="visual">
+    dfs(n, a, src, visited);
 
-
-<h2>HASH TABLE</h2>
-
-
-<table id="table"></table>
-
-
-<h3 id="output"></h3>
-
-
+    for (i = 1; i &lt;= n; i++)
+    {
+        if (visited[i] == 0)
+        {
+            printf("\n*** The graph is NOT connected ***\n");
+            getch();
+            exit(0);
+        }
+    }
+    printf("\nThe graph is connected\n");
+    getch();
+}
+    </pre>
+  </div>
 </div>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
 
 <script>
+let nNodes = 4;
+let adjMatrix = [
+  [0, 0, 0, 0, 0],
+  [0, 0, 1, 1, 0],
+  [0, 0, 0, 1, 0],
+  [0, 0, 0, 0, 1],
+  [0, 0, 0, 0, 0]
+];
 
-
-let size=10;
-
-
-let HT=[];
-
-
-
-function execute(line,text)
-{
-
-
-document.querySelectorAll(".line")
-.forEach(e=>{
-
-e.className="line";
-
-});
-
-
-document.getElementById(line)
-.className="line active";
-
-
-document.getElementById("output")
-.innerHTML=text;
-
-
+function highlightLines(lines, stepMsg) {
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  lines.forEach(id => {
+    let el = document.getElementById(id);
+    if(el) el.classList.add("active");
+  });
+  document.getElementById("stepText").innerHTML = "Current Step: " + stepMsg;
 }
 
-
-
-
-
-
-
-function createTable()
-{
-
-
-execute(
-"c2",
-"Creating Hash Table"
-);
-
-
-
-HT=new Array(size).fill("-");
-
-
-draw();
-
-
+function appendLog(text) {
+  const consoleLog = document.getElementById("consoleLog");
+  consoleLog.innerHTML += `<br>${text}`;
+  consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-
-
-
-
-
-
-function hash(k)
-{
-
-return k%size;
-
+function loadSampleConnected() {
+  nNodes = 4;
+  document.getElementById("numNodes").value = 4;
+  document.getElementById("srcNode").value = 1;
+  adjMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 0, 1, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 1, 0, 1],
+    [0, 0, 0, 1, 0]
+  ];
+  drawGraphAndMatrix();
+  highlightLines(["c3", "c20"], "Loaded sample Connected Graph (4 nodes).");
+  document.getElementById("statusMsg").innerText = "Loaded sample Connected Graph.";
+  appendLog("&gt; Loaded Connected Graph Adjacency Matrix (4x4).");
 }
 
-
-
-
-
-function insert()
-{
-
-
-let key=
-
-Number(document.getElementById("key").value);
-
-
-
-let index=hash(key);
-
-
-
-execute(
-"c5",
-"H(K)= "+key+" mod "+size+" = "+index
-);
-
-
-
-
-setTimeout(()=>{
-
-
-if(HT[index]=="-")
-{
-
-
-execute(
-"c7",
-"Inserted Key at Address "+index
-);
-
-
-HT[index]=key;
-
-
+function loadSampleDisconnected() {
+  nNodes = 4;
+  document.getElementById("numNodes").value = 4;
+  document.getElementById("srcNode").value = 1;
+  adjMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 0]
+  ];
+  drawGraphAndMatrix();
+  highlightLines(["c3", "c20"], "Loaded sample Disconnected Graph (4 nodes).");
+  document.getElementById("statusMsg").innerText = "Loaded sample Disconnected Graph.";
+  appendLog("&gt; Loaded Disconnected Graph Adjacency Matrix (4x4).");
 }
 
-else
-{
+function drawGraphAndMatrix() {
+  nNodes = parseInt(document.getElementById("numNodes").value) || 4;
+  
+  // Render SVG Graph Nodes in a Circle
+  const svg = document.getElementById("svgGraph");
+  svg.innerHTML = "";
+  
+  const width = svg.clientWidth || 300;
+  const height = svg.clientHeight || 240;
+  const cx = width / 2;
+  const cy = height / 2;
+  const radius = Math.min(width, height) / 2.8;
 
+  let nodePositions = {};
 
-execute(
-"c8",
-"Collision at Address "+index
-);
+  for (let i = 1; i <= nNodes; i++) {
+    let angle = ((i - 1) * 2 * Math.PI) / nNodes - Math.PI / 2;
+    nodePositions[i] = {
+      x: cx + radius * Math.cos(angle),
+      y: cy + radius * Math.sin(angle)
+    };
+  }
 
+  // Draw Edges
+  for (let i = 1; i <= nNodes; i++) {
+    for (let j = 1; j <= nNodes; j++) {
+      if (adjMatrix[i] && adjMatrix[i][j] === 1) {
+        let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", nodePositions[i].x);
+        line.setAttribute("y1", nodePositions[i].y);
+        line.setAttribute("x2", nodePositions[j].x);
+        line.setAttribute("y2", nodePositions[j].y);
+        line.setAttribute("stroke", "#003366");
+        line.setAttribute("stroke-width", "2");
+        svg.appendChild(line);
+      }
+    }
+  }
 
+  // Draw Nodes
+  for (let i = 1; i <= nNodes; i++) {
+    let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", nodePositions[i].x);
+    circle.setAttribute("cy", nodePositions[i].y);
+    circle.setAttribute("r", "16");
+    circle.setAttribute("fill", "#0066cc");
+    circle.setAttribute("stroke", "#003366");
+    circle.setAttribute("stroke-width", "2");
+    svg.appendChild(circle);
 
-let start=index;
+    let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", nodePositions[i].x);
+    text.setAttribute("y", nodePositions[i].y + 5);
+    text.setAttribute("fill", "#ffffff");
+    text.setAttribute("font-size", "12");
+    text.setAttribute("font-weight", "bold");
+    text.setAttribute("text-anchor", "middle");
+    text.textContent = i;
+    svg.appendChild(text);
+  }
 
+  // Render Matrix Table
+  let matrixHTML = `<table class="matrix-table"><tr><th>A</th>`;
+  for (let j = 1; j <= nNodes; j++) matrixHTML += `<th>${j}</th>`;
+  matrixHTML += `</tr>`;
 
-while(HT[index]!="-")
-{
-
-
-execute(
-"c9",
-"Linear probing : Checking "+index
-);
-
-
-
-index=(index+1)%size;
-
-
-
-if(index==start)
-return;
-
-
+  for (let i = 1; i <= nNodes; i++) {
+    matrixHTML += `<tr><th>${i}</th>`;
+    for (let j = 1; j <= nNodes; j++) {
+      let val = (adjMatrix[i] && adjMatrix[i][j]) ? adjMatrix[i][j] : 0;
+      matrixHTML += `<td>${val}</td>`;
+    }
+    matrixHTML += `</tr>`;
+  }
+  matrixHTML += `</table>`;
+  document.getElementById("matrixContainer").innerHTML = matrixHTML;
 }
 
+function runBFS() {
+  let src = parseInt(document.getElementById("srcNode").value) || 1;
+  let visited = Array(nNodes + 1).fill(0);
+  let queue = [];
+  let front = 0, rear = -1;
 
+  visited[src] = 1;
+  queue.push(src);
+  rear++;
 
-HT[index]=key;
+  while (front <= rear) {
+    let u = queue[front++];
+    for (let v = 1; v <= nNodes; v++) {
+      if (adjMatrix[u] && adjMatrix[u][v] === 1 && visited[v] === 0) {
+        visited[v] = 1;
+        queue.push(v);
+        rear++;
+      }
+    }
+  }
 
+  highlightLines(["c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17"], 
+                 `BFS executed from Source Vertex ${src}.`);
 
-execute(
-"c10",
-"Inserted using Linear Probing at "+index
-);
+  let reachList = [];
+  let consoleOut = `&gt; BFS Reachability Results (Source = ${src}):<br>`;
+  for (let i = 1; i <= nNodes; i++) {
+    if (visited[i] === 1) {
+      reachList.push(`${i} (Reachable)`);
+      consoleOut += `${i} is reachable<br>`;
+    } else {
+      reachList.push(`${i} (Not Reachable)`);
+      consoleOut += `${i} is not reachable<br>`;
+    }
+  }
 
+  document.getElementById("statusDisplay").innerHTML = `
+    <strong>Source Node:</strong> ${src}<br>
+    <strong>BFS Reachability:</strong> ${reachList.join(", ")}<br>
+    <strong>DFS Connectivity:</strong> --
+  `;
 
-
+  appendLog(consoleOut);
+  document.getElementById("statusMsg").innerText = `BFS Reachability check complete from source ${src}.`;
 }
 
-
-
-draw();
-
-
-},1000);
-
-
-
-
+function dfsTraverse(u, visited) {
+  visited[u] = 1;
+  for (let v = 1; v <= nNodes; v++) {
+    if (adjMatrix[u] && adjMatrix[u][v] === 1 && visited[v] === 0) {
+      dfsTraverse(v, visited);
+    }
+  }
 }
 
+function runDFS() {
+  let src = parseInt(document.getElementById("srcNode").value) || 1;
+  let visited = Array(nNodes + 1).fill(0);
 
+  dfsTraverse(src, visited);
 
+  highlightLines(["c20", "c21", "c22", "c23", "c24", "c25"], `DFS executed starting from vertex ${src}.`);
 
+  let isConnected = true;
+  for (let i = 1; i <= nNodes; i++) {
+    if (visited[i] === 0) {
+      isConnected = false;
+      break;
+    }
+  }
 
+  let resultStr = isConnected ? "The graph is Connected" : "*** The graph is NOT connected ***";
+  
+  let consoleOut = `&gt; DFS Connectivity Check (Start Node = ${src}):<br>${resultStr}`;
 
+  document.getElementById("statusDisplay").innerHTML = `
+    <strong>Source Node:</strong> ${src}<br>
+    <strong>BFS Reachability:</strong> --<br>
+    <strong>DFS Connectivity:</strong> ${resultStr}
+  `;
 
-function search()
-{
-
-
-let key=
-
-Number(document.getElementById("key").value);
-
-
-
-let index=hash(key);
-
-
-execute(
-"c11",
-"Searching Key "+key
-);
-
-
-
-let count=0;
-
-
-
-let timer=setInterval(()=>{
-
-
-execute(
-"c12",
-"Checking Address "+index
-);
-
-
-
-if(HT[index]==key)
-{
-
-
-clearInterval(timer);
-
-
-execute(
-"c13",
-"Record Found at "+index
-);
-
-
-highlight(index);
-
-
+  appendLog(consoleOut);
+  document.getElementById("statusMsg").innerText = resultStr;
 }
 
-
-else
-{
-
-
-index=(index+1)%size;
-
-
-count++;
-
-
-if(count==size)
-{
-
-clearInterval(timer);
-
-
-execute(
-"c13",
-"Record Not Found"
-);
-
-
+function toggleHighlight() {
+  let box = document.getElementById("codeBox");
+  box.classList.toggle("code-highlight");
+  document.getElementById("stepText").innerHTML = "Current Step: Code panel highlighted.";
 }
 
-
-
+function resetAll() {
+  loadSampleConnected();
+  document.getElementById("statusDisplay").innerHTML = `
+    <strong>Source Node:</strong> 1<br>
+    <strong>BFS Reachability:</strong> --<br>
+    <strong>DFS Connectivity:</strong> --
+  `;
+  document.getElementById("statusMsg").innerText = "Graph Visualizer Reset Completed.";
+  document.getElementById("stepText").innerText = "Current Step: Reset complete.";
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  document.getElementById("codeBox").classList.remove("code-highlight");
+  appendLog("&gt; System: Graph state reset.");
 }
 
-
-
-},1000);
-
-
-
+function openModal() {
+  document.getElementById("codeModal").style.display = "flex";
 }
 
-
-
-
-
-
-
-function draw()
-{
-
-
-let t=document.getElementById("table");
-
-
-t.innerHTML=
-
-`
-
-<tr>
-
-<th>Address</th>
-
-<th>Key</th>
-
-</tr>
-
-`;
-
-
-
-HT.forEach((x,i)=>{
-
-
-t.innerHTML+=
-
-`
-
-<tr>
-
-<td>${i}</td>
-
-<td id="cell${i}">
-${x}
-</td>
-
-</tr>
-
-`;
-
-
-
-});
-
-
-
+function closeModal() {
+  document.getElementById("codeModal").style.display = "none";
 }
 
-
-
-
-
-
-
-function highlight(i)
-{
-
-document.querySelectorAll("td")
-.forEach(e=>{
-
-e.className="";
-
-});
-
-
-document.getElementById("cell"+i)
-.className="inserted";
-
-
+function openCompiler() {
+  window.open("https://www.onlinegdb.com/online_c_compiler", "_blank");
 }
 
+// Initial Graph Load
+loadSampleConnected();
 
+ // Disable right-click menu
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-
-
-
-
-function reset()
-{
-
-HT=[];
-
-
-document.getElementById("table")
-.innerHTML="";
-
-
-document.getElementById("output")
-.innerHTML="";
-
-
-}
-
-
-
+    // Disable F12 and Ctrl+U / Ctrl+Shift+I / Ctrl+Shift+C
+    document.addEventListener('keydown', (e) => {
+      // F12 or Ctrl+U
+      if (e.keyCode === 123 || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
+        e.preventDefault();
+      }
+      
+      // Ctrl+Shift+I or Ctrl+Shift+C (Inspect Element shortcuts)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+      }
+    });
 </script>
 
-
 </body>
-
 </html>

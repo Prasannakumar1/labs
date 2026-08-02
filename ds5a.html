@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Infix to Postfix Conversion in C - Visualizer</title>
+<title>Suffix Expression Evaluation in C - Visualizer</title>
 
 <style>
   body {
@@ -49,7 +49,7 @@
     border: 2px solid #0066cc;
     border-radius: 4px;
     outline: none;
-    width: 240px;
+    width: 220px;
     font-family: Consolas, monospace;
   }
 
@@ -187,8 +187,8 @@
   }
 
   .output-box {
-    width: 210px;
-    min-height: 120px;
+    width: 220px;
+    min-height: 140px;
     border: 2px dashed #0066cc;
     background: #ffffff;
     padding: 10px;
@@ -201,7 +201,7 @@
     color: #003366;
   }
 
-  .postfix-string {
+  .eval-string {
     font-family: Consolas, monospace;
     font-size: 18px;
     color: #28a745;
@@ -282,13 +282,13 @@
 
 <body>
 
-<h1>INFIX TO POSTFIX CONVERSION IN C (VISUALIZER)</h1>
+<h1>SUFFIX EXPRESSION EVALUATION IN C (VISUALIZER)</h1>
 
 <div class="container">
 
   <!-- CONTROLS -->
   <div class="controls">
-    <input id="infixInput" value="((a+b)*c)/d" placeholder="Infix Expression (e.g. (a+b)*c)">
+    <input id="postfixInput" value="231*+9-" placeholder="Postfix Expression (e.g. 231*+9-)">
     <button class="btn-accent" onclick="startAutoPlay()">▶ Start Animation</button>
     <button onclick="nextStep()">⏭ Next Step</button>
     <button class="btn-danger" onclick="resetAll()">Reset</button>
@@ -303,51 +303,52 @@
     <div class="codePanel" id="codeBox">
       <h3>C SOURCE CODE</h3>
 <div class="codeLine" id="c1">#include &lt;stdio.h&gt;</div>
-<div class="codeLine" id="c2">#include &lt;string.h&gt;</div>
-<div class="codeLine" id="c3">int preced(char symbol) {</div>
-<div class="codeLine" id="c4">    switch (symbol) {</div>
-<div class="codeLine" id="c5">        case '^': return 3;</div>
-<div class="codeLine" id="c6">        case '/': case '*': case '%': return 2;</div>
-<div class="codeLine" id="c7">        case '+': case '-': return 1;</div>
-<div class="codeLine" id="c8">        case ')': case '(': return 0;</div>
-<div class="codeLine" id="c9">        case '#': return -1;</div>
-<div class="codeLine" id="c10">    }</div>
-<div class="codeLine" id="c11">}</div>
-<div class="codeLine" id="c12">void ifix_pfix() {</div>
-<div class="codeLine" id="c13">    push('#');</div>
-<div class="codeLine" id="c14">    while (i &lt; strlen(infix)) {</div>
-<div class="codeLine" id="c15">        symbol = infix[i];</div>
-<div class="codeLine" id="c16">        switch (symbol) {</div>
-<div class="codeLine" id="c17">            case '(': push(symbol); break;</div>
-<div class="codeLine" id="c18">            case ')': temp = pop();</div>
-<div class="codeLine" id="c19">                      while (temp != '(') { postfix[pos++] = temp; temp = pop(); } break;</div>
-<div class="codeLine" id="c20">            case '^': case '+': case '-': case '*': case '/': case '%':</div>
-<div class="codeLine" id="c21">                      while (preced(stack[top]) &gt;= preced(symbol)) postfix[pos++] = pop();</div>
-<div class="codeLine" id="c22">                      push(symbol); break;</div>
-<div class="codeLine" id="c23">            default:  postfix[pos++] = symbol; break;</div>
-<div class="codeLine" id="c24">        } i++;</div>
-<div class="codeLine" id="c25">    }</div>
-<div class="codeLine" id="c26">    while (top &gt; 0) postfix[pos++] = pop();</div>
-<div class="codeLine" id="c27">}</div>
+<div class="codeLine" id="c2">#include &lt;math.h&gt;</div>
+<div class="codeLine" id="c3">#define MAX 20</div>
+<div class="codeLine" id="c4">float stack[MAX]; int top = -1;</div>
+<div class="codeLine" id="c5">int isoperand(char x) {</div>
+<div class="codeLine" id="c6">    return (x &gt;= '0' &amp;&amp; x &lt;= '9');</div>
+<div class="codeLine" id="c7">}</div>
+<div class="codeLine" id="c8">float operate(float op1, float op2, char a) {</div>
+<div class="codeLine" id="c9">    switch(a) {</div>
+<div class="codeLine" id="c10">        case '+': return op2 + op1;</div>
+<div class="codeLine" id="c11">        case '-': return op2 - op1;</div>
+<div class="codeLine" id="c12">        case '*': return op2 * op1;</div>
+<div class="codeLine" id="c13">        case '/': return op2 / op1;</div>
+<div class="codeLine" id="c14">        case '^': return pow(op2, op1);</div>
+<div class="codeLine" id="c15">    }</div>
+<div class="codeLine" id="c16">}</div>
+<div class="codeLine" id="c17">void evaluate() {</div>
+<div class="codeLine" id="c18">    while (postfix[i] != '\0') {</div>
+<div class="codeLine" id="c19">        if (isoperand(postfix[i])) push(postfix[i] - 48);</div>
+<div class="codeLine" id="c20">        else {</div>
+<div class="codeLine" id="c21">            op1 = pop(); op2 = pop();</div>
+<div class="codeLine" id="c22">            ans = operate(op1, op2, postfix[i]); push(ans);</div>
+<div class="codeLine" id="c23">        } i++;</div>
+<div class="codeLine" id="c24">    }</div>
+<div class="codeLine" id="c25">    printf("%f", stack[top]);</div>
+<div class="codeLine" id="c26">}</div>
     </div>
 
     <!-- VISUAL OUTPUT SNAPSHOT -->
     <div class="vizPanel">
-      <h3>CONVERSION & STACK VISUALIZER</h3>
+      <h3>EVALUATION & STACK VISUALIZER</h3>
       
       <div class="viz-flex-area">
         <div class="stackArea">
-          <div style="font-weight:bold; color:#d9534f; margin-bottom:5px;">⬇ OPERATOR STACK</div>
+          <div style="font-weight:bold; color:#d9534f; margin-bottom:5px;">⬇ OPERAND STACK</div>
           <div class="stack" id="stackBox"></div>
         </div>
 
         <div class="output-box">
-          <strong>Infix Expression:</strong>
-          <div id="infixDisplay" style="font-family: Consolas, monospace; margin-bottom: 10px;">--</div>
-          <strong>Current Symbol:</strong>
+          <strong>Suffix Expression:</strong>
+          <div id="postfixDisplay" style="font-family: Consolas, monospace; margin-bottom: 8px;">--</div>
+          <strong>Scanned Symbol:</strong>
           <div id="currentSymbolDisplay" style="font-family: Consolas, monospace; font-size: 16px; color:#ff9800; font-weight:bold;">--</div>
-          <strong>Postfix Result:</strong>
-          <div class="postfix-string" id="postfixDisplay">--</div>
+          <strong>Last Operation:</strong>
+          <div id="operationDisplay" style="font-family: Consolas, monospace; font-size: 13px; color:#0066cc; margin-top:4px;">--</div>
+          <strong>Current Result:</strong>
+          <div class="eval-string" id="resultDisplay">--</div>
         </div>
       </div>
 
@@ -364,9 +365,9 @@
   <div class="snapshot-panel">
     <div class="snapshot-title">📷 Output Snapshot (Terminal Output Simulation)</div>
     <div id="consoleLog">
-      $ gcc infix_postfix.c -o infix_postfix<br>
-      $ ./infix_postfix<br>
-      [System]: Infix-to-Postfix Converter Module initialized.<br>
+      $ gcc postfix_eval.c -o postfix_eval -lm<br>
+      $ ./postfix_eval<br>
+      [System]: Suffix Evaluation Module initialized.<br>
       &gt; Awaiting choice...
     </div>
   </div>
@@ -381,108 +382,82 @@
     <pre>
 #include &lt;stdio.h&gt;
 #include &lt;conio.h&gt;
-#include &lt;string.h&gt;
+#include &lt;math.h&gt;
 
-int top = -1, pos = 0;
-char symbol, temp, stack[20], infix[20], postfix[20];
+#define MAX 20
+int top = -1;
+float stack[MAX];
+char postfix[MAX];
 
-void push(char symbol)
-{
-    stack[++top] = symbol;
-}
-
-char pop()
-{
-    return (stack[top--]);
-}
-
-int preced(char symbol)
-{
-    int p;
-    switch (symbol)
-    {
-    case '^':
-        p = 3;
-        break;
-    case '/':
-    case '*':
-    case '%':
-        p = 2;
-        break;
-    case '+':
-    case '-':
-        p = 1;
-        break;
-    case ')':
-    case '(':
-        p = 0;
-        break;
-    case '#':
-        p = -1;
-        break;
-    }
-    return (p);
-}
-
-void ifix_pfix()
-{
-    int i = 0;
-    push('#');
-    while (i &lt; strlen(infix))
-    {
-        symbol = infix[i];
-        switch (symbol)
-        {
-        case '(':
-            push(symbol);
-            break;
-        case ')':
-            temp = pop();
-            while (temp != '(')
-            {
-                postfix[pos++] = temp;
-                temp = pop();
-            }
-            break;
-        case '^':
-        case '+':
-        case '-':
-        case '*':
-        case '/':
-        case '%':
-            while (preced(stack[top]) &gt;= preced(symbol))
-            {
-                postfix[pos++] = pop();
-            }
-            push(symbol);
-            break;
-        default:
-            postfix[pos++] = symbol;
-            break;
-        }
-        i++;
-    }
-    while (top &gt; 0)
-    {
-        postfix[pos++] = pop();
-    }
-    postfix[pos] = '\0';
-}
+void push(float);
+float pop();
+int isoperand(char);
+float operate(float, float, char);
 
 void main()
 {
-    printf("Enter the Infix expression---&gt;");
-    scanf("%s", infix);
-    ifix_pfix();
-    printf("Postfix expression is---&gt; %s\n", postfix);
+    int i = 0;
+    float ans, op1, op2;
+    printf("Enter Expression:");
+    scanf("%s", postfix);
+
+    while (postfix[i] != '\0')
+    {
+        if (isoperand(postfix[i]))
+            push(postfix[i] - 48);
+        else
+        {
+            op1 = pop();
+            op2 = pop();
+            ans = operate(op1, op2, postfix[i]);
+            push(ans);
+            printf("%f %c %f = %f\n", op2, postfix[i], op1, ans);
+        }
+        i++;
+    }
+
+    printf("%f", stack[top]);
+}
+
+int isoperand(char x)
+{
+    if (x &gt;= '0' &amp;&amp; x &lt;= '9')
+        return 1;
+    else
+        return 0;
+}
+
+void push(float x)
+{
+    stack[++top] = x;
+}
+
+float pop()
+{
+    return stack[top--];
+}
+
+float operate(float op1, float op2, char a)
+{
+    switch (a)
+    {
+    case '+':
+        return op2 + op1;
+    case '-':
+        return op2 - op1;
+    case '*':
+        return op2 * op1;
+    case '/':
+        return op2 / op1;
+    case '^':
+        return pow(op2, op1);
+    }
 }
     </pre>
   </div>
 </div>
 
 <script>
-let stackArr = [];
-let postfixRes = "";
 let animationSteps = [];
 let currentStepIdx = 0;
 let timer = null;
@@ -512,125 +487,97 @@ function renderStack(arr) {
   });
 }
 
-function preced(sym) {
-  switch (sym) {
-    case '^': return 3;
-    case '/': case '*': case '%': return 2;
-    case '+': case '-': return 1;
-    case ')': case '(': return 0;
-    case '#': return -1;
-  }
-  return -1;
+function isoperand(ch) {
+  return ch >= '0' && ch <= '9';
 }
 
-function buildAnimationTrace(infix) {
+function operate(op1, op2, a) {
+  switch (a) {
+    case '+': return op2 + op1;
+    case '-': return op2 - op1;
+    case '*': return op2 * op1;
+    case '/': return op2 / op1;
+    case '^': return Math.pow(op2, op1);
+  }
+  return 0;
+}
+
+function buildAnimationTrace(postfix) {
   animationSteps = [];
-  let tempStack = ['#'];
-  let tempPostfix = "";
+  let tempStack = [];
 
   animationSteps.push({
     symbol: "START",
-    stack: [...tempStack],
-    postfix: "",
-    code: ["c13"],
-    msg: "Pushed initial '#' marker onto stack."
+    stack: [],
+    operation: "--",
+    result: "--",
+    code: ["c17", "c18"],
+    msg: "Starting evaluation of suffix expression."
   });
 
   let i = 0;
-  while (i < infix.length) {
-    let symbol = infix[i];
+  while (i < postfix.length) {
+    let symbol = postfix[i];
 
-    if (symbol === '(') {
-      tempStack.push(symbol);
+    if (isoperand(symbol)) {
+      let val = Number(symbol);
+      tempStack.push(val);
       animationSteps.push({
         symbol: symbol,
         stack: [...tempStack],
-        postfix: tempPostfix,
-        code: ["c17"],
-        msg: `Left parenthesis '(' found. Pushed to stack.`
+        operation: `push('${symbol}' - 48)`,
+        result: val,
+        code: ["c19"],
+        msg: `Scanned operand '${symbol}'. Pushed value ${val} onto stack.`
       });
-    } else if (symbol === ')') {
-      animationSteps.push({
-        symbol: symbol,
-        stack: [...tempStack],
-        postfix: tempPostfix,
-        code: ["c18", "c19"],
-        msg: `Right parenthesis ')' found. Popping operators until '('...`
-      });
-
-      let topElem = tempStack.pop();
-      while (topElem !== '(' && tempStack.length > 0) {
-        tempPostfix += topElem;
+    } else if (['+', '-', '*', '/', '^', '%'].includes(symbol)) {
+      if (tempStack.length < 2) {
         animationSteps.push({
           symbol: symbol,
           stack: [...tempStack],
-          postfix: tempPostfix,
-          code: ["c19"],
-          msg: `Popped '${topElem}' from stack and appended to Postfix.`
+          operation: "ERROR",
+          result: "Invalid Postfix",
+          code: ["c20"],
+          msg: `Error: Insufficient operands for operator '${symbol}'.`
         });
-        topElem = tempStack.pop();
+        return;
       }
-    } else if (['^', '+', '-', '*', '/', '%'].includes(symbol)) {
-      while (preced(tempStack[tempStack.length - 1]) >= preced(symbol)) {
-        let popped = tempStack.pop();
-        tempPostfix += popped;
-        animationSteps.push({
-          symbol: symbol,
-          stack: [...tempStack],
-          postfix: tempPostfix,
-          code: ["c21"],
-          msg: `Precedence of stack top >= '${symbol}'. Popped '${popped}' to Postfix.`
-        });
-      }
-      tempStack.push(symbol);
+
+      let op1 = tempStack.pop();
+      let op2 = tempStack.pop();
+      let ans = operate(op1, op2, symbol);
+      tempStack.push(ans);
+
       animationSteps.push({
         symbol: symbol,
         stack: [...tempStack],
-        postfix: tempPostfix,
-        code: ["c22"],
-        msg: `Pushed operator '${symbol}' to stack.`
-      });
-    } else {
-      tempPostfix += symbol;
-      animationSteps.push({
-        symbol: symbol,
-        stack: [...tempStack],
-        postfix: tempPostfix,
-        code: ["c23"],
-        msg: `Operand '${symbol}' directly appended to Postfix.`
+        operation: `${op2} ${symbol} ${op1} = ${ans}`,
+        result: ans,
+        code: ["c21", "c22"],
+        msg: `Scanned operator '${symbol}'. Calculated: ${op2} ${symbol} ${op1} = ${ans}. Pushed result.`
       });
     }
     i++;
   }
 
-  while (tempStack.length > 1) {
-    let popped = tempStack.pop();
-    if (popped !== '#') {
-      tempPostfix += popped;
-      animationSteps.push({
-        symbol: "END",
-        stack: [...tempStack],
-        postfix: tempPostfix,
-        code: ["c26"],
-        msg: `Emptying remaining operator '${popped}' from stack.`
-      });
-    }
+  if (tempStack.length === 1) {
+    animationSteps.push({
+      symbol: "END",
+      stack: [...tempStack],
+      operation: "Final Output",
+      result: tempStack[0],
+      code: ["c25"],
+      msg: `Evaluation Complete! Final Result = ${tempStack[0]}`
+    });
   }
-
-  animationSteps.push({
-    symbol: "COMPLETE",
-    stack: [...tempStack],
-    postfix: tempPostfix,
-    code: ["c27"],
-    msg: "Infix to Postfix conversion completed!"
-  });
 }
 
 function renderStep(idx) {
   let step = animationSteps[idx];
-  document.getElementById("infixDisplay").innerText = document.getElementById("infixInput").value;
+  document.getElementById("postfixDisplay").innerText = document.getElementById("postfixInput").value;
   document.getElementById("currentSymbolDisplay").innerText = step.symbol;
-  document.getElementById("postfixDisplay").innerText = step.postfix || "--";
+  document.getElementById("operationDisplay").innerText = step.operation;
+  document.getElementById("resultDisplay").innerText = step.result;
   renderStack(step.stack);
   highlightLines(step.code, step.msg);
   document.getElementById("statusMsg").innerText = step.msg;
@@ -638,14 +585,14 @@ function renderStep(idx) {
 }
 
 function nextStep() {
-  let infix = document.getElementById("infixInput").value.trim();
-  if (!infix) {
-    alert("Please enter an Infix Expression!");
+  let postfix = document.getElementById("postfixInput").value.trim();
+  if (!postfix) {
+    alert("Please enter a Postfix Expression!");
     return;
   }
 
   if (animationSteps.length === 0) {
-    buildAnimationTrace(infix);
+    buildAnimationTrace(postfix);
     currentStepIdx = 0;
   }
 
@@ -653,19 +600,19 @@ function nextStep() {
     renderStep(currentStepIdx);
     currentStepIdx++;
   } else {
-    document.getElementById("statusMsg").innerText = "Conversion already completed!";
+    document.getElementById("statusMsg").innerText = "Evaluation already completed!";
   }
 }
 
 function startAutoPlay() {
   resetAll();
-  let infix = document.getElementById("infixInput").value.trim();
-  if (!infix) {
-    alert("Please enter an Infix Expression!");
+  let postfix = document.getElementById("postfixInput").value.trim();
+  if (!postfix) {
+    alert("Please enter a Postfix Expression!");
     return;
   }
 
-  buildAnimationTrace(infix);
+  buildAnimationTrace(postfix);
   currentStepIdx = 0;
 
   if (timer) clearInterval(timer);
@@ -690,10 +637,11 @@ function resetAll() {
   animationSteps = [];
   currentStepIdx = 0;
   renderStack([]);
-  document.getElementById("infixDisplay").innerText = "--";
-  document.getElementById("currentSymbolDisplay").innerText = "--";
   document.getElementById("postfixDisplay").innerText = "--";
-  document.getElementById("statusMsg").innerText = "Converter Reset Completed.";
+  document.getElementById("currentSymbolDisplay").innerText = "--";
+  document.getElementById("operationDisplay").innerText = "--";
+  document.getElementById("resultDisplay").innerText = "--";
+  document.getElementById("statusMsg").innerText = "Evaluator Reset Completed.";
   document.getElementById("stepText").innerText = "Current Step: Reset complete.";
   document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
   document.getElementById("codeBox").classList.remove("code-highlight");

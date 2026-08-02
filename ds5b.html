@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tower of Hanoi in C - Visualizer</title>
+
+<style>
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #eaf2f8;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .container {
+    border: 3px solid #003366;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* CONTROLS & ACTION BUTTONS */
+  .controls {
+    text-align: center;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+  }
+
+  input {
+    padding: 8px 12px;
+    font-size: 15px;
+    margin: 5px;
+    border: 2px solid #0066cc;
+    border-radius: 4px;
+    outline: none;
+    width: 140px;
+    font-family: Consolas, monospace;
+    text-align: center;
+  }
+
+  input:focus {
+    border-color: #003366;
+  }
+
+  button {
+    padding: 8px 16px;
+    margin: 4px;
+    border: none;
+    border-radius: 5px;
+    background: #0066cc;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button:hover { background: #003366; }
+  .btn-accent { background: #28a745; }
+  .btn-accent:hover { background: #1e7e34; }
+  .btn-warning { background: #ff9800; color: #fff; }
+  .btn-warning:hover { background: #e65100; }
+  .btn-purple { background: #6f42c1; color: #fff; }
+  .btn-purple:hover { background: #59359a; }
+  .btn-danger { background: #dc3545; }
+  .btn-danger:hover { background: #bd2130; }
+
+  /* CONTENT LAYOUT */
+  .content {
+    display: grid;
+    grid-template-columns: 48% 50%;
+    gap: 2%;
+  }
+
+  /* C CODE PANEL */
+  .codePanel {
+    border: 2px solid #333;
+    padding: 12px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    height: 420px;
+    overflow: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-radius: 6px;
+  }
+
+  .codePanel h3 {
+    margin-top: 0;
+    color: #61dafb;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+  }
+
+  .codeLine {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    white-space: pre;
+  }
+
+  .active {
+    background: #ffd54f !important;
+    color: #000 !important;
+    font-weight: bold;
+  }
+
+  .code-highlight {
+    border: 3px solid #28a745 !important;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.5);
+  }
+
+  /* VISUALIZATION PANEL */
+  .vizPanel {
+    border: 2px solid #ccc;
+    padding: 15px;
+    text-align: center;
+    background: #fafafa;
+    border-radius: 6px;
+    min-height: 420px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .vizPanel h3 {
+    margin-top: 0;
+    color: #003366;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
+
+  /* TOWER OF HANOI GRAPHICS */
+  .pegs-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 220px;
+    border-bottom: 8px solid #555;
+    padding-bottom: 0;
+    margin-top: 10px;
+    position: relative;
+  }
+
+  .peg-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 30%;
+    height: 100%;
+    justify-content: flex-end;
+    position: relative;
+  }
+
+  .peg-pole {
+    width: 10px;
+    height: 160px;
+    background: #8b5a2b;
+    border-radius: 5px 5px 0 0;
+    position: absolute;
+    bottom: 0;
+    z-index: 1;
+  }
+
+  .peg-label {
+    font-weight: bold;
+    color: #003366;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  .disks-stack {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    width: 100%;
+    z-index: 2;
+    margin-bottom: 0;
+  }
+
+  .disk {
+    height: 22px;
+    margin: 2px 0;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+  }
+
+  /* DISK COLORS BASED ON SIZE */
+  .disk-1 { width: 45px; background: #e74c3c; }
+  .disk-2 { width: 65px; background: #e67e22; }
+  .disk-3 { width: 85px; background: #f1c40f; color: #000; }
+  .disk-4 { width: 105px; background: #2ecc71; }
+  .disk-5 { width: 125px; background: #3498db; }
+
+  /* ALGORITHM TRACKER & SNAPSHOT PANELS */
+  .algorithm {
+    margin-top: 15px;
+    border: 2px solid #003366;
+    padding: 10px;
+    background: #f0f4f8;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #003366;
+  }
+
+  .snapshot-panel {
+    margin-top: 15px;
+    background: #0c0c0c;
+    color: #00ff00;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    box-shadow: inset 0 0 10px #000;
+  }
+
+  .snapshot-title {
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  /* MODAL STYLES FOR SOURCE CODE POPUP */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: #fff;
+    width: 60%;
+    max-height: 80vh;
+    padding: 20px;
+    border-radius: 8px;
+    overflow: auto;
+    font-family: Consolas, monospace;
+  }
+
+  .close-btn {
+    float: right;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>TOWER OF HANOI IN C (VISUALIZER)</h1>
+
+<div class="container">
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <label>Disks (1-5): </label>
+    <input id="numDisks" type="number" min="1" max="5" value="3">
+    <button class="btn-accent" onclick="startAutoPlay()">▶ Start Animation</button>
+    <button onclick="nextStep()">⏭ Next Step</button>
+    <button class="btn-danger" onclick="resetAll()">Reset</button>
+    <br><br>
+    <button class="btn-warning" onclick="toggleHighlight()">Highlight Code Panel</button>
+    <button class="btn-purple" onclick="openModal()">📄 View Full Source Code</button>
+    <button class="btn-accent" onclick="openCompiler()">🚀 Run on Online Compiler</button>
+  </div>
+
+  <div class="content">
+    <!-- C SOURCE CODE DISPLAY -->
+    <div class="codePanel" id="codeBox">
+      <h3>C SOURCE CODE</h3>
+<div class="codeLine" id="c1">#include &lt;stdio.h&gt;</div>
+<div class="codeLine" id="c2">void towers(int num, char frompeg, char topeg, char auxpeg) {</div>
+<div class="codeLine" id="c3">    if (num == 1) {</div>
+<div class="codeLine" id="c4">        printf("\n Move disk 1 from peg %c to peg %c", frompeg, topeg);</div>
+<div class="codeLine" id="c5">        return;</div>
+<div class="codeLine" id="c6">    }</div>
+<div class="codeLine" id="c7">    towers(num - 1, frompeg, auxpeg, topeg);</div>
+<div class="codeLine" id="c8">    printf("\n Move disk %d from peg %c to peg %c", num, frompeg, topeg);</div>
+<div class="codeLine" id="c9">    towers(num - 1, auxpeg, topeg, frompeg);</div>
+<div class="codeLine" id="c10">}</div>
+<div class="codeLine" id="c11">void main() {</div>
+<div class="codeLine" id="c12">    int num;</div>
+<div class="codeLine" id="c13">    scanf("%d", &amp;num);</div>
+<div class="codeLine" id="c14">    towers(num, 'A', 'C', 'B');</div>
+<div class="codeLine" id="c15">}</div>
+    </div>
+
+    <!-- VISUAL OUTPUT SNAPSHOT -->
+    <div class="vizPanel">
+      <h3>GRAPHICAL TOWER ANIMATION</h3>
+      
+      <div class="pegs-container">
+        <!-- PEG A -->
+        <div class="peg-wrapper">
+          <div class="peg-label">Peg A (From)</div>
+          <div class="peg-pole"></div>
+          <div class="disks-stack" id="pegA"></div>
+        </div>
+
+        <!-- PEG B -->
+        <div class="peg-wrapper">
+          <div class="peg-label">Peg B (Aux)</div>
+          <div class="peg-pole"></div>
+          <div class="disks-stack" id="pegB"></div>
+        </div>
+
+        <!-- PEG C -->
+        <div class="peg-wrapper">
+          <div class="peg-label">Peg C (To)</div>
+          <div class="peg-pole"></div>
+          <div class="disks-stack" id="pegC"></div>
+        </div>
+      </div>
+
+      <p id="statusMsg" style="color:#0066cc; font-weight:bold; margin-top:15px;">Click '▶ Start Animation' or '⏭ Next Step'.</p>
+    </div>
+  </div>
+
+  <!-- ALGORITHM TRACKER -->
+  <div class="algorithm">
+    <span id="stepText">Current Step: Ready to begin recursive solution.</span>
+  </div>
+
+  <!-- TERMINAL CONSOLE SIMULATION -->
+  <div class="snapshot-panel">
+    <div class="snapshot-title">📷 Output Snapshot (Terminal Output Simulation)</div>
+    <div id="consoleLog">
+      $ gcc hanoi.c -o hanoi<br>
+      $ ./hanoi<br>
+      [System]: Tower of Hanoi recursive module ready.<br>
+      &gt; Awaiting choice...
+    </div>
+  </div>
+
+</div>
+
+<!-- SOURCE CODE MODAL POPUP -->
+<div class="modal" id="codeModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">X</button>
+    <h3>Full C Source Code</h3>
+    <pre>
+#include &lt;stdio.h&gt;
+
+void towers(int num, char frompeg, char topeg, char auxpeg)
+{
+    if (num == 1)
+    {
+        printf("\n Move disk 1 from peg %c to peg %c", frompeg, topeg);
+        return;
+    }
+    towers(num - 1, frompeg, auxpeg, topeg);
+    printf("\n Move disk %d from peg %c to peg %c", num, frompeg, topeg);
+    towers(num - 1, auxpeg, topeg, frompeg);
+}
+
+void main()
+{
+    int num;
+    printf("Enter the number of disks : ");
+    scanf("%d", &num);
+    printf("The sequence of moves involved in the Tower of Hanoi are :\n");
+    towers(num, 'A', 'C', 'B');
+}
+    </pre>
+  </div>
+</div>
+
+<script>
+let animationSteps = [];
+let currentStepIdx = 0;
+let timer = null;
+let currentPegs = { A: [], B: [], C: [] };
+
+function highlightLines(lines, stepMsg) {
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  lines.forEach(id => {
+    let el = document.getElementById(id);
+    if(el) el.classList.add("active");
+  });
+  document.getElementById("stepText").innerHTML = "Current Step: " + stepMsg;
+}
+
+function appendLog(text) {
+  const consoleLog = document.getElementById("consoleLog");
+  consoleLog.innerHTML += `<br>&gt; ${text}`;
+}
+
+function renderPegs() {
+  ['A', 'B', 'C'].forEach(peg => {
+    let container = document.getElementById('peg' + peg);
+    container.innerHTML = "";
+    currentPegs[peg].forEach(diskNum => {
+      let div = document.createElement("div");
+      div.className = `disk disk-${diskNum}`;
+      div.innerText = diskNum;
+      container.appendChild(div);
+    });
+  });
+}
+
+function solveHanoi(n, from, to, aux) {
+  if (n === 1) {
+    animationSteps.push({
+      disk: 1,
+      from: from,
+      to: to,
+      code: ["c3", "c4", "c5"],
+      msg: `Move disk 1 from peg ${from} to peg ${to}`
+    });
+    return;
+  }
+  solveHanoi(n - 1, from, aux, to);
+  animationSteps.push({
+    disk: n,
+    from: from,
+    to: to,
+    code: ["c8"],
+    msg: `Move disk ${n} from peg ${from} to peg ${to}`
+  });
+  solveHanoi(n - 1, aux, to, from);
+}
+
+function initPegs(n) {
+  currentPegs = { A: [], B: [], C: [] };
+  for (let i = n; i >= 1; i--) {
+    currentPegs.A.push(i);
+  }
+  renderPegs();
+}
+
+function renderStep(idx) {
+  let step = animationSteps[idx];
+  
+  // Update state array
+  let diskIndex = currentPegs[step.from].indexOf(step.disk);
+  if (diskIndex !== -1) {
+    currentPegs[step.from].splice(diskIndex, 1);
+    currentPegs[step.to].push(step.disk);
+  }
+
+  renderPegs();
+  highlightLines(step.code, step.msg);
+  document.getElementById("statusMsg").innerText = step.msg;
+  appendLog(`Move ${idx + 1}: Move disk ${step.disk} from peg ${step.from} to peg ${step.to}`);
+}
+
+function nextStep() {
+  let n = parseInt(document.getElementById("numDisks").value);
+  if (n < 1 || n > 5) {
+    alert("Please enter a disk count between 1 and 5!");
+    return;
+  }
+
+  if (animationSteps.length === 0) {
+    initPegs(n);
+    animationSteps = [];
+    solveHanoi(n, 'A', 'C', 'B');
+    currentStepIdx = 0;
+  }
+
+  if (currentStepIdx < animationSteps.length) {
+    renderStep(currentStepIdx);
+    currentStepIdx++;
+  } else {
+    document.getElementById("statusMsg").innerText = "Tower of Hanoi solved!";
+  }
+}
+
+function startAutoPlay() {
+  resetAll();
+  let n = parseInt(document.getElementById("numDisks").value);
+  if (n < 1 || n > 5) {
+    alert("Please enter a disk count between 1 and 5!");
+    return;
+  }
+
+  initPegs(n);
+  animationSteps = [];
+  solveHanoi(n, 'A', 'C', 'B');
+  currentStepIdx = 0;
+
+  if (timer) clearInterval(timer);
+  timer = setInterval(() => {
+    if (currentStepIdx < animationSteps.length) {
+      renderStep(currentStepIdx);
+      currentStepIdx++;
+    } else {
+      clearInterval(timer);
+    }
+  }, 1200);
+}
+
+function toggleHighlight() {
+  let box = document.getElementById("codeBox");
+  box.classList.toggle("code-highlight");
+  document.getElementById("stepText").innerHTML = "Current Step: Code panel highlighted.";
+}
+
+function resetAll() {
+  if (timer) clearInterval(timer);
+  animationSteps = [];
+  currentStepIdx = 0;
+  let n = parseInt(document.getElementById("numDisks").value) || 3;
+  initPegs(n);
+  document.getElementById("statusMsg").innerText = "Visualizer Reset Completed.";
+  document.getElementById("stepText").innerText = "Current Step: Reset complete.";
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  document.getElementById("codeBox").classList.remove("code-highlight");
+  appendLog("System: Tower visualizer reset.");
+}
+
+function openModal() {
+  document.getElementById("codeModal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("codeModal").style.display = "none";
+}
+
+function openCompiler() {
+  window.open("https://www.onlinegdb.com/online_c_compiler", "_blank");
+}
+
+// Initial state setup
+initPegs(3);
+ // Disable right-click menu
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Disable F12 and Ctrl+U / Ctrl+Shift+I / Ctrl+Shift+C
+    document.addEventListener('keydown', (e) => {
+      // F12 or Ctrl+U
+      if (e.keyCode === 123 || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
+        e.preventDefault();
+      }
+      
+      // Ctrl+Shift+I or Ctrl+Shift+C (Inspect Element shortcuts)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+      }
+    });
+</script>
+
+</body>
+</html>

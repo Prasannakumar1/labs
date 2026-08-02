@@ -1,680 +1,673 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-<title>Circular Queue Animation with Code Highlight</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circular Queue of Characters in C - Visualizer</title>
 
 <style>
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #eaf2f8;
+    color: #333;
+  }
 
-body{
-    font-family:Segoe UI,Arial;
-    background:#eaf2f8;
-    padding:20px;
-}
+  h1 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
 
-h1,h2{
-    text-align:center;
-    color:#003366;
-}
+  .container {
+    border: 3px solid #003366;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
+  /* CONTROLS & ACTION BUTTONS */
+  .controls {
+    text-align: center;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+  }
 
-.container{
-    background:white;
-    border:4px solid #003366;
-    border-radius:15px;
-    padding:20px;
-    margin-bottom:25px;
-}
+  input {
+    padding: 8px 12px;
+    font-size: 15px;
+    margin: 5px;
+    border: 2px solid #0066cc;
+    border-radius: 4px;
+    outline: none;
+    width: 120px;
+    font-family: Consolas, monospace;
+    text-align: center;
+  }
 
+  input:focus {
+    border-color: #003366;
+  }
 
-button{
+  button {
+    padding: 8px 16px;
+    margin: 4px;
+    border: none;
+    border-radius: 5px;
+    background: #0066cc;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
 
-background:#003366;
-color:white;
-padding:10px 15px;
-margin:5px;
-border:none;
-border-radius:8px;
-cursor:pointer;
+  button:hover { background: #003366; }
+  .btn-accent { background: #28a745; }
+  .btn-accent:hover { background: #1e7e34; }
+  .btn-warning { background: #ff9800; color: #fff; }
+  .btn-warning:hover { background: #e65100; }
+  .btn-purple { background: #6f42c1; color: #fff; }
+  .btn-purple:hover { background: #59359a; }
+  .btn-danger { background: #dc3545; }
+  .btn-danger:hover { background: #bd2130; }
 
-}
+  /* CONTENT LAYOUT */
+  .content {
+    display: grid;
+    grid-template-columns: 48% 50%;
+    gap: 2%;
+  }
 
-button:hover{
-background:red;
-}
+  /* C CODE PANEL */
+  .codePanel {
+    border: 2px solid #333;
+    padding: 12px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    height: 420px;
+    overflow: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-radius: 6px;
+  }
 
+  .codePanel h3 {
+    margin-top: 0;
+    color: #61dafb;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+  }
 
-input{
+  .codeLine {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    white-space: pre;
+  }
 
-padding:8px;
-font-size:18px;
+  .active {
+    background: #ffd54f !important;
+    color: #000 !important;
+    font-weight: bold;
+  }
 
-}
+  .code-highlight {
+    border: 3px solid #28a745 !important;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.5);
+  }
 
+  /* VISUALIZATION PANEL */
+  .vizPanel {
+    border: 2px solid #ccc;
+    padding: 15px;
+    text-align: center;
+    background: #fafafa;
+    border-radius: 6px;
+    min-height: 420px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
 
-/* Queue */
+  .vizPanel h3 {
+    margin-top: 0;
+    color: #003366;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
 
-.queue{
+  /* CIRCULAR QUEUE RING VISUALIZER */
+  .ring-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+  }
 
-display:flex;
-justify-content:center;
-margin:30px;
+  .queue-slot {
+    width: 80px;
+    height: 80px;
+    border: 3px solid #003366;
+    border-radius: 12px;
+    background: #e3f2fd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
 
-}
+  .queue-slot .slot-index {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #555;
+  }
 
+  .queue-slot .slot-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #003366;
+  }
 
-.box{
+  .pointer-badge {
+    position: absolute;
+    bottom: -22px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #fff;
+  }
 
-width:65px;
-height:65px;
-border:3px solid black;
-margin:5px;
-text-align:center;
-line-height:65px;
-font-size:25px;
-font-weight:bold;
+  .pointer-front {
+    background: #28a745;
+  }
 
-}
+  .pointer-rear {
+    background: #dc3545;
+  }
 
+  .pointer-both {
+    background: #ff9800;
+  }
 
-.element{
+  .status-cards {
+    display: flex;
+    justify-content: space-around;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 15px;
+  }
 
-background:#3498db;
-color:white;
+  .status-card {
+    font-size: 14px;
+  }
 
-}
+  .status-card strong {
+    color: #003366;
+  }
 
+  /* ALGORITHM TRACKER & SNAPSHOT PANELS */
+  .algorithm {
+    margin-top: 15px;
+    border: 2px solid #003366;
+    padding: 10px;
+    background: #f0f4f8;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #003366;
+  }
 
+  .snapshot-panel {
+    margin-top: 15px;
+    background: #0c0c0c;
+    color: #00ff00;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    box-shadow: inset 0 0 10px #000;
+  }
 
-.pointer{
+  .snapshot-title {
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
 
-text-align:center;
-font-size:20px;
-font-weight:bold;
+  /* MODAL STYLES FOR SOURCE CODE POPUP */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
 
-}
+  .modal-content {
+    background: #fff;
+    width: 60%;
+    max-height: 80vh;
+    padding: 20px;
+    border-radius: 8px;
+    overflow: auto;
+    font-family: Consolas, monospace;
+  }
 
-
-
-/* Code */
-
-
-pre{
-
-background:#111;
-color:#00ff00;
-padding:15px;
-font-size:16px;
-
-}
-
-
-pre span{
-
-display:block;
-
-}
-
-
-.highlight{
-
-background:#ffeb3b;
-color:black;
-font-weight:bold;
-border-left:8px solid red;
-
-}
-
-
-
+  .close-btn {
+    float: right;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+  }
 </style>
-
-
 </head>
-
 
 <body>
 
-
-<h1>CIRCULAR QUEUE USING ARRAY</h1>
-
-
+<h1>CIRCULAR QUEUE IN C (VISUALIZER)</h1>
 
 <div class="container">
 
+  <!-- CONTROLS -->
+  <div class="controls">
+    <input id="elemInput" maxlength="1" placeholder="Char (e.g. A)">
+    <button class="btn-accent" onclick="runInsert()">1. INSERT</button>
+    <button class="btn-warning" onclick="runDelete()">2. DELETE</button>
+    <button onclick="runDisplay()">3. DISPLAY</button>
+    <button class="btn-danger" onclick="resetAll()">Reset</button>
+    <br><br>
+    <button class="btn-warning" onclick="toggleHighlight()">Highlight Code Panel</button>
+    <button class="btn-purple" onclick="openModal()">📄 View Full Source Code</button>
+    <button class="btn-accent" onclick="openCompiler()">🚀 Run on Online Compiler</button>
+  </div>
 
-<h2>Menu Driven Circular Queue</h2>
+  <div class="content">
+    <!-- C SOURCE CODE DISPLAY -->
+    <div class="codePanel" id="codeBox">
+      <h3>C SOURCE CODE</h3>
+<div class="codeLine" id="c1">#include &lt;stdio.h&gt;</div>
+<div class="codeLine" id="c2">#define MAX 3</div>
+<div class="codeLine" id="c3">char q[MAX]; int rear = -1, front = -1;</div>
+<div class="codeLine" id="c4">void insert(char x) {</div>
+<div class="codeLine" id="c5">    if (front == (rear + 1) % MAX)</div>
+<div class="codeLine" id="c6">        printf("Q is Full!!\n");</div>
+<div class="codeLine" id="c7">    else if (front == -1 &amp;&amp; rear == -1) {</div>
+<div class="codeLine" id="c8">        front = rear = 0; q[rear] = x;</div>
+<div class="codeLine" id="c9">    } else {</div>
+<div class="codeLine" id="c10">        rear = (rear + 1) % MAX; q[rear] = x;</div>
+<div class="codeLine" id="c11">    }</div>
+<div class="codeLine" id="c12">}</div>
+<div class="codeLine" id="c13">void delete() {</div>
+<div class="codeLine" id="c14">    if (front == -1 &amp;&amp; rear == -1)</div>
+<div class="codeLine" id="c15">        printf("Q is Empty!!\n");</div>
+<div class="codeLine" id="c16">    else if (front == rear) {</div>
+<div class="codeLine" id="c17">        printf("Deleted item: %c\n", q[front]);</div>
+<div class="codeLine" id="c18">        front = rear = -1;</div>
+<div class="codeLine" id="c19">    } else {</div>
+<div class="codeLine" id="c20">        printf("Deleted item: %c\n", q[front]);</div>
+<div class="codeLine" id="c21">        front = (front + 1) % MAX;</div>
+<div class="codeLine" id="c22">    }</div>
+<div class="codeLine" id="c23">}</div>
+    </div>
 
+    <!-- VISUAL OUTPUT SNAPSHOT -->
+    <div class="vizPanel">
+      <h3>CIRCULAR QUEUE RING BUFFER</h3>
+      
+      <div class="ring-container" id="slotsContainer">
+        <!-- Slot 0 -->
+        <div class="queue-slot" id="slot0">
+          <span class="slot-index">[0]</span>
+          <span class="slot-value" id="val0">-</span>
+          <div id="ptr0"></div>
+        </div>
+        <!-- Slot 1 -->
+        <div class="queue-slot" id="slot1">
+          <span class="slot-index">[1]</span>
+          <span class="slot-value" id="val1">-</span>
+          <div id="ptr1"></div>
+        </div>
+        <!-- Slot 2 -->
+        <div class="queue-slot" id="slot2">
+          <span class="slot-index">[2]</span>
+          <span class="slot-value" id="val2">-</span>
+          <div id="ptr2"></div>
+        </div>
+      </div>
 
-MAX SIZE :
+      <div class="status-cards">
+        <div class="status-card"><strong>FRONT:</strong> <span id="frontVal">-1</span></div>
+        <div class="status-card"><strong>REAR:</strong> <span id="rearVal">-1</span></div>
+        <div class="status-card"><strong>MAX SIZE:</strong> 3</div>
+      </div>
 
-<input id="max" value="5" type="number">
+      <p id="statusMsg" style="color:#0066cc; font-weight:bold; margin-top:15px;">Queue initialized. Enter a character to insert.</p>
+    </div>
+  </div>
 
+  <!-- ALGORITHM TRACKER -->
+  <div class="algorithm">
+    <span id="stepText">Current Step: Ready to execute operations.</span>
+  </div>
 
-<br><br>
-
-
-Character :
-
-<input id="char" maxlength="1">
-
-
-<br>
-
-
-<button onclick="insert()">Insert</button>
-
-<button onclick="deleteQueue()">Delete</button>
-
-<button onclick="overflow()">Overflow</button>
-
-<button onclick="underflow()">Underflow</button>
-
-<button onclick="display()">Display</button>
-
-<button onclick="exitProgram()">Exit</button>
-
-
-
-<h3 id="msg"></h3>
-
-
-
-<div class="queue" id="queue"></div>
-
-
-<div class="pointer">
-
-Front :
-<span id="front">-1</span>
-
-&nbsp;&nbsp;
-
-Rear :
-<span id="rear">-1</span>
+  <!-- TERMINAL CONSOLE SIMULATION -->
+  <div class="snapshot-panel">
+    <div class="snapshot-title">📷 Output Snapshot (Terminal Output Simulation)</div>
+    <div id="consoleLog">
+      $ gcc circular_queue.c -o circular_queue<br>
+      $ ./circular_queue<br>
+      MAIN MENU: 1.INSERTION 2.DELETION 3.DISPLAY 4.EXIT<br>
+      [System]: Circular Queue initialized with MAX = 3.<br>
+      &gt; Awaiting choice...
+    </div>
+  </div>
 
 </div>
 
+<!-- SOURCE CODE MODAL POPUP -->
+<div class="modal" id="codeModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">X</button>
+    <h3>Full C Source Code</h3>
+    <pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#define MAX 3
 
+char q[MAX];
+int rear = -1, front = -1;
+
+void insert(char x)
+{
+    if (front == (rear + 1) % MAX)
+    {
+        printf("Q is Full!!\n");
+    }
+    else if (front == -1 &amp;&amp; rear == -1)
+    {
+        front = rear = 0;
+        q[rear] = x;
+    }
+    else
+    {
+        rear = (rear + 1) % MAX;
+        q[rear] = x;
+    }
+    printf("\nCircular Queue Status: Rear = %d Front = %d\n", rear, front);
+}
+
+void delete ()
+{
+    if (front == -1 &amp;&amp; rear == -1)
+    {
+        printf("Q is Empty!!\n");
+    }
+    else if (front == rear)
+    {
+        printf("The deleted item is %c\n", q[front]);
+        front = rear = -1;
+    }
+    else
+    {
+        printf("The deleted item is %c\n", q[front]);
+        front = (front + 1) % MAX;
+    }
+    printf("\nCircular Queue Status: Rear = %d Front = %d\n", rear, front);
+}
+
+void display()
+{
+    int i;
+    if (rear == -1 &amp;&amp; front == -1)
+        printf("Queue is empty\n");
+    else
+    {
+        printf("Q Contents are: ");
+        for (i = front; i != rear; i = (i + 1) % MAX)
+            printf("%c\t", q[i]);
+        printf("%c\n", q[rear]);
+    }
+}
+
+void main()
+{
+    int ch;
+    char num;
+    for (;;)
+    {
+        printf("\n MAIN MENU:");
+        printf("\n 1.INSERTION");
+        printf("\n 2.DELETION");
+        printf("\n 3.DISPLAY");
+        printf("\n 4.EXIT");
+        printf("\n ENTER YOUR CHOICE : ");
+        scanf("%d", &amp;ch);
+        switch (ch)
+        {
+        case 1:
+            printf("\nENTER THE QUEUE ELEMENT : ");
+            scanf(" %c", &amp;num);
+            insert(num);
+            display();
+            break;
+        case 2:
+            delete ();
+            break;
+        case 3:
+            display();
+            break;
+        case 4:
+            exit(0);
+        default:
+            printf("\nInvalid Choice.");
+        }
+    }
+}
+    </pre>
+  </div>
 </div>
-
-
-
-
-
-<div class="container">
-
-
-<h2>C Program Execution</h2>
-
-
-
-<pre id="code">
-
-
-<span id="l1">#define MAX 5</span>
-
-<span id="l2">char queue[MAX];</span>
-
-<span id="l3">int front=-1;</span>
-
-<span id="l4">int rear=-1;</span>
-
-
-<span id="l5">void insert()</span>
-<span id="l6">{</span>
-
-<span id="l7">if((rear+1)%MAX==front)</span>
-
-<span id="l8">printf("Queue Overflow");</span>
-
-
-<span id="l9">else</span>
-<span id="l10">{</span>
-
-
-<span id="l11">if(front==-1)</span>
-
-<span id="l12">front=0;</span>
-
-
-<span id="l13">rear=(rear+1)%MAX;</span>
-
-
-<span id="l14">queue[rear]=item;</span>
-
-
-<span id="l15">}</span>
-
-<span id="l16">}</span>
-
-
-
-
-<span id="l17">void delete()</span>
-
-<span id="l18">{</span>
-
-
-<span id="l19">if(front==-1)</span>
-
-<span id="l20">printf("Queue Underflow");</span>
-
-
-<span id="l21">else</span>
-
-<span id="l22">{</span>
-
-
-<span id="l23">item=queue[front];</span>
-
-
-<span id="l24">front=(front+1)%MAX;</span>
-
-
-<span id="l25">}</span>
-
-<span id="l26">}</span>
-
-
-
-
-<span id="l27">void display()</span>
-
-<span id="l28">{</span>
-
-
-<span id="l29">i=front;</span>
-
-
-<span id="l30">while(i!=rear)</span>
-
-<span id="l31">{</span>
-
-
-<span id="l32">printf("%c",queue[i]);</span>
-
-
-<span id="l33">i=(i+1)%MAX;</span>
-
-
-<span id="l34">}</span>
-
-<span id="l35">}</span>
-
-
-</pre>
-
-
-</div>
-
-
-
-
 
 <script>
+const MAX = 3;
+let queue = ['-', '-', '-'];
+let front = -1;
+let rear = -1;
 
-
-let MAX=5;
-
-let queue=[];
-
-let front=-1;
-
-let rear=-1;
-
-
-
-function init()
-{
-
-MAX=parseInt(document.getElementById("max").value);
-
-queue=new Array(MAX).fill("");
-
-draw();
-
+function highlightLines(lines, stepMsg) {
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  lines.forEach(id => {
+    let el = document.getElementById(id);
+    if(el) el.classList.add("active");
+  });
+  document.getElementById("stepText").innerHTML = "Current Step: " + stepMsg;
 }
 
-
-init();
-
-
-
-
-
-function highlight(line)
-{
-
-let all=document.querySelectorAll("#code span");
-
-
-all.forEach(x=>{
-
-x.classList.remove("highlight");
-
-});
-
-
-document.getElementById(line)
-.classList.add("highlight");
-
-
+function appendLog(text) {
+  const consoleLog = document.getElementById("consoleLog");
+  consoleLog.innerHTML += `<br>&gt; ${text}`;
 }
 
+function updateUI() {
+  // Update slot values
+  for (let i = 0; i < MAX; i++) {
+    document.getElementById(`val${i}`).innerText = queue[i];
+    document.getElementById(`ptr${i}`).innerHTML = "";
+    document.getElementById(`slot${i}`).style.borderColor = "#003366";
+  }
 
+  // Update pointers
+  if (front !== -1) {
+    if (front === rear) {
+      document.getElementById(`ptr${front}`).innerHTML = `<span class="pointer-badge pointer-both">F & R</span>`;
+    } else {
+      document.getElementById(`ptr${front}`).innerHTML = `<span class="pointer-badge pointer-front">FRONT</span>`;
+      document.getElementById(`ptr${rear}`).innerHTML = `<span class="pointer-badge pointer-rear">REAR</span>`;
+    }
+  }
 
+  // Highlight active slot
+  if (rear !== -1) {
+    document.getElementById(`slot${rear}`).style.borderColor = "#28a745";
+  }
 
-
-function insert()
-{
-
-let ch=document.getElementById("char").value;
-
-
-highlight("l7");
-
-
-if((rear+1)%MAX==front)
-{
-
-msg("Queue Overflow");
-
-highlight("l8");
-
-return;
-
+  document.getElementById("frontVal").innerText = front;
+  document.getElementById("rearVal").innerText = rear;
 }
 
+function runInsert() {
+  let input = document.getElementById("elemInput").value.trim();
+  if (!input) {
+    alert("Please enter a character to insert!");
+    return;
+  }
+  let ch = input[0].toUpperCase();
 
+  // Check Overflow
+  if (front === (rear + 1) % MAX) {
+    highlightLines(["c5", "c6"], "Overflow condition triggered: front == (rear + 1) % MAX.");
+    document.getElementById("statusMsg").innerText = "Q is Full!! (Overflow Situation)";
+    appendLog("insert(): Q is Full!! (Overflow Situation)");
+    return;
+  }
 
-setTimeout(()=>highlight("l11"),700);
+  if (front === -1 && rear === -1) {
+    front = rear = 0;
+    queue[rear] = ch;
+    highlightLines(["c7", "c8"], `Inserting first element '${ch}' at index 0.`);
+  } else {
+    rear = (rear + 1) % MAX;
+    queue[rear] = ch;
+    highlightLines(["c9", "c10"], `Incrementing rear = (rear + 1) % ${MAX} -> ${rear}. Inserted '${ch}'.`);
+  }
 
-
-
-if(front==-1)
-front=0;
-
-
-
-setTimeout(()=>highlight("l13"),1400);
-
-
-
-rear=(rear+1)%MAX;
-
-
-setTimeout(()=>highlight("l14"),2100);
-
-
-
-queue[rear]=ch;
-
-
-message("Inserted : "+ch);
-
-
-draw();
-
-
+  updateUI();
+  document.getElementById("statusMsg").innerText = `Inserted '${ch}'. Rear = ${rear}, Front = ${front}`;
+  appendLog(`insert('${ch}'): Circular Queue Status: Rear = ${rear}, Front = ${front}`);
+  document.getElementById("elemInput").value = "";
 }
 
+function runDelete() {
+  // Check Underflow
+  if (front === -1 && rear === -1) {
+    highlightLines(["c14", "c15"], "Underflow condition triggered: front == -1 && rear == -1.");
+    document.getElementById("statusMsg").innerText = "Q is Empty!! (Underflow Situation)";
+    appendLog("delete(): Q is Empty!! (Underflow Situation)");
+    return;
+  }
 
+  let deletedItem = queue[front];
+  queue[front] = '-';
 
+  if (front === rear) {
+    front = rear = -1;
+    highlightLines(["c16", "c17", "c18"], `Deleted last element '${deletedItem}'. Resetting front = rear = -1.`);
+  } else {
+    front = (front + 1) % MAX;
+    highlightLines(["c19", "c20", "c21"], `Deleted '${deletedItem}'. Updating front = (front + 1) % ${MAX} -> ${front}.`);
+  }
 
-
-function deleteQueue()
-{
-
-
-highlight("l19");
-
-
-if(front==-1)
-{
-
-message("Queue Underflow");
-
-highlight("l20");
-
-return;
-
+  updateUI();
+  document.getElementById("statusMsg").innerText = `Deleted '${deletedItem}'. Rear = ${rear}, Front = ${front}`;
+  appendLog(`delete(): The deleted item is ${deletedItem}. Status: Rear = ${rear}, Front = ${front}`);
 }
 
-
-
-setTimeout(()=>highlight("l23"),700);
-
-
-
-let ch=queue[front];
-
-
-queue[front]="";
-
-
-
-setTimeout(()=>highlight("l24"),1400);
-
-
-
-if(front==rear)
-{
-
-front=-1;
-
-rear=-1;
-
+function runDisplay() {
+  if (front === -1 && rear === -1) {
+    highlightLines(["c14"], "Displaying status: Queue is empty.");
+    document.getElementById("statusMsg").innerText = "Queue is empty.";
+    appendLog("display(): Queue is empty");
+  } else {
+    highlightLines(["c4", "c12"], "Displaying active queue elements.");
+    let contents = [];
+    let i = front;
+    while (true) {
+      contents.push(queue[i]);
+      if (i === rear) break;
+      i = (i + 1) % MAX;
+    }
+    let msg = "Q Contents are: " + contents.join("\t");
+    document.getElementById("statusMsg").innerText = msg;
+    appendLog(`display(): ${msg}`);
+  }
 }
 
-else
-{
-
-front=(front+1)%MAX;
-
+function toggleHighlight() {
+  let box = document.getElementById("codeBox");
+  box.classList.toggle("code-highlight");
+  document.getElementById("stepText").innerHTML = "Current Step: Code panel highlighted.";
 }
 
-
-
-message("Deleted : "+ch);
-
-
-draw();
-
-
+function resetAll() {
+  queue = ['-', '-', '-'];
+  front = -1;
+  rear = -1;
+  updateUI();
+  document.getElementById("statusMsg").innerText = "Circular Queue Reset Completed.";
+  document.getElementById("stepText").innerText = "Current Step: Reset complete.";
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  document.getElementById("codeBox").classList.remove("code-highlight");
+  appendLog("System: Circular Queue reset.");
 }
 
-
-
-
-
-
-function overflow()
-{
-
-while(!((rear+1)%MAX==front))
-{
-
-if(front==-1)
-front=0;
-
-
-rear=(rear+1)%MAX;
-
-
-queue[rear]="X";
-
-
+function openModal() {
+  document.getElementById("codeModal").style.display = "flex";
 }
 
-
-highlight("l8");
-
-message("Overflow Condition");
-
-
-draw();
-
+function closeModal() {
+  document.getElementById("codeModal").style.display = "none";
 }
 
-
-
-
-
-function underflow()
-{
-
-
-queue=new Array(MAX).fill("");
-
-front=-1;
-
-rear=-1;
-
-
-highlight("l20");
-
-
-message("Underflow Condition");
-
-
-draw();
-
+function openCompiler() {
+  window.open("https://www.onlinegdb.com/online_c_compiler", "_blank");
 }
 
-
-
-
-function display()
-{
-
-highlight("l27");
-
-
-if(front==-1)
-{
-
-message("Queue Empty");
-
-return;
-
-}
-
-
-let text="Queue : ";
-
-let i=front;
-
-
-highlight("l29");
-
-
-while(i!=rear)
-{
-
-highlight("l32");
-
-
-text+=queue[i]+" ";
-
-i=(i+1)%MAX;
-
-
-highlight("l33");
-
-}
-
-
-text+=queue[rear];
-
-
-message(text);
-
-
-}
-
-
-
-
-function draw()
-{
-
-let area=document.getElementById("queue");
-
-area.innerHTML="";
-
-
-for(let i=0;i<MAX;i++)
-{
-
-let div=document.createElement("div");
-
-div.className="box";
-
-
-if(queue[i]!="")
-{
-
-div.classList.add("element");
-
-div.innerHTML=queue[i];
-
-}
-
-else
-{
-
-div.innerHTML="-";
-
-}
-
-
-area.appendChild(div);
-
-
-}
-
-
-
-document.getElementById("front").innerHTML=front;
-
-document.getElementById("rear").innerHTML=rear;
-
-
-}
-
-
-
-function message(t)
-{
-
-document.getElementById("msg").innerHTML=t;
-
-}
-
-
-
-function exitProgram()
-{
-
-message("Program Exit");
-
-
-queue=new Array(MAX).fill("");
-
-front=-1;
-
-rear=-1;
-
-draw();
-
-}
-
-
-
+// Initial UI render
+updateUI();
+
+ // Disable right-click menu
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Disable F12 and Ctrl+U / Ctrl+Shift+I / Ctrl+Shift+C
+    document.addEventListener('keydown', (e) => {
+      // F12 or Ctrl+U
+      if (e.keyCode === 123 || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
+        e.preventDefault();
+      }
+      
+      // Ctrl+Shift+I or Ctrl+Shift+C (Inspect Element shortcuts)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+      }
+    });
 </script>
-
-
 
 </body>
 </html>

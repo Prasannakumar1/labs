@@ -1,706 +1,791 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-
-<title>BST Animation Using C</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binary Search Tree (BST) Operations in C - Visualizer</title>
 
 <style>
-
-
-body{
-
-font-family:Segoe UI,Arial;
-background:#eaf2f8;
-padding:20px;
-
-}
-
-
-h1{
-
-text-align:center;
-color:#003366;
-
-}
-
-
-
-.container{
-
-background:white;
-border:4px solid #003366;
-border-radius:15px;
-padding:15px;
-
-}
-
-
-
-button{
-
-background:#0066cc;
-color:white;
-padding:10px 15px;
-margin:5px;
-border:none;
-border-radius:6px;
-
-}
-
-
-input{
-
-padding:8px;
-
-}
-
-
-
-.main{
-
-display:grid;
-grid-template-columns:45% 55%;
-gap:15px;
-
-}
-
-
-
-
-/* CODE PANEL */
-
-
-.code{
-
-background:#111;
-color:white;
-height:600px;
-overflow:auto;
-padding:15px;
-font-family:Consolas;
-
-}
-
-
-
-.line{
-
-padding:5px;
-
-}
-
-
-.highlight{
-
-background:#ffd54f;
-color:black;
-font-weight:bold;
-
-}
-
-
-
-
-
-/* TREE */
-
-
-.treePanel{
-
-border:3px solid #555;
-padding:20px;
-text-align:center;
-
-}
-
-
-.node{
-
-display:inline-block;
-background:#3498db;
-color:white;
-width:45px;
-height:45px;
-line-height:45px;
-border-radius:50%;
-margin:8px;
-font-weight:bold;
-animation:zoom .5s;
-
-}
-
-
-.activeNode{
-
-background:red;
-
-}
-
-
-
-.level{
-
-margin:15px;
-
-}
-
-
-
-.arrow{
-
-font-size:25px;
-color:red;
-
-}
-
-
-
-@keyframes zoom{
-
-from{
-
-transform:scale(0);
-
-}
-
-to{
-
-transform:scale(1);
-
-}
-
-}
-
-
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #eaf2f8;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .container {
+    border: 3px solid #003366;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* CONTROLS & ACTION BUTTONS */
+  .controls {
+    text-align: center;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+  }
+
+  .form-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  input {
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 2px solid #0066cc;
+    border-radius: 4px;
+    outline: none;
+    width: 140px;
+    font-family: Consolas, monospace;
+  }
+
+  input:focus {
+    border-color: #003366;
+  }
+
+  button {
+    padding: 8px 14px;
+    margin: 3px;
+    border: none;
+    border-radius: 5px;
+    background: #0066cc;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button:hover { background: #003366; }
+  .btn-accent { background: #28a745; }
+  .btn-accent:hover { background: #1e7e34; }
+  .btn-warning { background: #ff9800; color: #fff; }
+  .btn-warning:hover { background: #e65100; }
+  .btn-purple { background: #6f42c1; color: #fff; }
+  .btn-purple:hover { background: #59359a; }
+  .btn-danger { background: #dc3545; }
+  .btn-danger:hover { background: #bd2130; }
+
+  /* CONTENT LAYOUT */
+  .content {
+    display: grid;
+    grid-template-columns: 48% 50%;
+    gap: 2%;
+  }
+
+  /* C CODE PANEL */
+  .codePanel {
+    border: 2px solid #333;
+    padding: 12px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    height: 420px;
+    overflow: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-radius: 6px;
+  }
+
+  .codePanel h3 {
+    margin-top: 0;
+    color: #61dafb;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+  }
+
+  .codeLine {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    white-space: pre;
+  }
+
+  .active {
+    background: #ffd54f !important;
+    color: #000 !important;
+    font-weight: bold;
+  }
+
+  .code-highlight {
+    border: 3px solid #28a745 !important;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.5);
+  }
+
+  /* VISUALIZATION PANEL */
+  .vizPanel {
+    border: 2px solid #ccc;
+    padding: 15px;
+    text-align: center;
+    background: #fafafa;
+    border-radius: 6px;
+    min-height: 420px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .vizPanel h3 {
+    margin-top: 0;
+    color: #003366;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
+
+  /* TREE VISUALIZER CANVAS / SVG */
+  .tree-canvas {
+    width: 100%;
+    height: 250px;
+    border: 1px dashed #0066cc;
+    border-radius: 8px;
+    background: #f0f8ff;
+    position: relative;
+    overflow: auto;
+  }
+
+  .status-bar {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 13px;
+    margin-top: 10px;
+    font-family: Consolas, monospace;
+    text-align: left;
+  }
+
+  /* ALGORITHM TRACKER & SNAPSHOT PANELS */
+  .algorithm {
+    margin-top: 15px;
+    border: 2px solid #003366;
+    padding: 10px;
+    background: #f0f4f8;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #003366;
+  }
+
+  .snapshot-panel {
+    margin-top: 15px;
+    background: #0c0c0c;
+    color: #00ff00;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    box-shadow: inset 0 0 10px #000;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .snapshot-title {
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  /* MODAL STYLES FOR SOURCE CODE POPUP */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: #fff;
+    width: 60%;
+    max-height: 80vh;
+    padding: 20px;
+    border-radius: 8px;
+    overflow: auto;
+    font-family: Consolas, monospace;
+  }
+
+  .close-btn {
+    float: right;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+  }
 </style>
-
-
 </head>
-
 
 <body>
 
-
-<h1>
-BINARY SEARCH TREE USING C
-</h1>
-
-
+<h1>BINARY SEARCH TREE IN C (VISUALIZER)</h1>
 
 <div class="container">
 
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="form-grid">
+      <input id="nodeValInput" type="number" placeholder="Value (e.g. 6)">
+      <button class="btn-accent" onclick="runInsertVal()">1. Insert Element</button>
+      <button class="btn-purple" onclick="runInsertDefaultList()">Insert Default List [6,9,5,2,8,15,24,14,7]</button>
+    </div>
+    
+    <button class="btn-warning" onclick="runTraversals()">2. Traverse (In, Pre, Post)</button>
+    <button onclick="runSearchVal()">3. Search KEY</button>
+    <button class="btn-danger" onclick="resetAll()">Reset Tree</button>
+    <br><br>
+    <button class="btn-warning" onclick="toggleHighlight()">Highlight Code Panel</button>
+    <button class="btn-purple" onclick="openModal()">📄 View Full Source Code</button>
+    <button class="btn-accent" onclick="openCompiler()">🚀 Run on Online Compiler</button>
+  </div>
 
+  <div class="content">
+    <!-- C SOURCE CODE DISPLAY -->
+    <div class="codePanel" id="codeBox">
+      <h3>C SOURCE CODE</h3>
+<div class="codeLine" id="c1">#include &lt;stdio.h&gt;</div>
+<div class="codeLine" id="c2">#include &lt;stdlib.h&gt;</div>
+<div class="codeLine" id="c3">struct node { int data; struct node *leftChild, *rightChild; };</div>
+<div class="codeLine" id="c4">typedef struct node *NODE;</div>
+<div class="codeLine" id="c5">NODE insert(NODE root) {</div>
+<div class="codeLine" id="c6">    temp = (struct node *)malloc(sizeof(struct node)); temp-&gt;data = item;</div>
+<div class="codeLine" id="c7">    temp-&gt;leftChild = temp-&gt;rightChild = NULL;</div>
+<div class="codeLine" id="c8">    if (root == NULL) return temp;</div>
+<div class="codeLine" id="c9">    cur = root; while (cur != NULL) {</div>
+<div class="codeLine" id="c10">        prev = cur;</div>
+<div class="codeLine" id="c11">        if (item == cur-&gt;data) { printf("Duplicate!"); free(temp); return root; }</div>
+<div class="codeLine" id="c12">        if (item &lt; cur-&gt;data) cur = cur-&gt;leftChild; else cur = cur-&gt;rightChild;</div>
+<div class="codeLine" id="c13">    }</div>
+<div class="codeLine" id="c14">    if (item &lt; prev-&gt;data) prev-&gt;leftChild = temp; else prev-&gt;rightChild = temp;</div>
+<div class="codeLine" id="c15">    return root;</div>
+<div class="codeLine" id="c16">}</div>
+<div class="codeLine" id="c17">void inorder(NODE root) { if (root!=NULL) { inorder(root-&gt;leftChild); printf("%d ", root-&gt;data); inorder(root-&gt;rightChild); } }</div>
+<div class="codeLine" id="c18">void preorder(NODE root) { if (root!=NULL) { printf("%d ", root-&gt;data); preorder(root-&gt;leftChild); preorder(root-&gt;rightChild); } }</div>
+<div class="codeLine" id="c19">void postorder(NODE root) { if (root!=NULL) { postorder(root-&gt;leftChild); postorder(root-&gt;rightChild); printf("%d ", root-&gt;data); } }</div>
+<div class="codeLine" id="c20">NODE search(NODE root, int key) { ... }</div>
+    </div>
 
-<button onclick="createBST()">
-Create BST
-</button>
+    <!-- VISUAL OUTPUT SNAPSHOT -->
+    <div class="vizPanel">
+      <h3>BST GRAPHICAL TREE DIAGRAM</h3>
+      
+      <div class="tree-canvas" id="treeCanvas">
+        <svg id="svgTree" width="100%" height="100%"></svg>
+      </div>
 
+      <div class="status-bar" id="traversalDisplay">
+        <strong>Inorder:</strong> --<br>
+        <strong>Preorder:</strong> --<br>
+        <strong>Postorder:</strong> --
+      </div>
 
-<button onclick="inorder()">
-Inorder
-</button>
+      <p id="statusMsg" style="color:#0066cc; font-weight:bold; margin-top:10px;">Tree initialized. Insert elements to construct BST.</p>
+    </div>
+  </div>
 
+  <!-- ALGORITHM TRACKER -->
+  <div class="algorithm">
+    <span id="stepText">Current Step: Ready to execute operations.</span>
+  </div>
 
-<button onclick="preorder()">
-Preorder
-</button>
+  <!-- TERMINAL CONSOLE SNAPSHOT -->
+  <div class="snapshot-panel">
+    <div class="snapshot-title">📷 Output Snapshot (Terminal Output Simulation)</div>
+    <div id="consoleLog">
+      $ gcc bst.c -o bst<br>
+      $ ./bst<br>
+      --------MENU-------------<br>
+      1.Create  2.Traverse  3.Search  4.Exit<br>
+      [System]: Binary Search Tree module initialized.<br>
+      &gt; Awaiting choice...
+    </div>
+  </div>
 
+</div>
 
-<button onclick="postorder()">
-Postorder
-</button>
+<!-- SOURCE CODE MODAL POPUP -->
+<div class="modal" id="codeModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">X</button>
+    <h3>Full C Source Code</h3>
+    <pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
 
-
-<input id="key" placeholder="Search Key">
-
-
-<button onclick="search()">
-Search
-</button>
-
-
-<button onclick="reset()">
-Exit / Reset
-</button>
-
-
-
-
-
-<div class="main">
-
-
-
-
-
-<!-- C PROGRAM -->
-
-
-<div class="code">
-
-
-<h2>C PROGRAM</h2>
-
-
-
-<div class="line" id="c1">
 struct node
-</div>
-
-
-<div class="line" id="c2">
 {
-</div>
-
-
-<div class="line" id="c3">
-int data;
-</div>
-
-
-<div class="line" id="c4">
-struct node *left,*right;
-</div>
-
-
-<div class="line" id="c5">
+    int data;
+    struct node *leftChild, *rightChild;
 };
+
+typedef struct node *NODE;
+
+NODE insert(NODE root)
+{
+    NODE temp, cur, prev;
+    int item;
+    printf("\nEnter the element:");
+    scanf("%d", &amp;item);
+
+    temp = (struct node *)malloc(sizeof(struct node));
+    temp-&gt;leftChild = NULL;
+    temp-&gt;rightChild = NULL;
+    temp-&gt;data = item;
+
+    if (root == NULL)
+        return temp;
+
+    prev = NULL;
+    cur = root;
+    while (cur != NULL)
+    {
+        prev = cur;
+        if (item == cur-&gt;data)
+        {
+            printf("Duplicate items are not allowed");
+            free(temp);
+            return root;
+        }
+        if (item &lt; cur-&gt;data)
+            cur = cur-&gt;leftChild;
+        else
+            cur = cur-&gt;rightChild;
+    }
+
+    if (item &lt; prev-&gt;data)
+        prev-&gt;leftChild = temp;
+    else
+        prev-&gt;rightChild = temp;
+    return root;
+}
+
+void inorder(NODE root)
+{
+    if (root != NULL)
+    {
+        inorder(root-&gt;leftChild);
+        printf("%d\t", root-&gt;data);
+        inorder(root-&gt;rightChild);
+    }
+}
+
+void preorder(NODE root)
+{
+    if (root != NULL)
+    {
+        printf("%d\t", root-&gt;data);
+        preorder(root-&gt;leftChild);
+        preorder(root-&gt;rightChild);
+    }
+}
+
+void postorder(NODE root)
+{
+    if (root != NULL)
+    {
+        postorder(root-&gt;leftChild);
+        postorder(root-&gt;rightChild);
+        printf("%d\t", root-&gt;data);
+    }
+}
+
+NODE search(NODE root, int key)
+{
+    NODE cur;
+    if (root == NULL)
+        return NULL;
+    cur = root;
+    while (cur != NULL)
+    {
+        if (key == cur-&gt;data)
+            return cur;
+        if (key &lt; cur-&gt;data)
+            cur = cur-&gt;leftChild;
+        else
+            cur = cur-&gt;rightChild;
+    }
+    return NULL;
+}
+
+void main()
+{
+    int choice, key;
+    NODE root = NULL, cur;
+    while (1)
+    {
+        printf("\n--------MENU------------- \n");
+        printf("\n1.Create");
+        printf("\n2.Traverse the Tree in Preorder, Inorder, Postorder");
+        printf("\n3.Search");
+        printf("\n4.Exit");
+        printf("\nEnter your choice :");
+        scanf("%d", &amp;choice);
+
+        switch (choice)
+        {
+        case 1:
+            root = insert(root);
+            break;
+        case 2:
+            if (root == NULL)
+                printf("Tree is not created");
+            else
+            {
+                printf("\nThe Inorder traversal: ");
+                inorder(root);
+                printf("\nThe Preorder traversal: ");
+                preorder(root);
+                printf("\nThe Postorder traversal: ");
+                postorder(root);
+            }
+            break;
+        case 3:
+            printf("\nEnter the element to be searched :");
+            scanf("%d", &amp;key);
+            cur = search(root, key);
+            if (cur == NULL)
+                printf("Element does not exists\n");
+            else
+                printf("\nThe element %d found", cur-&gt;data);
+            break;
+        case 4:
+            exit(0);
+        default:
+            printf("Invalid choice");
+        }
+    }
+}
+    </pre>
+  </div>
 </div>
-
-
-
-<br>
-
-
-
-<div class="line" id="c6">
-createBST()
-</div>
-
-
-<div class="line" id="c7">
-if(root==NULL)
-</div>
-
-
-<div class="line" id="c8">
-create new node
-</div>
-
-
-
-<div class="line" id="c9">
-if(item < root->data)
-</div>
-
-
-<div class="line" id="c10">
-insert left subtree
-</div>
-
-
-
-<div class="line" id="c11">
-else
-</div>
-
-
-<div class="line" id="c12">
-insert right subtree
-</div>
-
-
-
-
-<br>
-
-
-<div class="line" id="c13">
-void inorder(root)
-</div>
-
-
-<div class="line" id="c14">
-left - root - right
-</div>
-
-
-
-<br>
-
-
-<div class="line" id="c15">
-void preorder(root)
-</div>
-
-
-<div class="line" id="c16">
-root - left - right
-</div>
-
-
-
-
-<br>
-
-
-<div class="line" id="c17">
-void postorder(root)
-</div>
-
-
-<div class="line" id="c18">
-left - right - root
-</div>
-
-
-
-<br>
-
-
-
-<div class="line" id="c19">
-Search KEY
-</div>
-
-
-<div class="line" id="c20">
-Compare node data
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<!-- TREE PANEL -->
-
-
-<div class="treePanel">
-
-
-<h2>BST Visualization</h2>
-
-
-<div id="tree"></div>
-
-
-<h3 id="output"></h3>
-
-
-</div>
-
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
 
 <script>
-
-
-let values=[6,9,5,2,8,15,24,14,7,8,5,2];
-
-
-let bst=[];
-
-
-
-function highlight(lines,msg)
-{
-
-
-document.querySelectorAll(".line")
-.forEach(e=>e.className="line");
-
-
-
-lines.forEach((x,i)=>{
-
-
-setTimeout(()=>{
-
-
-document.getElementById(x)
-.className="line highlight";
-
-
-},i*400);
-
-
-});
-
-
-
-document.getElementById("output")
-.innerHTML=msg;
-
-
+// BST Node Class
+class TreeNode {
+  constructor(val) {
+    this.data = val;
+    this.leftChild = null;
+    this.rightChild = null;
+  }
 }
 
+let bstRoot = null;
 
-
-
-
-
-function createBST()
-{
-
-
-highlight(
-
-["c6","c7","c8","c9","c10","c12"],
-
-"Creating Binary Search Tree"
-
-);
-
-
-
-bst=[];
-
-
-values.forEach(x=>{
-
-bst.push(x);
-
-});
-
-
-draw();
-
-
-
+function highlightLines(lines, stepMsg) {
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  lines.forEach(id => {
+    let el = document.getElementById(id);
+    if(el) el.classList.add("active");
+  });
+  document.getElementById("stepText").innerHTML = "Current Step: " + stepMsg;
 }
 
-
-
-
-
-
-
-function inorder()
-{
-
-
-highlight(
-
-["c13","c14"],
-
-"Inorder Traversal : Left Root Right"
-
-);
-
-
-
-let arr=[...bst].sort((a,b)=>a-b);
-
-
-document.getElementById("output")
-.innerHTML=
-
-"Inorder : "+arr;
-
-
-
+function appendLog(text) {
+  const consoleLog = document.getElementById("consoleLog");
+  consoleLog.innerHTML += `<br>${text}`;
+  consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
-
-
-
-function preorder()
-{
-
-
-highlight(
-
-["c15","c16"],
-
-"Preorder Traversal : Root Left Right"
-
-);
-
-
-document.getElementById("output")
-.innerHTML=
-
-"Preorder : "+bst;
-
-
+function insertNode(root, val) {
+  if (!root) return new TreeNode(val);
+  
+  if (val === root.data) {
+    return "DUPLICATE";
+  }
+  
+  if (val < root.data) {
+    let res = insertNode(root.leftChild, val);
+    if (res === "DUPLICATE") return "DUPLICATE";
+    root.leftChild = res;
+  } else {
+    let res = insertNode(root.rightChild, val);
+    if (res === "DUPLICATE") return "DUPLICATE";
+    root.rightChild = res;
+  }
+  return root;
 }
 
+function runInsertVal() {
+  let valInput = document.getElementById("nodeValInput").value.trim();
+  if (valInput === "") {
+    alert("Please enter a number to insert!");
+    return;
+  }
+  let val = parseInt(valInput);
 
+  if (!bstRoot) {
+    bstRoot = new TreeNode(val);
+    highlightLines(["c5", "c6", "c7", "c8"], `Created root node with value ${val}.`);
+  } else {
+    let res = insertNode(bstRoot, val);
+    if (res === "DUPLICATE") {
+      highlightLines(["c11"], `Duplicate item '${val}' not allowed!`);
+      document.getElementById("statusMsg").innerText = `Duplicate items are not allowed (${val})`;
+      appendLog(`&gt; insert(): Duplicate items are not allowed (${val})`);
+      document.getElementById("nodeValInput").value = "";
+      return;
+    }
+    highlightLines(["c9", "c10", "c12", "c13", "c14", "c15"], `Traversed BST & inserted ${val}.`);
+  }
 
-
-
-
-function postorder()
-{
-
-
-highlight(
-
-["c17","c18"],
-
-"Postorder Traversal : Left Right Root"
-
-);
-
-
-
-let arr=[...bst].reverse();
-
-
-document.getElementById("output")
-.innerHTML=
-
-"Postorder : "+arr;
-
-
+  drawTree();
+  document.getElementById("statusMsg").innerText = `Inserted ${val} into BST.`;
+  appendLog(`&gt; insert(): Inserted ${val}`);
+  document.getElementById("nodeValInput").value = "";
 }
 
+function runInsertDefaultList() {
+  const defaults = [6, 9, 5, 2, 8, 15, 24, 14, 7];
+  defaults.forEach(v => {
+    if (!bstRoot) {
+      bstRoot = new TreeNode(v);
+    } else {
+      insertNode(bstRoot, v);
+    }
+  });
 
-
-
-
-
-
-function search()
-{
-
-
-let key=
-
-Number(document.getElementById("key").value);
-
-
-
-highlight(
-
-["c19","c20"],
-
-"Searching KEY = "+key
-
-);
-
-
-
-if(bst.includes(key))
-
-document.getElementById("output")
-.innerHTML=
-
-"Element Found : "+key;
-
-
-else
-
-document.getElementById("output")
-.innerHTML=
-
-"Element Not Found";
-
-
+  highlightLines(["c5", "c6", "c14"], "Inserted default list into BST.");
+  drawTree();
+  document.getElementById("statusMsg").innerText = "Inserted default list: [6, 9, 5, 2, 8, 15, 24, 14, 7]";
+  appendLog("&gt; insert(): Inserted batch [6, 9, 5, 2, 8, 15, 24, 14, 7]");
 }
 
+// Traversals
+let inArr = [], preArr = [], postArr = [];
 
-
-
-
-function draw()
-{
-
-
-let tree=document.getElementById("tree");
-
-tree.innerHTML="";
-
-
-
-let levels=[
-
-[6],
-
-[5,9],
-
-[2,8,15],
-
-[7,14,24]
-
-];
-
-
-
-levels.forEach(level=>{
-
-
-let div=document.createElement("div");
-
-div.className="level";
-
-
-level.forEach(n=>{
-
-
-let node=document.createElement("span");
-
-node.className="node";
-
-node.innerHTML=n;
-
-
-div.appendChild(node);
-
-
-
-});
-
-
-tree.appendChild(div);
-
-
-});
-
-
-
+function getInorder(node) {
+  if (node) {
+    getInorder(node.leftChild);
+    inArr.push(node.data);
+    getInorder(node.rightChild);
+  }
 }
 
-
-
-
-function reset()
-{
-
-bst=[];
-
-document.getElementById("tree").innerHTML="";
-
-document.getElementById("output").innerHTML="";
-
+function getPreorder(node) {
+  if (node) {
+    preArr.push(node.data);
+    getPreorder(node.leftChild);
+    getPreorder(node.rightChild);
+  }
 }
 
+function getPostorder(node) {
+  if (node) {
+    getPostorder(node.leftChild);
+    getPostorder(node.rightChild);
+    postArr.push(node.data);
+  }
+}
 
+function runTraversals() {
+  if (!bstRoot) {
+    highlightLines(["c17"], "Tree is not created!");
+    document.getElementById("statusMsg").innerText = "Tree is not created";
+    appendLog("&gt; traverse(): Tree is not created");
+    return;
+  }
 
+  inArr = []; preArr = []; postArr = [];
+  getInorder(bstRoot);
+  getPreorder(bstRoot);
+  getPostorder(bstRoot);
 
+  highlightLines(["c17", "c18", "c19"], "Executed Inorder, Preorder, and Postorder traversals.");
+
+  let strIn = inArr.join("  ");
+  let strPre = preArr.join("  ");
+  let strPost = postArr.join("  ");
+
+  document.getElementById("traversalDisplay").innerHTML = `
+    <strong>Inorder:</strong> ${strIn}<br>
+    <strong>Preorder:</strong> ${strPre}<br>
+    <strong>Postorder:</strong> ${strPost}
+  `;
+
+  let consoleOutput = `&gt; Traversals:<br>`;
+  consoleOutput += `The Inorder traversal: ${strIn}<br>`;
+  consoleOutput += `The Preorder traversal: ${strPre}<br>`;
+  consoleOutput += `The Postorder traversal: ${strPost}`;
+
+  appendLog(consoleOutput);
+  document.getElementById("statusMsg").innerText = "Traversals updated below.";
+}
+
+function searchBST(root, key) {
+  let cur = root;
+  while (cur != null) {
+    if (key === cur.data) return cur;
+    if (key < cur.data) cur = cur.leftChild;
+    else cur = cur.rightChild;
+  }
+  return null;
+}
+
+function runSearchVal() {
+  let keyInput = document.getElementById("nodeValInput").value.trim();
+  if (keyInput === "") {
+    alert("Please enter a key to search!");
+    return;
+  }
+  let key = parseInt(keyInput);
+
+  highlightLines(["c20"], `Searching for KEY = ${key}...`);
+
+  let res = searchBST(bstRoot, key);
+  if (!res) {
+    document.getElementById("statusMsg").innerText = `Element ${key} does not exist in BST.`;
+    appendLog(`&gt; search(${key}): Element does not exist`);
+  } else {
+    document.getElementById("statusMsg").innerText = `Element ${key} FOUND in BST!`;
+    appendLog(`&gt; search(${key}): The element ${key} found`);
+  }
+}
+
+// Tree SVG Rendering
+function drawTree() {
+  const svg = document.getElementById("svgTree");
+  svg.innerHTML = "";
+  if (!bstRoot) return;
+
+  const canvasWidth = 500;
+  let startX = canvasWidth / 2;
+  let startY = 30;
+
+  function renderSVGNode(node, x, y, offset) {
+    if (!node) return;
+
+    // Draw Left Child Line
+    if (node.leftChild) {
+      let childX = x - offset;
+      let childY = y + 50;
+      let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", x);
+      line.setAttribute("y1", y);
+      line.setAttribute("x2", childX);
+      line.setAttribute("y2", childY);
+      line.setAttribute("stroke", "#003366");
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+      renderSVGNode(node.leftChild, childX, childY, offset / 1.8);
+    }
+
+    // Draw Right Child Line
+    if (node.rightChild) {
+      let childX = x + offset;
+      let childY = y + 50;
+      let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", x);
+      line.setAttribute("y1", y);
+      line.setAttribute("x2", childX);
+      line.setAttribute("y2", childY);
+      line.setAttribute("stroke", "#003366");
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+      renderSVGNode(node.rightChild, childX, childY, offset / 1.8);
+    }
+
+    // Draw Circle Node
+    let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", "16");
+    circle.setAttribute("fill", "#0066cc");
+    circle.setAttribute("stroke", "#003366");
+    circle.setAttribute("stroke-width", "2");
+    svg.appendChild(circle);
+
+    // Draw Node Text
+    let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", x);
+    text.setAttribute("y", y + 5);
+    text.setAttribute("fill", "#ffffff");
+    text.setAttribute("font-size", "12");
+    text.setAttribute("font-weight", "bold");
+    text.setAttribute("text-anchor", "middle");
+    text.textContent = node.data;
+    svg.appendChild(text);
+  }
+
+  renderSVGNode(bstRoot, startX, startY, 100);
+}
+
+function toggleHighlight() {
+  let box = document.getElementById("codeBox");
+  box.classList.toggle("code-highlight");
+  document.getElementById("stepText").innerHTML = "Current Step: Code panel highlighted.";
+}
+
+function resetAll() {
+  bstRoot = null;
+  drawTree();
+  document.getElementById("traversalDisplay").innerHTML = `
+    <strong>Inorder:</strong> --<br>
+    <strong>Preorder:</strong> --<br>
+    <strong>Postorder:</strong> --
+  `;
+  document.getElementById("statusMsg").innerText = "BST Visualizer Reset Completed.";
+  document.getElementById("stepText").innerText = "Current Step: Reset complete.";
+  document.querySelectorAll(".codeLine").forEach(e => e.classList.remove("active"));
+  document.getElementById("codeBox").classList.remove("code-highlight");
+  appendLog("&gt; System: BST reset.");
+}
+
+function openModal() {
+  document.getElementById("codeModal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("codeModal").style.display = "none";
+}
+
+function openCompiler() {
+  window.open("https://www.onlinegdb.com/online_c_compiler", "_blank");
+}
+
+// Initial Tree Render
+drawTree();
+
+ // Disable right-click menu
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Disable F12 and Ctrl+U / Ctrl+Shift+I / Ctrl+Shift+C
+    document.addEventListener('keydown', (e) => {
+      // F12 or Ctrl+U
+      if (e.keyCode === 123 || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
+        e.preventDefault();
+      }
+      
+      // Ctrl+Shift+I or Ctrl+Shift+C (Inspect Element shortcuts)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+      }
+    });
 </script>
 
-
 </body>
-
 </html>
