@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS2 Simulation: Syntax Highlighted Code & Falling Packets</title>
+    
+    <!-- Prism.js Syntax Highlighter Stylesheet (Okaidia Theme) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Courier New', Courier, monospace; background-color: #121212; color: #00ff00; margin: 0; padding: 10px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        h1 { text-align: center; color: #00ff66; font-size: 15px; text-transform: uppercase; letter-spacing: 2px; margin: 2px 0 6px 0; }
+        
+        /* Main split container layout */
+        .main-container { display: flex; flex: 1; gap: 10px; overflow: hidden; height: calc(100vh - 35px); }
+        
+        /* Left Pane: Source Code Viewer with Prism */
+        .left-pane { flex: 1; background: #272822; border: 1px solid #333; border-radius: 5px; display: flex; flex-direction: column; overflow: hidden; }
+        .pane-header { background: #1e1e1e; padding: 6px 10px; font-size: 11px; font-weight: bold; color: #00ffff; border-bottom: 1px solid #333; }
+        .code-container { flex: 1; overflow-y: auto; margin: 0; background: #272822 !important; font-size: 10.5px !important; }
+        pre[class*="language-"] { margin: 0 !important; padding: 15px !important; background: #272822 !important; }
+        
+        /* Right Pane: Simulation Canvas & Controls */
+        .right-pane { flex: 1; background: #1a1a1a; border: 1px solid #333; border-radius: 5px; display: flex; flex-direction: column; overflow: hidden; padding: 8px; }
+        
+        .simulation-window { position: relative; background: #000; border: 2px solid #555; height: 220px; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+        canvas { display: block; width: 100%; height: 100%; }
+
+        .toolbar { margin-top: 6px; display: flex; justify-content: space-between; align-items: center; background: #252525; padding: 6px; border-radius: 4px; font-size: 11px; flex-shrink: 0; }
+        .controls label { color: #bbb; }
+        .controls input, .controls select { background: #111; color: #00ff00; border: 1px solid #444; padding: 2px; font-family: monospace; font-size: 11px; }
+        
+        button { background: #004400; color: #00ff00; border: 1px solid #00ff00; padding: 4px 10px; cursor: pointer; font-family: monospace; font-weight: bold; border-radius: 3px; font-size: 11px; }
+        button:hover { background: #006600; }
+        button.stop { background: #440000; color: #ff4444; border: 1px solid #ff4444; }
+        button.stop:hover { background: #660000; }
+
+        .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 6px; text-align: center; flex-shrink: 0; }
+        .metric-box { background: #222; padding: 5px; border: 1px solid #444; border-radius: 4px; font-size: 10px; }
+        .metric-value { font-size: 13px; font-weight: bold; color: #00ffff; margin-top: 2px; }
+
+        .console-output { margin-top: 6px; background: #0b0b0b; border: 1px solid #333; flex: 1; overflow-y: auto; padding: 6px; font-size: 10px; color: #00ffcc; min-height: 60px; }
+    </style>
+</head>
+<body>
+
+<h1>3-Node Network Simulation & Syntax-Highlighted Source Code</h1>
+
+<div class="main-container">
+    
+    <!-- LEFT PANE: Syntax Highlighted Code Viewer -->
+    <div class="left-pane">
+        <div class="pane-header">Source Files: <code>network.tcl</code> & <code>droppackets.awk</code></div>
+        <div class="code-container">
+            <pre><code class="language-clike"># --- 1. NS2 Tcl Script (network.tcl) ---
+set ns [new Simulator]
+
+$ns color 1 Blue
+$ns color 2 Red
+
+set nf [open out.nam w]
+$ns namtrace-all $nf
+set tf [open trace.tr w]
+$ns trace-all $tf
+
+proc finish {} {
+    global ns nf tf
+    $ns flush-trace
+    close $nf
+    close $tf
+    exec nam out.nam &
+    exit 0
+}
+
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+
+# Duplex link configurations
+$ns duplex-link $n0 $n1 1Mb 10ms DropTail
+$ns duplex-link $n1 $n2 0.2Mb 10ms DropTail
+
+# Bottleneck Queue limit setup
+$ns queue-limit $n1 $n2 5
+
+set udp [new Agent/UDP]
+$udp set fid_ 2
+$ns attach-agent $n0 $udp
+set null [new Agent/Null]
+$ns attach-agent $n2 $null
+$ns connect $udp $null
+
+set cbr [new Application/Traffic/CBR]
+$cbr set packetSize_ 500
+$cbr set interval_ 0.005
+$cbr attach-agent $udp
+
+$ns at 0.1 "$cbr start"
+$ns at 4.5 "$cbr stop"
+$ns at 5.0 "finish"
+$ns run
+
+# --- 2. AWK Drop Calculator (droppackets.awk) ---
+BEGIN {
+    drop_count = 0;
+}
+{
+    action = $1;
+    if (action == "d") {
+        drop_count++;
+    }
+}
+END {
+    printf("Total dropped = %d\n", drop_count);
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- RIGHT PANE: Interactive Simulation Canvas & Controls -->
+    <div class="right-pane">
+        <div class="pane-header">NAM Visual Simulation & Trace Event Logs</div>
+        
+        <div class="simulation-window">
+            <canvas id="namCanvas" width="480" height="220"></canvas>
+        </div>
+
+        <div class="toolbar">
+            <div class="controls">
+                <label>Q-Limit: </label>
+                <input type="number" id="queueLimit" value="5" min="1" max="20" style="width: 35px;" onchange="drawScene()">
+                &nbsp;
+                <label>Link Bandwidth: </label>
+                <select id="bandwidthSelect">
+                    <option value="0.2">0.2 Mbps (Congested)</option>
+                    <option value="0.8">0.8 Mbps (Clear)</option>
+                </select>
+            </div>
+            <div>
+                <button onclick="startSimulation()">Play (▶)</button>
+                <button class="stop" onclick="resetSimulation()">Reset (■)</button>
+            </div>
+        </div>
+
+        <div class="metrics">
+            <div class="metric-box">Time<div class="metric-value" id="simTime">0.00s</div></div>
+            <div class="metric-box">Sent<div class="metric-value" id="statSent">0</div></div>
+            <div class="metric-box">Recv<div class="metric-value" id="statRecv">0</div></div>
+            <div class="metric-box" style="color: #ff4444;">Drops<div class="metric-value" id="statDrop" style="color: #ff4444;">0</div></div>
+        </div>
+
+        <div class="console-output" id="traceConsole">
+            [0.00s] NS2 Trace console initialized. Click Play.<br>
+        </div>
+    </div>
+
+</div>
+
+<!-- Prism.js Core CDN Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+<script>
+    const canvas = document.getElementById("namCanvas");
+    const ctx = canvas.getContext("2d");
+    const consoleBox = document.getElementById("traceConsole");
+
+    let isRunning = false;
+    let animId = null;
+    let time = 0.0;
+    let sent = 0, recv = 0, dropped = 0;
+    let packets = [];
+    let spawnCounter = 0;
+    let routerQueue = [];
+
+    const nodes = {
+        n0: { x: 70, y: 100, label: "n0 (Source)" },
+        n1: { x: 240, y: 100, label: "n1 (Router)" },
+        n2: { x: 410, y: 100, label: "n2 (Dest)" }
+    };
+
+    function logTrace(action, t, from, to) {
+        let color = action === 'd' ? '#ff4444' : (action === '+' ? '#00ffff' : '#00ff00');
+        consoleBox.innerHTML += `<span style="color:${color};">[${t.toFixed(2)}] ${action} node ${from} -> ${to}</span><br>`;
+        consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
+
+    function drawScene() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Links
+        ctx.strokeStyle = "#444";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(nodes.n0.x, nodes.n0.y);
+        ctx.lineTo(nodes.n1.x, nodes.n1.y);
+        ctx.moveTo(nodes.n1.x, nodes.n1.y);
+        ctx.lineTo(nodes.n2.x, nodes.n2.y);
+        ctx.stroke();
+
+        // Draw Nodes
+        for (let key in nodes) {
+            let n = nodes[key];
+            ctx.fillStyle = key === 'n1' ? '#ff8800' : '#0066cc';
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, 16, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#ffffff";
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "10px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText(n.label, n.x, n.y - 22);
+        }
+
+        // Queue Indicator Box
+        let maxQ = parseInt(document.getElementById("queueLimit").value);
+        let currentQueueSize = routerQueue.length;
+        
+        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        ctx.fillRect(nodes.n1.x - 35, nodes.n1.y + 20, 70, 18);
+        ctx.strokeStyle = "#555";
+        ctx.strokeRect(nodes.n1.x - 35, nodes.n1.y + 20, 70, 18);
+
+        ctx.fillStyle = currentQueueSize >= maxQ ? "#ff4444" : "#00ff00";
+        ctx.font = "10px monospace";
+        ctx.fillText(`Q: ${currentQueueSize}/${maxQ}`, nodes.n1.x, nodes.n1.y + 33);
+
+        // Draw Packets (traveling, queue, or falling drops)
+        packets.forEach(p => {
+            if (p.dropped) {
+                // Falling packet drop animation effect
+                ctx.fillStyle = "#ff0000";
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#ffaaaa";
+                ctx.font = "9px monospace";
+                ctx.fillText("DROP", p.x, p.y + 12);
+            } else {
+                ctx.fillStyle = p.state === 'queue' ? "#ffff00" : "#00ffff";
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+    }
+
+    function updateSimulation() {
+        if (!isRunning) return;
+
+        time += 0.05;
+        document.getElementById("simTime").innerText = time.toFixed(2) + "s";
+
+        spawnCounter++;
+        if (spawnCounter % 10 === 0) {
+            packets.push({
+                x: nodes.n0.x,
+                y: nodes.n0.y,
+                speed: 4,
+                state: 'travel_in',
+                dropped: false,
+                vy: 0 // vertical velocity for drop fall
+            });
+            sent++;
+            document.getElementById("statSent").innerText = sent;
+            logTrace('+', time, '0', '1');
+        }
+
+        let maxQ = parseInt(document.getElementById("queueLimit").value);
+        let bwMode = parseFloat(document.getElementById("bandwidthSelect").value);
+        let egressSpeed = bwMode === 0.2 ? 1.0 : 3.5;
+
+        // Process all packets
+        for (let i = packets.length - 1; i >= 0; i--) {
+            let p = packets[i];
+
+            if (p.dropped) {
+                // Gravity fall effect for dropped packets
+                p.vy += 0.4;
+                p.y += p.vy;
+                p.x += 0.5; // Slight drift
+                // Remove packet once it falls off the bottom canvas view
+                if (p.y > canvas.height + 20) {
+                    packets.splice(i, 1);
+                }
+            } else if (p.state === 'travel_in') {
+                p.x += p.speed;
+                if (p.x >= nodes.n1.x) {
+                    p.x = nodes.n1.x;
+                    if (routerQueue.length >= maxQ) {
+                        p.dropped = true;
+                        p.state = 'dropped';
+                        p.vy = -1; // Initial bounce upward before falling
+                        dropped++;
+                        document.getElementById("statDrop").innerText = dropped;
+                        logTrace('d', time, '1', '2');
+                    } else {
+                        p.state = 'queue';
+                        routerQueue.push(p);
+                    }
+                }
+            }
+        }
+
+        // Router FIFO queue transmission
+        if (routerQueue.length > 0) {
+            let frontPacket = routerQueue[0];
+            if (frontPacket.state === 'queue') {
+                let activeOut = packets.filter(pkt => pkt.state === 'travel_out' && !pkt.dropped);
+                if (activeOut.length === 0) {
+                    routerQueue.shift();
+                    frontPacket.state = 'travel_out';
+                    logTrace('-', time, '1', '2');
+                }
+            }
+        }
+
+        // Outbound transit from n1 to n2
+        for (let i = packets.length - 1; i >= 0; i--) {
+            let p = packets[i];
+            if (p.state === 'travel_out' && !p.dropped) {
+                p.x += egressSpeed;
+                if (p.x >= nodes.n2.x) {
+                    recv++;
+                    document.getElementById("statRecv").innerText = recv;
+                    logTrace('r', time, '1', '2');
+                    packets.splice(i, 1);
+                }
+            }
+        }
+
+        drawScene();
+        animId = requestAnimationFrame(updateSimulation);
+    }
+
+    function startSimulation() {
+        if (isRunning) return;
+        isRunning = true;
+        updateSimulation();
+    }
+
+    function resetSimulation() {
+        isRunning = false;
+        cancelAnimationFrame(animId);
+        packets = [];
+        routerQueue = [];
+        time = 0.0;
+        sent = 0; recv = 0; dropped = 0;
+        document.getElementById("simTime").innerText = "0.00s";
+        document.getElementById("statSent").innerText = "0";
+        document.getElementById("statRecv").innerText = "0";
+        document.getElementById("statDrop").innerText = "0";
+        consoleBox.innerHTML = "[0.00s] Simulation reset.<br>";
+        drawScene();
+    }
+
+    window.onload = () => {
+        if (window.Prism) {
+            Prism.highlightAll();
+        }
+        drawScene();
+    };
+</script>
+
+</body>
+</html>

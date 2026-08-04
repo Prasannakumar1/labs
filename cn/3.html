@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS2 TCL Scripting & Network Congestion Simulator</title>
+    <!-- Chart.js for Plotting Congestion Window -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: #181825;
+            padding: 12px 20px;
+            border-bottom: 1px solid #313244;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.2rem;
+            color: #89b4fa;
+        }
+
+        /* Split Screen Layout */
+        .container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 50px);
+        }
+
+        .panel {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+        }
+
+        .left-panel {
+            border-right: 1px solid #313244;
+            background-color: #1e1e2e;
+        }
+
+        .right-panel {
+            background-color: #181825;
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #a6adc8;
+            border-bottom: 2px solid #45475a;
+            padding-bottom: 6px;
+        }
+
+        /* Form Controls */
+        .controls-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            background: #2b2b3b;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: #bac2de;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        input, select {
+            background: #181825;
+            border: 1px solid #45475a;
+            color: #cdd6f4;
+            padding: 6px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #89b4fa;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background: #89b4fa;
+            color: #11111b;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #b4befe;
+        }
+
+        button.stop {
+            background: #f38ba8;
+        }
+
+        button.stop:hover {
+            background: #f5e0dc;
+        }
+
+        /* Code Display Box */
+        pre {
+            background: #11111b;
+            color: #a6e3a1;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.82rem;
+            flex: 1;
+            overflow-x: auto;
+            border: 1px solid #313244;
+            white-space: pre-wrap;
+        }
+
+        /* Visual Canvas */
+        .visual-container {
+            background: #11111b;
+            border-radius: 6px;
+            border: 1px solid #313244;
+            position: relative;
+        }
+
+        canvas#netTopology {
+            width: 100%;
+            height: 200px;
+            display: block;
+        }
+
+        .chart-container {
+            background: #11111b;
+            border-radius: 6px;
+            border: 1px solid #313244;
+            padding: 10px;
+            flex: 1;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>NS2 Ethernet LAN Simulator & TCL Generator</h1>
+        <span>Status: <strong id="simStatus" style="color: #a6e3a1;">Idle</strong></span>
+    </header>
+
+    <div class="container">
+        <!-- LEFT PANEL: CONTROLS & TCL SCRIPT -->
+        <div class="panel left-panel">
+            <div class="panel-title">1. Simulation Parameters & TCL Code</div>
+            
+            <div class="controls-group">
+                <label>
+                    Nodes (N):
+                    <input type="number" id="numNodes" min="4" max="10" value="6" onchange="updateSimParameters()">
+                </label>
+                <label>
+                    Bandwidth (Mbps):
+                    <input type="number" id="bandwidth" value="100" onchange="updateSimParameters()">
+                </label>
+                <label>
+                    Packet Loss Rate (%):
+                    <input type="number" id="lossRate" min="0" max="10" value="2" step="0.5" onchange="updateSimParameters()">
+                </label>
+                <label>
+                    TCP Type:
+                    <select id="tcpType" onchange="updateSimParameters()">
+                        <option value="Reno">TCP Reno</option>
+                        <option value="Tahoe">TCP Tahoe</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="btn-group">
+                <button onclick="startSimulation()">▶ Run Simulation</button>
+                <button class="stop" onclick="resetSimulation()">↺ Reset</button>
+            </div>
+
+            <div class="panel-title">Generated NS2 TCL Script</div>
+            <pre id="tclCode"># TCL script will be dynamically generated here...</pre>
+        </div>
+
+        <!-- RIGHT PANEL: ANIMATION & PLOT -->
+        <div class="panel right-panel">
+            <div class="panel-title">2. LAN Topology Animation</div>
+            <div class="visual-container">
+                <canvas id="netTopology"></canvas>
+            </div>
+
+            <div class="panel-title">3. Live TCP Congestion Window (cwnd) Plot</div>
+            <div class="chart-container">
+                <canvas id="cwndChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Global Variables ---
+        let simInterval = null;
+        let timeStep = 0;
+        let chart;
+        let activeFlows = [];
+
+        // Canvas Setup
+        const topoCanvas = document.getElementById('netTopology');
+        const ctx = topoCanvas.getContext('2d');
+
+        // Initialize Page
+        window.onload = () => {
+            resizeCanvas();
+            initChart();
+            updateSimParameters();
+        };
+
+        function resizeCanvas() {
+            topoCanvas.width = topoCanvas.parentElement.clientWidth;
+            topoCanvas.height = 200;
+        }
+
+        // --- TCL Script Generator ---
+        function updateSimParameters() {
+            const n = parseInt(document.getElementById('numNodes').value);
+            const bw = document.getElementById('bandwidth').value;
+            const tcp = document.getElementById('tcpType').value;
+            
+            let tcl = `# NS2 TCL Script for Ethernet LAN Simulation\n`;
+            tcl += `set ns [new Simulator]\n\n`;
+            tcl += `# Create Trace and NAM files\n`;
+            tcl += `set tf [open out.tr w]\n$ns trace-all $tf\n`;
+            tcl += `set nf [open out.nam w]\n$ns namtrace-all $nf\n\n`;
+            
+            tcl += `# Create ${n} LAN Nodes\n`;
+            tcl += `for {set i 0} {$i < ${n}} {incr i} {\n`;
+            tcl += `    set n($i) [$ns node]\n`;
+            tcl += `}\n\n`;
+
+            tcl += `# Create LAN CSMA Bus Topology\n`;
+            tcl += `set node_list ""\n`;
+            tcl += `for {set i 0} {$i < ${n}} {incr i} { append node_list "$n($i) " }\n`;
+            tcl += `$ns make-lan $node_list ${bw}Mb 10ms LL Queue/DropTail Mac/802_3\n\n`;
+
+            const numFlows = Math.floor(n / 2);
+            tcl += `# Setup ${numFlows} TCP Flows\n`;
+            for(let i=0; i<numFlows; i++) {
+                let src = i;
+                let dst = i + numFlows;
+                tcl += `# Flow ${i+1}: Node ${src} -> Node ${dst}\n`;
+                tcl += `set tcp${i} [new Agent/TCP/${tcp}]\n`;
+                tcl += `$ns attach-agent $n(${src}) $tcp${i}\n`;
+                tcl += `set sink${i} [new Agent/TCPSink]\n`;
+                tcl += `$ns attach-agent $n(${dst}) $sink${i}\n`;
+                tcl += `$ns connect $tcp${i} $sink${i}\n`;
+                tcl += `set ftp${i} [new Application/FTP]\n`;
+                tcl += `$ns attach-agent $tcp${i} $ftp${i}\n`;
+                tcl += `$ns at 0.${i*2 + 1} "$ftp${i} start"\n\n`;
+            }
+
+            tcl += `$ns at 10.0 "finish"\n`;
+            tcl += `proc finish {} {\n    global ns tf nf\n    $ns flush-trace\n    close $tf\n    close $nf\n    exit 0\n}\n$ns run`;
+
+            document.getElementById('tclCode').innerText = tcl;
+            drawTopology();
+        }
+
+        // --- Draw Network Topology ---
+        function drawTopology() {
+            ctx.clearRect(0, 0, topoCanvas.width, topoCanvas.height);
+            const n = parseInt(document.getElementById('numNodes').value);
+            const width = topoCanvas.width;
+            const height = topoCanvas.height;
+
+            // Draw Central Ethernet Bus Line
+            ctx.beginPath();
+            ctx.strokeStyle = '#89b4fa';
+            ctx.lineWidth = 4;
+            ctx.moveTo(50, height / 2);
+            ctx.lineTo(width - 50, height / 2);
+            ctx.stroke();
+
+            // Node Placement
+            const spacing = (width - 100) / (n - 1);
+            for (let i = 0; i < n; i++) {
+                let x = 50 + i * spacing;
+                let y = (i % 2 === 0) ? height / 2 - 50 : height / 2 + 50;
+
+                // Draw Link to Bus
+                ctx.beginPath();
+                ctx.strokeStyle = '#45475a';
+                ctx.lineWidth = 2;
+                ctx.moveTo(x, height / 2);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+
+                // Draw Node Circle
+                ctx.beginPath();
+                ctx.arc(x, y, 16, 0, 2 * Math.PI);
+                ctx.fillStyle = '#313244';
+                ctx.fill();
+                ctx.strokeStyle = '#a6e3a1';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Node Text
+                ctx.fillStyle = '#cdd6f4';
+                ctx.font = '12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`N${i}`, x, y + 4);
+            }
+        }
+
+        // --- Chart.js Setup ---
+        function initChart() {
+            const ctxChart = document.getElementById('cwndChart').getContext('2d');
+            chart = new Chart(ctxChart, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Time (s)', color: '#a6adc8' },
+                            ticks: { color: '#bac2de' },
+                            grid: { color: '#313244' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Congestion Window (cwnd)', color: '#a6adc8' },
+                            ticks: { color: '#bac2de' },
+                            grid: { color: '#313244' },
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#cdd6f4' } }
+                    }
+                }
+            });
+        }
+
+        // --- Simulation Engine ---
+        function startSimulation() {
+            resetSimulation();
+            document.getElementById('simStatus').innerText = "Running...";
+            document.getElementById('simStatus').style.color = "#f9e2af";
+
+            const n = parseInt(document.getElementById('numNodes').value);
+            const numFlows = Math.floor(n / 2);
+            const lossRate = parseFloat(document.getElementById('lossRate').value) / 100;
+            const colors = ['#f38ba8', '#89b4fa', '#a6e3a1', '#fab387', '#cba6f7'];
+
+            // Setup Flow Tracking Objects
+            activeFlows = [];
+            chart.data.datasets = [];
+
+            for (let i = 0; i < numFlows; i++) {
+                activeFlows.push({
+                    id: i,
+                    cwnd: 1,
+                    ssthresh: 16,
+                    color: colors[i % colors.length]
+                });
+
+                chart.data.datasets.push({
+                    label: `Flow ${i + 1} (N${i} → N${i + numFlows})`,
+                    data: [],
+                    borderColor: colors[i % colors.length],
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1
+                });
+            }
+
+            // Real-Time Loop
+            simInterval = setInterval(() => {
+                timeStep += 0.5;
+                chart.data.labels.push(timeStep.toFixed(1));
+
+                activeFlows.forEach((flow) => {
+                    // Simulate Packet Drop Randomness based on Loss Rate
+                    let hasDrop = Math.random() < lossRate;
+
+                    if (hasDrop) {
+                        // Collision/Drop Event -> Reduce cwnd
+                        flow.ssthresh = Math.max(2, Math.floor(flow.cwnd / 2));
+                        flow.cwnd = 1; // TCP Reno Timeout Reset
+                    } else {
+                        // Slow Start vs Congestion Avoidance
+                        if (flow.cwnd < flow.ssthresh) {
+                            flow.cwnd *= 2; // Exponential Growth
+                        } else {
+                            flow.cwnd += 1; // Linear Growth
+                        }
+                    }
+
+                    chart.data.datasets[flow.id].data.push(flow.cwnd);
+                });
+
+                chart.update();
+
+                if (timeStep >= 20) {
+                    clearInterval(simInterval);
+                    document.getElementById('simStatus').innerText = "Completed";
+                    document.getElementById('simStatus').style.color = "#a6e3a1";
+                }
+            }, 500);
+        }
+
+        function resetSimulation() {
+            if (simInterval) clearInterval(simInterval);
+            timeStep = 0;
+            chart.data.labels = [];
+            chart.data.datasets = [];
+            chart.update();
+            document.getElementById('simStatus').innerText = "Idle";
+            document.getElementById('simStatus').style.color = "#a6e3a1";
+            drawTopology();
+        }
+    </script>
+</body>
+</html>

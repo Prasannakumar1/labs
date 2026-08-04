@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6-Node Network Simulation - Side-by-Side View</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 15px;
+            color: #333;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h2 { margin: 0 0 10px 0; color: #2c3e50; font-size: 18px; }
+        
+        .main-container {
+            display: flex;
+            gap: 15px;
+            flex: 1;
+            min-height: 0; /* Prevents overflow */
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        /* Left Side: Code Viewer */
+        .left-panel {
+            flex: 1.2;
+        }
+        .code-box {
+            flex: 1;
+            background: #1e1e1e;
+            color: #dcdcdc;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 12px;
+            border-radius: 4px;
+            overflow: auto;
+            white-space: pre;
+            margin: 0;
+        }
+
+        /* Right Side: Simulation View */
+        .right-panel {
+            flex: 1;
+            align-items: center;
+        }
+        .canvas-container {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        canvas {
+            background: #ffffff;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+        }
+
+        .stats-controls-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .sub-box {
+            flex: 1;
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        .sub-box div { margin: 3px 0; }
+        .drop-count { color: #c0392b; font-weight: bold; }
+        .success-count { color: #27ae60; font-weight: bold; }
+
+        .controls {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        button {
+            flex: 1;
+            padding: 6px;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+        #startBtn { background-color: #27ae60; }
+        #stopBtn { background-color: #c0392b; }
+
+        .log-box {
+            flex: 1;
+            background: #111;
+            color: #00ffcc;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            overflow-y: auto;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>6-Node Network Topology & Congestion Simulation</h2>
+
+    <div class="main-container">
+        <!-- LEFT SIDE: Code View -->
+        <div class="panel left-panel">
+            <h2>Simulation Source Code (HTML / JS)</h2>
+            <pre class="code-box" id="codeDisplay">Loading code...</pre>
+        </div>
+
+        <!-- RIGHT SIDE: Simulation View -->
+        <div class="panel right-panel">
+            <h2>Live Simulation & Visualization</h2>
+            
+            <div class="canvas-container">
+                <canvas id="netCanvas" width="420" height="200"></canvas>
+            </div>
+
+            <div class="stats-controls-row">
+                <div class="sub-box">
+                    <div>Total Sent: <span id="lblTotal">0</span></div>
+                    <div>Successful: <span id="lblSuccess" class="success-count">0</span></div>
+                    <div>Drops (Congestion): <span id="lblDrops" class="drop-count">0</span></div>
+                </div>
+                <div class="sub-box">
+                    <div>Loss Rate: <span id="lblLoss" class="drop-count">0.00%</span></div>
+                    <div class="controls">
+                        <button id="startBtn" onclick="startSimulation()">Start</button>
+                        <button id="stopBtn" onclick="stopSimulation()">Pause</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 2px;">Event Terminal Log:</div>
+            <div id="logBox" class="log-box">Simulation ready...<br></div>
+        </div>
+    </div>
+
+<script>
+    // Auto-populate the left-side code box with this script's contents for visualization
+    document.getElementById('codeDisplay').textContent = document.documentElement.outerHTML;
+
+    const canvas = document.getElementById('netCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // 6 Nodes Coordinates Layout
+    const nodes = {
+        'Node1': { x: 50, y: 100 },
+        'Node2': { x: 130, y: 50 },
+        'Node3': { x: 130, y: 150 },
+        'Node4': { x: 250, y: 50 },
+        'Node5': { x: 250, y: 150 },
+        'Node6': { x: 370, y: 100 }
+    };
+
+    const links = [
+        { from: 'Node1', to: 'Node2', queue: 0, maxQueue: 2 },
+        { from: 'Node1', to: 'Node3', queue: 0, maxQueue: 2 },
+        { from: 'Node2', to: 'Node4', queue: 0, maxQueue: 2 },
+        { from: 'Node3', to: 'Node5', queue: 0, maxQueue: 2 },
+        { from: 'Node4', to: 'Node6', queue: 0, maxQueue: 2 },
+        { from: 'Node5', to: 'Node6', queue: 0, maxQueue: 2 },
+    ];
+
+    let simulationInterval = null;
+    let stats = { total: 0, success: 0, drops: 0 };
+    let activePackets = [];
+
+    function logMessage(msg, isError = false) {
+        const box = document.getElementById('logBox');
+        const color = isError ? '#ff5555' : '#00ffcc';
+        box.innerHTML += `<span style="color: ${color}">[${new Date().toLocaleTimeString()}] ${msg}</span><br>`;
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function updateStats() {
+        document.getElementById('lblTotal').innerText = stats.total;
+        document.getElementById('lblSuccess').innerText = stats.success;
+        document.getElementById('lblDrops').innerText = stats.drops;
+        let rate = stats.total > 0 ? ((stats.drops / stats.total) * 100).toFixed(2) : '0.00';
+        document.getElementById('lblLoss').innerText = rate + '%';
+    }
+
+    function drawNetwork() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        links.forEach(link => {
+            let n1 = nodes[link.from];
+            let n2 = nodes[link.to];
+            ctx.beginPath();
+            ctx.moveTo(n1.x, n1.y);
+            ctx.lineTo(n2.x, n2.y);
+            ctx.strokeStyle = link.queue >= link.maxQueue ? '#e74c3c' : '#bdc3c7';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            let midX = (n1.x + n2.x) / 2;
+            let midY = (n1.y + n2.y) / 2;
+            ctx.fillStyle = '#7f8c8d';
+            ctx.font = '9px Arial';
+            ctx.fillText(`Q:${link.queue}/${link.maxQueue}`, midX - 12, midY - 4);
+        });
+
+        for (let key in nodes) {
+            let node = nodes[key];
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 14, 0, 2 * Math.PI);
+            ctx.fillStyle = '#3498db';
+            ctx.fill();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#2980b9';
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 9px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(key.replace('Node', 'N'), node.x, node.y);
+        }
+
+        activePackets.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#f1c40f';
+            ctx.fill();
+        });
+    }
+
+    function generatePacket() {
+        stats.total++;
+        const paths = [
+            ['Node1', 'Node2', 'Node4', 'Node6'],
+            ['Node1', 'Node3', 'Node5', 'Node6']
+        ];
+        let path = paths[Math.floor(Math.random() * paths.length)];
+        
+        activePackets.push({
+            id: stats.total,
+            path: path,
+            currentHop: 0,
+            x: nodes[path[0]].x,
+            y: nodes[path[0]].y,
+            targetX: nodes[path[1]].x,
+            targetY: nodes[path[1]].y
+        });
+        
+        logMessage(`PING #${stats.total} sent via ${path[0]}->...->${path[path.length-1]}`);
+    }
+
+    function updateSimulation() {
+        links.forEach(l => { if(l.queue > 0 && Math.random() > 0.5) l.queue--; });
+
+        for (let i = activePackets.length - 1; i >= 0; i--) {
+            let p = activePackets[i];
+            p.x += (p.targetX - p.x) * 0.15;
+            p.y += (p.targetY - p.y) * 0.15;
+
+            if (Math.abs(p.x - p.targetX) < 2 && Math.abs(p.y - p.targetY) < 2) {
+                p.currentHop++;
+                if (p.currentHop < p.path.length - 1) {
+                    let fromNode = p.path[p.currentHop];
+                    let toNode = p.path[p.currentHop + 1];
+                    let link = links.find(l => l.from === fromNode && l.to === toNode);
+
+                    if (link) {
+                        if (link.queue >= link.maxQueue) {
+                            stats.drops++;
+                            logMessage(`Congestion Drop: PING #${p.id} dropped at link ${fromNode}->${toNode}`, true);
+                            activePackets.splice(i, 1);
+                            updateStats();
+                            continue;
+                        } else {
+                            link.queue++;
+                        }
+                    }
+                    p.targetX = nodes[toNode].x;
+                    p.targetY = nodes[toNode].y;
+                } else {
+                    stats.success++;
+                    logMessage(`PING #${p.id} reached destination Node6.`);
+                    activePackets.splice(i, 1);
+                }
+            }
+        }
+
+        if (Math.random() < 0.4) generatePacket();
+
+        updateStats();
+        drawNetwork();
+    }
+
+    function startSimulation() {
+        if (simulationInterval) return;
+        logMessage("Simulation started.");
+        simulationInterval = setInterval(updateSimulation, 60);
+    }
+
+    function stopSimulation() {
+        clearInterval(simulationInterval);
+        simulationInterval = null;
+        logMessage("Simulation paused.");
+    }
+
+    drawNetwork();
+</script>
+
+</body>
+</html>

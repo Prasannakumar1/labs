@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP/IP Socket File Transfer - System Image Simulation</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 12px 20px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            height: 50px;
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            color: #0d6efd;
+            font-weight: 700;
+        }
+
+        /* Split Screen Container */
+        .container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 50px);
+            width: 100vw;
+        }
+
+        .panel {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            border-right: 2px solid #e9ecef;
+            background-color: #ffffff;
+        }
+
+        .right-panel {
+            background-color: #f8f9fa;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+            height: 35px;
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #343a40;
+            text-transform: uppercase;
+        }
+
+        /* Tab Switcher Buttons */
+        .tab-bar {
+            display: flex;
+            gap: 5px;
+        }
+
+        .tab-btn {
+            background: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .tab-btn.active {
+            background: #0d6efd;
+            color: #ffffff;
+            border-color: #0d6efd;
+        }
+
+        /* Dedicated Scrollable Code Box */
+        .code-scroll-box {
+            flex: 1;
+            border: 1px solid #ced4da;
+            background: #ffffff;
+            border-radius: 6px;
+            overflow-y: scroll !important;
+            overflow-x: auto;
+            position: relative;
+            max-height: calc(100vh - 120px);
+            padding: 10px 0;
+        }
+
+        .code-line {
+            display: block;
+            padding: 2px 15px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            white-space: pre;
+            color: #24292e;
+        }
+
+        /* Syntax Color Tokens */
+        .kwd { color: #d73a49; font-weight: bold; }
+        .str { color: #032f62; }
+        .cls { color: #6f42c1; font-weight: bold; }
+        .com { color: #6a737d; font-style: italic; }
+
+        /* 🟡 VIVID HIGH-CONTRAST YELLOW HIGHLIGHTER */
+        .highlight-yellow {
+            background-color: #ffff00 !important;
+            color: #000000 !important;
+            border-left: 6px solid #d4af37 !important;
+            font-weight: bold !important;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        .highlight-yellow span {
+            color: #000000 !important;
+        }
+
+        /* Visual Animation Canvas Box */
+        .canvas-box {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            height: 190px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Interactive Controls */
+        .controls {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            padding: 12px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: #495057;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        input[type="text"], select {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            color: #212529;
+            padding: 8px;
+            border-radius: 4px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            background: #0d6efd;
+            color: #ffffff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.82rem;
+        }
+
+        button:hover { background: #0b5ed7; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5c636a; }
+        .btn-ide { background: #198754; }
+        .btn-ide:hover { background: #157347; }
+
+        /* Scrollable Terminal Output Box */
+        .terminal {
+            background: #1e1e1e;
+            border: 1px solid #ced4da;
+            color: #00ff66;
+            padding: 12px;
+            font-size: 0.85rem;
+            flex: 1;
+            overflow-y: scroll !important;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            max-height: calc(100vh - 420px);
+        }
+
+        .term-err { color: #ff6b6b; }
+        .term-info { color: #4dabf7; }
+        .term-head { color: #ffd43b; }
+        .term-ack { color: #a6e3a1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>TCP/IP SOCKET PROGRAMMING // VISUAL FILE TRANSFER SIMULATOR</h1>
+        <span style="color: #6c757d; font-weight: 600;">Client - Server Architecture (Port 4000)</span>
+    </header>
+
+    <div class="container">
+        <!-- LEFT PANEL: FULLY SCROLLABLE SOURCE CODE WITH SERVER/CLIENT TABS -->
+        <div class="panel left-panel">
+            <div class="panel-header">
+                <div class="tab-bar">
+                    <button class="tab-btn active" id="tabServer" onclick="switchTab('server')">Server.java</button>
+                    <button class="tab-btn" id="tabClient" onclick="switchTab('client')">Client.java</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="copyCode()">📋 Copy Code</button>
+                    <button class="btn btn-ide" onclick="openExternalCompiler()">External IDE ↗</button>
+                </div>
+            </div>
+            
+            <!-- Scrollable Server Code Box -->
+            <div class="code-scroll-box" id="serverContainer">
+                <span class="code-line" id="s_line1"><span class="kwd">import</span> java.io.*;</span>
+                <span class="code-line" id="s_line2"><span class="kwd">import</span> java.net.*;</span>
+                <span class="code-line" id="s_line3"></span>
+                <span class="code-line" id="s_line4"><span class="kwd">public class</span> <span class="cls">Server</span> {</span>
+                <span class="code-line" id="s_line5">    <span class="kwd">public static void</span> main(String[] args) <span class="kwd">throws</span> IOException {</span>
+                <span class="code-line" id="s_line6">        <span class="com">// 1. Bind ServerSocket to Port 4000</span></span>
+                <span class="code-line" id="s_line7">        ServerSocket serverSocket = <span class="kwd">new</span> ServerSocket(4000);</span>
+                <span class="code-line" id="s_line8">        System.out.println(<span class="str">"Server listening on port 4000..."</span>);</span>
+                <span class="code-line" id="s_line9"></span>
+                <span class="code-line" id="s_line10">        <span class="com">// 2. Accept incoming client connection</span></span>
+                <span class="code-line" id="s_line11">        Socket socket = serverSocket.accept();</span>
+                <span class="code-line" id="s_line12">        System.out.println(<span class="str">"Client connected successfully."</span>);</span>
+                <span class="code-line" id="s_line13"></span>
+                <span class="code-line" id="s_line14">        <span class="com">// 3. Setup Input stream to receive filename from Client</span></span>
+                <span class="code-line" id="s_line15">        BufferedReader in = <span class="kwd">new</span> BufferedReader(<span class="kwd">new</span> InputStreamReader(socket.getInputStream()));</span>
+                <span class="code-line" id="s_line16">        String fileName = in.readLine();</span>
+                <span class="code-line" id="s_line17">        System.out.println(<span class="str">"Requested file: "</span> + fileName);</span>
+                <span class="code-line" id="s_line18"></span>
+                <span class="code-line" id="s_line19">        <span class="com">// 4. Setup Output stream to send file contents to Client</span></span>
+                <span class="code-line" id="s_line20">        PrintWriter out = <span class="kwd">new</span> PrintWriter(socket.getOutputStream(), <span class="kwd">true</span>);</span>
+                <span class="code-line" id="s_line21">        File file = <span class="kwd">new</span> File(fileName);</span>
+                <span class="code-line" id="s_line22"></span>
+                <span class="code-line" id="s_line23">        <span class="kwd">if</span> (file.exists() &amp;&amp; !file.isDirectory()) {</span>
+                <span class="code-line" id="s_line24">            BufferedReader fileReader = <span class="kwd">new</span> BufferedReader(<span class="kwd">new</span> FileReader(file));</span>
+                <span class="code-line" id="s_line25">            String line;</span>
+                <span class="code-line" id="s_line26">            <span class="kwd">while</span> ((line = fileReader.readLine()) != <span class="kwd">null</span>) {</span>
+                <span class="code-line" id="s_line27">                out.println(line); <span class="com">// Send content line by line</span></span>
+                <span class="code-line" id="s_line28">            }</span>
+                <span class="code-line" id="s_line29">            fileReader.close();</span>
+                <span class="code-line" id="s_line30">        } <span class="kwd">else</span> {</span>
+                <span class="code-line" id="s_line31">            out.println(<span class="str">"ERROR: File Not Found on Server!"</span>);</span>
+                <span class="code-line" id="s_line32">        }</span>
+                <span class="code-line" id="s_line33"></span>
+                <span class="code-line" id="s_line34">        <span class="com">// 5. Close Sockets</span></span>
+                <span class="code-line" id="s_line35">        socket.close();</span>
+                <span class="code-line" id="s_line36">        serverSocket.close();</span>
+                <span class="code-line" id="s_line37">    }</span>
+                <span class="code-line" id="s_line38">}</span>
+            </div>
+
+            <!-- Scrollable Client Code Box (Hidden by default) -->
+            <div class="code-scroll-box" id="clientContainer" style="display: none;">
+                <span class="code-line" id="c_line1"><span class="kwd">import</span> java.io.*;</span>
+                <span class="code-line" id="c_line2"><span class="kwd">import</span> java.net.*;</span>
+                <span class="code-line" id="c_line3"><span class="kwd">import</span> java.util.Scanner;</span>
+                <span class="code-line" id="c_line4"></span>
+                <span class="code-line" id="c_line5"><span class="kwd">public class</span> <span class="cls">Client</span> {</span>
+                <span class="code-line" id="c_line6">    <span class="kwd">public static void</span> main(String[] args) <span class="kwd">throws</span> IOException {</span>
+                <span class="code-line" id="c_line7">        <span class="com">// 1. Connect to Server running on localhost:4000</span></span>
+                <span class="code-line" id="c_line8">        Socket socket = <span class="kwd">new</span> Socket(<span class="str">"127.0.0.1"</span>, 4000);</span>
+                <span class="code-line" id="c_line9">        System.out.println(<span class="str">"Connected to TCP Server."</span>);</span>
+                <span class="code-line" id="c_line10"></span>
+                <span class="code-line" id="c_line11">        <span class="com">// 2. Read target filename from User</span></span>
+                <span class="code-line" id="c_line12">        Scanner scanner = <span class="kwd">new</span> Scanner(System.in);</span>
+                <span class="code-line" id="c_line13">        System.out.print(<span class="str">"Enter file name to request: "</span>);</span>
+                <span class="code-line" id="c_line14">        String fileName = scanner.nextLine();</span>
+                <span class="code-line" id="c_line15"></span>
+                <span class="code-line" id="c_line16">        <span class="com">// 3. Send requested filename to Server</span></span>
+                <span class="code-line" id="c_line17">        PrintWriter out = <span class="kwd">new</span> PrintWriter(socket.getOutputStream(), <span class="kwd">true</span>);</span>
+                <span class="code-line" id="c_line18">        out.println(fileName);</span>
+                <span class="code-line" id="c_line19"></span>
+                <span class="code-line" id="c_line20">        <span class="com">// 4. Read file content stream sent back by Server</span></span>
+                <span class="code-line" id="c_line21">        BufferedReader in = <span class="kwd">new</span> BufferedReader(<span class="kwd">new</span> InputStreamReader(socket.getInputStream()));</span>
+                <span class="code-line" id="c_line22">        String line;</span>
+                <span class="code-line" id="c_line23">        System.out.println(<span class="str">"\n--- Received File Content ---"</span>);</span>
+                <span class="code-line" id="c_line24">        <span class="kwd">while</span> ((line = in.readLine()) != <span class="kwd">null</span>) {</span>
+                <span class="code-line" id="c_line25">            System.out.println(line);</span>
+                <span class="code-line" id="c_line26">        }</span>
+                <span class="code-line" id="c_line27"></span>
+                <span class="code-line" id="c_line28">        <span class="com">// 5. Cleanup Resources</span></span>
+                <span class="code-line" id="c_line29">        socket.close();</span>
+                <span class="code-line" id="c_line30">        scanner.close();</span>
+                <span class="code-line" id="c_line31">    }</span>
+                <span class="code-line" id="c_line32">}</span>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: ONLINE COMPILER CONSOLE & ANIMATION -->
+        <div class="panel right-panel">
+            <div class="panel-header">
+                <span class="panel-title">Visual Simulation &amp; Console</span>
+                <div class="btn-group">
+                    <button onclick="startAnimatedRun()">▶ Animated Run</button>
+                    <button class="btn-secondary" onclick="runCompiler()">⚡ Instant Run</button>
+                    <button class="btn btn-ide" onclick="openExternalCompiler()">External IDE ↗</button>
+                </div>
+            </div>
+
+            <!-- Visual Animation Canvas -->
+            <div class="canvas-box">
+                <canvas id="socketCanvas" width="450" height="190"></canvas>
+            </div>
+
+            <div class="controls">
+                <div style="display: flex; gap: 10px;">
+                    <label style="flex: 1;">
+                        Requested File Name:
+                        <select id="fileSelect">
+                            <option value="sample.txt">sample.txt (File Exists)</option>
+                            <option value="data.csv">data.csv (File Exists)</option>
+                            <option value="missing.txt">missing.txt (File Not Found)</option>
+                        </select>
+                    </label>
+                    <label style="width: 150px;">
+                        Animation Speed:
+                        <select id="animSpeed">
+                            <option value="700">Normal (700ms)</option>
+                            <option value="400">Fast (400ms)</option>
+                            <option value="1200">Slow (1.2s)</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel-title" style="margin-top: 2px;">Standard Output (stdout)</div>
+            
+            <div class="terminal" id="console">
+&gt; Environment Initialized.
+&gt; Click "ANIMATED RUN" to watch visual socket file transfer simulation with yellow line highlighting.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('socketCanvas');
+        const ctx = canvas.getContext('2d');
+
+        window.onload = () => {
+            drawTCPSimulation("IDLE", "");
+        };
+
+        let currentTab = 'server';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tabServer').classList.toggle('active', tab === 'server');
+            document.getElementById('tabClient').classList.toggle('active', tab === 'client');
+            document.getElementById('serverContainer').style.display = tab === 'server' ? 'block' : 'none';
+            document.getElementById('clientContainer').style.display = tab === 'client' ? 'block' : 'none';
+        }
+
+        function copyCode() {
+            const containerId = currentTab === 'server' ? 'serverContainer' : 'clientContainer';
+            const codeText = document.getElementById(containerId).innerText;
+            navigator.clipboard.writeText(codeText);
+            alert((currentTab === 'server' ? "Server.java" : "Client.java") + " copied to clipboard!");
+        }
+
+        function openExternalCompiler() {
+            window.open('https://www.jdoodle.com/online-java-compiler/', '_blank');
+        }
+
+        function highlightYellowLine(prefix, lineNum) {
+            document.querySelectorAll('.highlight-yellow').forEach(el => el.classList.remove('highlight-yellow'));
+            
+            const targetLine = document.getElementById(`${prefix}_line${lineNum}`);
+            if (targetLine) {
+                targetLine.classList.add('highlight-yellow');
+                targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // 2D Canvas Renderer Drawing Real System Hardware (Server Rack + Desktop Client PC)
+        function drawTCPSimulation(stage, fileName) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // ==========================================
+            // 1. DRAW SERVER RACK GRAPHIC (LEFT)
+            // ==========================================
+            const sX = 20, sY = 25, sW = 85, sH = 120;
+            
+            // Outer Metal Cabinet
+            ctx.fillStyle = '#2b3035';
+            ctx.fillRect(sX, sY, sW, sH);
+            ctx.strokeStyle = '#0d6efd';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(sX, sY, sW, sH);
+
+            // Server Blade Units (Drive Bays)
+            for (let i = 0; i < 4; i++) {
+                let unitY = sY + 10 + (i * 26);
+                ctx.fillStyle = '#1c1f23';
+                ctx.fillRect(sX + 6, unitY, sW - 12, 20);
+                
+                // Server Drive Slots
+                ctx.fillStyle = '#495057';
+                ctx.fillRect(sX + 12, unitY + 6, 25, 8);
+                
+                // LED Indicators
+                ctx.fillStyle = (stage !== "IDLE" && i % 2 === 0) ? '#00ff66' : '#6c757d';
+                ctx.beginPath();
+                ctx.arc(sX + sW - 20, unitY + 10, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = (stage === "LOOKUP" && i === 1) ? '#ffc107' : '#0d6efd';
+                ctx.beginPath();
+                ctx.arc(sX + sW - 12, unitY + 10, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Server Label
+            ctx.fillStyle = '#212529';
+            ctx.font = 'bold 11px Consolas';
+            ctx.fillText('SERVER RACK', sX + 5, sY + sH + 18);
+            ctx.fillStyle = '#6c757d';
+            ctx.font = '10px Consolas';
+            ctx.fillText('Port :4000', sX + 15, sY + sH + 30);
+
+
+            // ==========================================
+            // 2. DRAW CLIENT WORKSTATION PC GRAPHIC (RIGHT)
+            // ==========================================
+            const cX = 330, cY = 30, cW = 95, cH = 75;
+
+            // Monitor Outer Bezel
+            ctx.fillStyle = '#212529';
+            ctx.fillRect(cX, cY, cW, cH);
+            
+            // Monitor Screen
+            ctx.fillStyle = (stage === "REQ_SENT" || stage === "STREAMING") ? '#112233' : '#1e1e1e';
+            ctx.fillRect(cX + 5, cY + 5, cW - 10, cH - 10);
+            
+            // Screen Graphics Lines
+            ctx.fillStyle = '#00ff66';
+            ctx.fillRect(cX + 12, cY + 15, 30, 3);
+            ctx.fillStyle = '#4dabf7';
+            ctx.fillRect(cX + 12, cY + 23, 50, 3);
+            ctx.fillRect(cX + 12, cY + 31, 40, 3);
+
+            // Stand & Base
+            ctx.fillStyle = '#495057';
+            ctx.fillRect(cX + (cW / 2) - 8, cY + cH, 16, 15); // Stand neck
+            ctx.fillRect(cX + (cW / 2) - 25, cY + cH + 15, 50, 6); // Base foot
+
+            // Keyboard Graphic
+            ctx.fillStyle = '#ced4da';
+            ctx.fillRect(cX + (cW / 2) - 30, cY + cH + 24, 60, 8);
+
+            // Client Label
+            ctx.fillStyle = '#212529';
+            ctx.font = 'bold 11px Consolas';
+            ctx.fillText('CLIENT PC', cX + 18, cY + cH + 48);
+
+
+            // ==========================================
+            // 3. DRAW TCP NETWORK PIPE CHANNEL
+            // ==========================================
+            ctx.strokeStyle = '#adb5bd';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(sX + sW, 90);
+            ctx.lineTo(cX, 90);
+            ctx.stroke();
+
+
+            // ==========================================
+            // 4. STAGE ANIMATIONS & MOVING DATA PACKETS
+            // ==========================================
+            if (stage === "SERVER_LISTEN") {
+                ctx.fillStyle = '#0d6efd';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText("🎧 ServerSocket listening on Port 4000...", 120, 45);
+            }
+            else if (stage === "CLIENT_CONNECT") {
+                ctx.fillStyle = '#198754';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText("🔗 Connecting 127.0.0.1:4000 -> Handshake OK", 115, 45);
+            }
+            else if (stage === "REQ_SENT") {
+                // Moving Request Packet (Client -> Server)
+                ctx.fillStyle = '#ffc107';
+                ctx.fillRect(210, 72, 85, 35);
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 10px Consolas';
+                ctx.fillText(`REQ: ${fileName}`, 215, 93);
+
+                ctx.fillStyle = '#343a40';
+                ctx.font = '11px Consolas';
+                ctx.fillText("📤 Client sending requested filename...", 125, 155);
+            }
+            else if (stage === "LOOKUP") {
+                // Disk activity graphic on Server
+                ctx.fillStyle = '#ffc107';
+                ctx.fillRect(sX + 12, sY + 36, 25, 8); // Flashing disk bay
+
+                ctx.fillStyle = '#0d6efd';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText(`🔍 Server searching disk for '${fileName}'...`, 115, 155);
+            }
+            else if (stage === "STREAMING") {
+                // Moving Stream Packet (Server -> Client)
+                ctx.fillStyle = '#198754';
+                ctx.fillRect(160, 72, 95, 35);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 10px Consolas';
+                ctx.fillText("STREAM [Data]", 165, 93);
+
+                ctx.fillStyle = '#198754';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText("📥 File found! Streaming payload back to Client...", 110, 155);
+            }
+            else if (stage === "ERROR_NOT_FOUND") {
+                ctx.fillStyle = '#dc3545';
+                ctx.fillRect(160, 72, 95, 35);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 10px Consolas';
+                ctx.fillText("ERR: 404", 180, 93);
+
+                ctx.fillStyle = '#dc3545';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText("❌ Error: Requested file not found on server!", 115, 155);
+            }
+            else if (stage === "COMPLETE") {
+                ctx.fillStyle = '#198754';
+                ctx.font = 'bold 12px Consolas';
+                ctx.fillText("🎉 TCP File Transfer Session Terminated!", 120, 155);
+            }
+        }
+
+        const serverFiles = {
+            'sample.txt': "Hello! This is a sample file content.\nTCP/IP Socket File Transfer Successful.\nLine 3: End of file.",
+            'data.csv': "ID,Name,Role\n101,Rudrappa,Developer\n102,Mahesh,Network Engineer"
+        };
+
+        async function startAnimatedRun() {
+            const consoleEl = document.getElementById('console');
+            const selectedFile = document.getElementById('fileSelect').value;
+            const delayMs = parseInt(document.getElementById('animSpeed').value);
+
+            consoleEl.innerHTML = '';
+            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+            log("<span class='term-head'>[COMPILING] Server.java & Client.java...</span>");
+            log("<span class='term-info'>[BUILD SUCCESS] 0 Warnings, 0 Errors.</span>\n");
+            drawTCPSimulation("IDLE", selectedFile);
+            await sleep(delayMs);
+
+            // Step 1: Server Initialization
+            switchTab('server');
+            highlightYellowLine('s', 7);
+            log("<span class='term-head'>[SERVER] ServerSocket listening on port 4000...</span>");
+            drawTCPSimulation("SERVER_LISTEN", selectedFile);
+            await sleep(delayMs);
+
+            // Step 2: Client Connection
+            switchTab('client');
+            highlightYellowLine('c', 8);
+            log("[CLIENT] Connecting to 127.0.0.1:4000...");
+            drawTCPSimulation("CLIENT_CONNECT", selectedFile);
+            await sleep(delayMs);
+
+            switchTab('server');
+            highlightYellowLine('s', 11);
+            log("[SERVER] Connection accepted from Client socket.", 'term-ack');
+            await sleep(delayMs);
+
+            // Step 3: Client Sends File Request
+            switchTab('client');
+            highlightYellowLine('c', 18);
+            log(`[CLIENT] Sending requested file name: "${selectedFile}"`);
+            drawTCPSimulation("REQ_SENT", selectedFile);
+            await sleep(delayMs);
+
+            // Step 4: Server Reads Request & Looks up File
+            switchTab('server');
+            highlightYellowLine('s', 16);
+            log(`[SERVER] Received request for file: "${selectedFile}"`);
+            drawTCPSimulation("LOOKUP", selectedFile);
+            await sleep(delayMs);
+
+            highlightYellowLine('s', 23);
+            log("[SERVER] Checking local file system repository...");
+            await sleep(delayMs);
+
+            // Step 5: Server Responds & Streams Data
+            if (serverFiles[selectedFile]) {
+                highlightYellowLine('s', 27);
+                log("[SERVER] File found! Streaming file payload back to Client...", 'term-ack');
+                drawTCPSimulation("STREAMING", selectedFile);
+                await sleep(delayMs);
+
+                switchTab('client');
+                highlightYellowLine('c', 24);
+                log("\n<span class='term-ack'>--- [CLIENT RECEIVED FILE CONTENT] ---</span>");
+                log(serverFiles[selectedFile]);
+                await sleep(delayMs);
+                
+                log("\n>>> STATUS: FILE TRANSFER COMPLETED SUCCESSFULLY", 'term-ack');
+            } else {
+                highlightYellowLine('s', 31);
+                log("[SERVER] ❌ File Not Found! Returning error message.", 'term-err');
+                drawTCPSimulation("ERROR_NOT_FOUND", selectedFile);
+                await sleep(delayMs);
+
+                switchTab('client');
+                highlightYellowLine('c', 24);
+                log("\n<span class='term-err'>--- [CLIENT RECEIVED RESPONSE] ---</span>");
+                log("ERROR: File Not Found on Server!", 'term-err');
+                await sleep(delayMs);
+
+                log("\n>>> STATUS: FILE REQUEST FAILED (NOT FOUND)", 'term-err');
+            }
+
+            // Cleanup
+            switchTab('server');
+            highlightYellowLine('s', 35);
+            log("\n[SERVER & CLIENT] Sockets closed. Session terminated.");
+            drawTCPSimulation("COMPLETE", selectedFile);
+        }
+
+        function runCompiler() {
+            const consoleEl = document.getElementById('console');
+            const selectedFile = document.getElementById('fileSelect').value;
+
+            consoleEl.innerHTML = '';
+            
+            log("<span class='term-head'>[COMPILING] Server.java & Client.java...</span>");
+            log("<span class='term-info'>[BUILD SUCCESS] 0 Warnings, 0 Errors.</span>\n");
+
+            log("[SERVER] ServerSocket listening on port 4000...");
+            log("[CLIENT] Connected to 127.0.0.1:4000");
+            log(`[CLIENT -> SERVER] Requesting file: "${selectedFile}"`);
+
+            if (serverFiles[selectedFile]) {
+                log("[SERVER] File Found. Streaming content to client...");
+                log("\n<span class='term-ack'>--- [CLIENT RECEIVED FILE CONTENT] ---</span>");
+                log(serverFiles[selectedFile]);
+                log("\n>>> STATUS: FILE TRANSFER COMPLETED SUCCESSFULLY", 'term-ack');
+            } else {
+                log("[SERVER] ❌ File Not Found.");
+                log("\n<span class='term-err'>--- [CLIENT RECEIVED RESPONSE] ---</span>");
+                log("ERROR: File Not Found on Server!", 'term-err');
+                log("\n>>> STATUS: FILE REQUEST FAILED (NOT FOUND)", 'term-err');
+            }
+
+            drawTCPSimulation("COMPLETE", selectedFile);
+        }
+
+        function log(msg, cls = "") {
+            const consoleEl = document.getElementById('console');
+            consoleEl.innerHTML += `<div class="${cls}">${msg}</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+    </script>
+</body>
+</html>

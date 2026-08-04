@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRC-CCITT (16-bit) Error Detection - Visual Simulator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 12px 20px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            height: 50px;
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            color: #0d6efd;
+            font-weight: 700;
+        }
+
+        /* Split Screen Container */
+        .container {
+            display: flex;
+            height: calc(100vh - 50px);
+            width: 100vw;
+        }
+
+        .panel {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            border-right: 2px solid #e9ecef;
+            background-color: #ffffff;
+        }
+
+        .right-panel {
+            background-color: #f8f9fa;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+            height: 35px;
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #343a40;
+            text-transform: uppercase;
+        }
+
+        /* Dedicated Scrollable Code Box */
+        .code-scroll-box {
+            flex: 1;
+            border: 1px solid #ced4da;
+            background: #ffffff;
+            border-radius: 6px;
+            overflow-y: scroll !important; /* Force vertical scrollbar */
+            overflow-x: auto;
+            position: relative;
+            max-height: calc(100vh - 120px);
+            padding: 10px 0;
+        }
+
+        .code-line {
+            display: block;
+            padding: 2px 15px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            white-space: pre;
+            color: #24292e;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Syntax Color Tokens */
+        .kwd { color: #d73a49; font-weight: bold; } /* Keywords */
+        .str { color: #032f62; } /* Strings */
+        .cls { color: #6f42c1; font-weight: bold; } /* Classes */
+        .com { color: #6a737d; font-style: italic; } /* Comments */
+
+        /* 🟡 VIVID HIGH-CONTRAST YELLOW HIGHLIGHTER FOR LINE-BY-LINE EXECUTION */
+        .highlight-yellow {
+            background-color: #ffff00 !important; /* Pure Yellow */
+            color: #000000 !important;           /* Black Text for maximum contrast */
+            border-left: 6px solid #d4af37 !important; /* Gold Left Indicator Bar */
+            font-weight: bold !important;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.15);
+        }
+
+        .highlight-yellow span {
+            color: #000000 !important; /* Keeps code tokens black when line is highlighted */
+        }
+
+        /* Visual Animation Canvas Box */
+        .canvas-box {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            height: 180px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Interactive Controls */
+        .controls {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            padding: 12px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: #495057;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        input[type="text"], select {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            color: #212529;
+            padding: 8px;
+            border-radius: 4px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            background: #0d6efd;
+            color: #ffffff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.82rem;
+        }
+
+        button:hover {
+            background: #0b5ed7;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-secondary:hover {
+            background: #5c636a;
+        }
+
+        .btn-ide {
+            background: #198754;
+            color: #ffffff;
+        }
+
+        .btn-ide:hover {
+            background: #157347;
+        }
+
+        /* Scrollable Terminal Console Output */
+        .terminal {
+            background: #1e1e1e;
+            border: 1px solid #ced4da;
+            color: #00ff66;
+            padding: 12px;
+            font-size: 0.85rem;
+            flex: 1;
+            overflow-y: scroll !important; /* Force scrollbar */
+            border-radius: 6px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            max-height: calc(100vh - 410px);
+        }
+
+        .term-err { color: #ff6b6b; }
+        .term-info { color: #4dabf7; }
+        .term-head { color: #ffd43b; }
+        .term-ack { color: #a6e3a1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CRC-CCITT (16-BIT) ERROR DETECTION TOOL</h1>
+        <span style="color: #6c757d; font-weight: 600;">Polynomial: 0x1021</span>
+    </header>
+
+    <div class="container">
+        <!-- LEFT PANEL: SCROLLABLE CODE WITH INDIVIDUAL LINE SPANS -->
+        <div class="panel left-panel">
+            <div class="panel-header">
+                <span class="panel-title">Java Source Code</span>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="copyCode()">📋 Copy Code</button>
+                    <button class="btn btn-ide" onclick="openExternalCompiler()">External IDE ↗</button>
+                </div>
+            </div>
+            
+            <!-- Dedicated Scrollable Container -->
+            <div class="code-scroll-box" id="codeContainer">
+                <span class="code-line" id="line1"><span class="kwd">import</span> java.util.Scanner;</span>
+                <span class="code-line" id="line2"></span>
+                <span class="code-line" id="line3"><span class="kwd">public class</span> <span class="cls">CRCCCITT</span> {</span>
+                <span class="code-line" id="line4">    <span class="com">// CRC-CCITT Polynomial: x^16 + x^12 + x^5 + 1 (0x1021)</span></span>
+                <span class="code-line" id="line5">    <span class="kwd">private static final int</span> POLYNOMIAL = 0x1021;</span>
+                <span class="code-line" id="line6">    <span class="kwd">private static final int</span> INITIAL_VALUE = 0xFFFF;</span>
+                <span class="code-line" id="line7"></span>
+                <span class="code-line" id="line8">    <span class="kwd">public static int</span> calculateCRC(String data) {</span>
+                <span class="code-line" id="line9">        <span class="kwd">int</span> crc = INITIAL_VALUE;</span>
+                <span class="code-line" id="line10">        <span class="kwd">byte</span>[] bytes = data.getBytes();</span>
+                <span class="code-line" id="line11"></span>
+                <span class="code-line" id="line12">        <span class="kwd">for</span> (<span class="kwd">byte</span> b : bytes) {</span>
+                <span class="code-line" id="line13">            <span class="kwd">for</span> (<span class="kwd">int</span> i = 0; i &lt; 8; i++) {</span>
+                <span class="code-line" id="line14">                <span class="kwd">boolean</span> bit = ((b &gt;&gt; (7 - i)) &amp; 1) == 1;</span>
+                <span class="code-line" id="line15">                <span class="kwd">boolean</span> c15 = ((crc &gt;&gt; 15) &amp; 1) == 1;</span>
+                <span class="code-line" id="line16">                crc &lt;&lt;= 1;</span>
+                <span class="code-line" id="line17">                <span class="kwd">if</span> (c15 ^ bit) {</span>
+                <span class="code-line" id="line18">                    crc ^= POLYNOMIAL;</span>
+                <span class="code-line" id="line19">                }</span>
+                <span class="code-line" id="line20">            }</span>
+                <span class="code-line" id="line21">        }</span>
+                <span class="code-line" id="line22">        <span class="kwd">return</span> crc &amp; 0xFFFF;</span>
+                <span class="code-line" id="line23">    }</span>
+                <span class="code-line" id="line24"></span>
+                <span class="code-line" id="line25">    <span class="kwd">public static void</span> main(String[] args) {</span>
+                <span class="code-line" id="line26">        Scanner scanner = <span class="kwd">new</span> Scanner(System.in);</span>
+                <span class="code-line" id="line27">        System.out.print(<span class="str">"Enter Message Data: "</span>);</span>
+                <span class="code-line" id="line28">        String message = scanner.nextLine();</span>
+                <span class="code-line" id="line29"></span>
+                <span class="code-line" id="line30">        <span class="kwd">int</span> checksum = calculateCRC(message);</span>
+                <span class="code-line" id="line31">        System.out.printf(<span class="str">"CRC-CCITT Checksum: 0x%04X\n"</span>, checksum);</span>
+                <span class="code-line" id="line32">        scanner.close();</span>
+                <span class="code-line" id="line33">    }</span>
+                <span class="code-line" id="line34">}</span>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: ONLINE COMPILER & CONSOLE -->
+        <div class="panel right-panel">
+            <div class="panel-header">
+                <span class="panel-title">Visual Simulation &amp; Console</span>
+                <div class="btn-group">
+                    <button onclick="startAnimatedRun()">▶ Animated Run</button>
+                    <button class="btn-secondary" onclick="runCompiler()">⚡ Instant Run</button>
+                    <button class="btn btn-ide" onclick="openExternalCompiler()">External IDE ↗</button>
+                </div>
+            </div>
+
+            <!-- Visual Animation Canvas -->
+            <div class="canvas-box">
+                <canvas id="crcCanvas" width="450" height="180"></canvas>
+            </div>
+
+            <div class="controls">
+                <div style="display: flex; gap: 10px;">
+                    <label style="flex: 1;">
+                        Input Data String:
+                        <input type="text" id="strInput" value="123456789">
+                    </label>
+                    <label style="width: 150px;">
+                        Animation Speed:
+                        <select id="animSpeed">
+                            <option value="600">Normal (600ms)</option>
+                            <option value="300">Fast (300ms)</option>
+                            <option value="1200">Slow (1.2s)</option>
+                        </select>
+                    </label>
+                </div>
+                <label style="flex-direction: row; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" id="injectError"> Corrupt Transmitted Bit (Simulate Channel Noise)
+                </label>
+            </div>
+
+            <div class="panel-title" style="margin-top: 2px;">Standard Output (stdout)</div>
+            <div class="terminal" id="console">
+&gt; Environment Initialized.
+&gt; Click "ANIMATED RUN" to step through execution with line-by-line yellow highlighting.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('crcCanvas');
+        const ctx = canvas.getContext('2d');
+
+        window.onload = () => {
+            drawCRCSimulation("IDLE", "", "", false);
+        };
+
+        function copyCode() {
+            const codeText = document.getElementById('codeContainer').innerText;
+            navigator.clipboard.writeText(codeText);
+            alert("Code copied to clipboard!");
+        }
+
+        function openExternalCompiler() {
+            window.open('https://www.jdoodle.com/online-java-compiler/', '_blank');
+        }
+
+        // Applies Bright Yellow Highlight to Executing Line & Scrolls to It
+        function highlightYellowLine(lineNumber) {
+            document.querySelectorAll('.highlight-yellow').forEach(el => el.classList.remove('highlight-yellow'));
+
+            const targetLine = document.getElementById(`line${lineNumber}`);
+            if (targetLine) {
+                targetLine.classList.add('highlight-yellow');
+                targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // 2D Canvas Renderer for CRC-CCITT Error Detection Animation
+        function drawCRCSimulation(stage, dataVal, crcHex, isCorrupted) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Sender Box
+            ctx.fillStyle = '#0d6efd';
+            ctx.fillRect(20, 40, 85, 90);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px Consolas';
+            ctx.fillText('SENDER', 36, 65);
+            ctx.font = '10px Consolas';
+            ctx.fillText('(Calc CRC)', 33, 80);
+
+            // 2. Draw Receiver Box
+            ctx.fillStyle = '#198754';
+            ctx.fillRect(345, 40, 85, 90);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px Consolas';
+            ctx.fillText('RECEIVER', 355, 65);
+            ctx.font = '10px Consolas';
+            ctx.fillText('(Verify)', 363, 80);
+
+            // 3. Draw Channel Pipe
+            ctx.strokeStyle = '#ced4da';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(105, 85);
+            ctx.lineTo(345, 85);
+            ctx.stroke();
+
+            // 4. Render Stage Animations
+            const displayStr = dataVal.length > 8 ? dataVal.substring(0, 6) + ".." : dataVal;
+
+            if (stage === "COMPUTING") {
+                ctx.fillStyle = '#ffc107';
+                ctx.fillRect(115, 60, 95, 50);
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 10px Consolas';
+                ctx.fillText(`Data: "${displayStr}"`, 120, 78);
+                ctx.fillText(`Poly: 0x1021`, 120, 95);
+
+                ctx.fillStyle = '#d4af37';
+                ctx.font = '11px Consolas';
+                ctx.fillText("⚡ Executing Modulo-2 Division...", 120, 145);
+            }
+            else if (stage === "TRANSMITTING") {
+                // Moving Payload Frame (Data + Checksum)
+                ctx.fillStyle = '#0d6efd';
+                ctx.fillRect(200, 62, 105, 46);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 10px Consolas';
+                ctx.fillText(`Data: "${displayStr}"`, 205, 78);
+                ctx.fillStyle = '#a6e3a1';
+                ctx.fillText(`CRC: 0x${crcHex}`, 205, 96);
+
+                if (isCorrupted) {
+                    // Draw Noise Lightning Bolt
+                    ctx.fillStyle = '#ff4d4d';
+                    ctx.beginPath();
+                    ctx.moveTo(250, 40); ctx.lineTo(240, 58); ctx.lineTo(248, 58);
+                    ctx.lineTo(242, 72); ctx.lineTo(256, 52); ctx.lineTo(248, 52);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#dc3545';
+                    ctx.font = 'bold 11px Consolas';
+                    ctx.fillText("⚡ CHANNEL NOISE: Bit Corrupted!", 120, 145);
+                } else {
+                    ctx.fillStyle = '#6c757d';
+                    ctx.font = '11px Consolas';
+                    ctx.fillText("📦 Data Frame + CRC transmitting clean...", 110, 145);
+                }
+            }
+            else if (stage === "VERIFYING") {
+                ctx.fillStyle = isCorrupted ? '#dc3545' : '#198754';
+                ctx.fillRect(240, 60, 95, 50);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 10px Consolas';
+                ctx.fillText(`Recv CRC`, 250, 78);
+                ctx.fillText(isCorrupted ? "MISMATCH!" : "MATCH OK!", 250, 95);
+
+                ctx.fillStyle = isCorrupted ? '#dc3545' : '#198754';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText(isCorrupted ? "❌ Remainder != 0 (Packet Rejected!)" : "✅ Remainder == 0 (Valid Frame!)", 110, 145);
+            }
+        }
+
+        // JavaScript implementation of CRC-CCITT (0x1021)
+        function computeCRC(data) {
+            let crc = 0xFFFF;
+            const poly = 0x1021;
+            for (let i = 0; i < data.length; i++) {
+                let byteVal = data.charCodeAt(i);
+                for (let b = 0; b < 8; b++) {
+                    let bit = ((byteVal >> (7 - b)) & 1) === 1;
+                    let c15 = ((crc >> 15) & 1) === 1;
+                    crc = (crc << 1) & 0xFFFF;
+                    if (c15 ^ bit) {
+                        crc ^= poly;
+                    }
+                }
+            }
+            return crc & 0xFFFF;
+        }
+
+        // Step-by-Step Animated Simulation with Active Yellow Highlighting & Canvas Graphics
+        async function startAnimatedRun() {
+            const consoleEl = document.getElementById('console');
+            const dataVal = document.getElementById('strInput').value;
+            const corrupt = document.getElementById('injectError').checked;
+            const delayMs = parseInt(document.getElementById('animSpeed').value);
+
+            consoleEl.innerHTML = '';
+            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+            if(!dataVal) {
+                log("<span class='term-err'>Error: Input data stream empty!</span>");
+                return;
+            }
+
+            highlightYellowLine(25);
+            log("<span class='term-head'>[COMPILING] CRCCCITT.java...</span>");
+            log("<span class='term-info'>[BUILD SUCCESS] 0 Warnings, 0 Errors.</span>\n");
+            log("<span class='term-head'>[EXECUTING BINARY]</span>");
+            drawCRCSimulation("IDLE", dataVal, "", false);
+            await sleep(delayMs);
+
+            highlightYellowLine(28);
+            log(`Sender Input Message : "${dataVal}"`);
+            await sleep(delayMs);
+
+            highlightYellowLine(30);
+            log("\n<span class='term-info'>--- [CALLING calculateCRC()] ---</span>");
+            drawCRCSimulation("COMPUTING", dataVal, "", false);
+            await sleep(delayMs);
+
+            highlightYellowLine(8); // calculateCRC header
+            await sleep(delayMs);
+
+            highlightYellowLine(9); // init crc = INITIAL_VALUE
+            await sleep(delayMs);
+
+            highlightYellowLine(12); // Loop bytes
+            let crcInt = computeCRC(dataVal);
+            let crcHex = crcInt.toString(16).toUpperCase().padStart(4, '0');
+            await sleep(delayMs);
+
+            highlightYellowLine(22); // return crc
+            await sleep(delayMs);
+
+            highlightYellowLine(31);
+            log(`Calculated Checksum   : 0x${crcHex}`, 'term-ack');
+            log(`Transmitted Payload   : ${dataVal}[0x${crcHex}]`);
+            drawCRCSimulation("TRANSMITTING", dataVal, crcHex, corrupt);
+            await sleep(delayMs);
+
+            log("\n--- [NETWORK CHANNEL TRANSMISSION] ---");
+            let rxData = dataVal;
+            if(corrupt) {
+                let lastChar = rxData.slice(-1);
+                rxData = rxData.slice(0, -1) + String.fromCharCode(lastChar.charCodeAt(0) ^ 1);
+                log(`[CHANNEL NOISE] Data corrupted in transit -> "${rxData}"`, 'term-err');
+            } else {
+                log("[CHANNEL CLEAN] Frame transmitted with zero bit errors.");
+            }
+            await sleep(delayMs);
+
+            log("\n--- [RECEIVER SIDE CHECK] ---");
+            let rxCrcInt = computeCRC(rxData);
+            let rxCrcHex = rxCrcInt.toString(16).toUpperCase().padStart(4, '0');
+            log(`Receiver Re-computed CRC: 0x${rxCrcHex}`);
+            drawCRCSimulation("VERIFYING", rxData, rxCrcHex, corrupt);
+            await sleep(delayMs);
+
+            if(rxCrcInt === crcInt) {
+                log("\n>>> STATUS: VERIFICATION SUCCESS (NO ERRORS DETECTED)", 'term-ack');
+            } else {
+                log("\n>>> STATUS: CHECKSUM MISMATCH (DATA CORRUPTED, PACKET REJECTED)", 'term-err');
+            }
+        }
+
+        // Instant Execution Mode
+        function runCompiler() {
+            const consoleEl = document.getElementById('console');
+            const dataVal = document.getElementById('strInput').value;
+            const corrupt = document.getElementById('injectError').checked;
+
+            consoleEl.innerHTML = '';
+            highlightYellowLine(25);
+            
+            log("<span class='term-head'>[COMPILING] CRCCCITT.java...</span>");
+            log("<span class='term-info'>[BUILD SUCCESS] 0 Warnings, 0 Errors.</span>\n");
+            log("<span class='term-head'>[EXECUTING BINARY]</span>");
+
+            if(!dataVal) {
+                log("<span class='term-err'>Error: Input data stream empty!</span>");
+                return;
+            }
+
+            log(`Sender Input Message : "${dataVal}"`);
+            
+            let crcInt = computeCRC(dataVal);
+            let crcHex = crcInt.toString(16).toUpperCase().padStart(4, '0');
+            log(`Calculated Checksum   : 0x${crcHex}`, 'term-info');
+            log(`Transmitted Payload   : ${dataVal}[0x${crcHex}]`);
+
+            log("\n--- [NETWORK CHANNEL TRANSMISSION] ---");
+            let rxData = dataVal;
+            if(corrupt) {
+                let lastChar = rxData.slice(-1);
+                rxData = rxData.slice(0, -1) + String.fromCharCode(lastChar.charCodeAt(0) ^ 1);
+                log(`[CHANNEL NOISE] Data corrupted in transit -> "${rxData}"`, 'term-err');
+            } else {
+                log("[CHANNEL CLEAN] Frame transmitted with zero bit errors.");
+            }
+
+            log("\n--- [RECEIVER SIDE CHECK] ---");
+            let rxCrcInt = computeCRC(rxData);
+            let rxCrcHex = rxCrcInt.toString(16).toUpperCase().padStart(4, '0');
+            log(`Receiver Re-computed CRC: 0x${rxCrcHex}`);
+
+            if(rxCrcInt === crcInt) {
+                log("\n>>> STATUS: VERIFICATION SUCCESS (NO ERRORS DETECTED)", 'term-info');
+            } else {
+                log("\n>>> STATUS: CHECKSUM MISMATCH (DATA CORRUPTED, PACKET REJECTED)", 'term-err');
+            }
+
+            drawCRCSimulation("VERIFYING", rxData, rxCrcHex, corrupt);
+        }
+
+        function log(msg, cls = "") {
+            const consoleEl = document.getElementById('console');
+            consoleEl.innerHTML += `<div class="${cls}">${msg}</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Window Protocol - Visual Animated Simulator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 12px 20px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 50px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            color: #0d6efd;
+            font-weight: 700;
+        }
+
+        /* Split Screen Container */
+        .container {
+            display: flex;
+            height: calc(100vh - 50px);
+            width: 100vw;
+        }
+
+        .panel {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            border-right: 2px solid #e9ecef;
+            background-color: #ffffff;
+        }
+
+        .right-panel {
+            background-color: #f8f9fa;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+            height: 35px;
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #343a40;
+            text-transform: uppercase;
+        }
+
+        /* Dedicated Scrollable Code Box */
+        .code-scroll-box {
+            flex: 1;
+            border: 1px solid #ced4da;
+            background: #ffffff;
+            border-radius: 6px;
+            overflow-y: scroll !important; /* Forces scrollbar */
+            overflow-x: auto;
+            position: relative;
+            max-height: calc(100vh - 120px);
+            padding: 10px 0;
+        }
+
+        .code-line {
+            display: block;
+            padding: 2px 15px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            white-space: pre;
+            color: #24292e;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Syntax Token Colors */
+        .kwd { color: #d73a49; font-weight: bold; } /* Keywords */
+        .str { color: #032f62; } /* Strings */
+        .cls { color: #6f42c1; font-weight: bold; } /* Classes */
+        .com { color: #6a737d; font-style: italic; } /* Comments */
+
+        /* 🟡 VIVID HIGH-CONTRAST YELLOW HIGHLIGHTER FOR ACTIVE EXECUTING LINE */
+        .highlight-yellow {
+            background-color: #ffff00 !important; /* Pure Yellow */
+            color: #000000 !important;           /* Black Text for high contrast */
+            border-left: 6px solid #d4af37 !important; /* Gold Left Border */
+            font-weight: bold !important;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.15);
+        }
+
+        .highlight-yellow span {
+            color: #000000 !important; /* Keeps code tokens black when line is highlighted */
+        }
+
+        /* Visual Animation Canvas Box */
+        .canvas-box {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            height: 200px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Controls Area */
+        .controls {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            padding: 10px;
+            border-radius: 6px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: #495057;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        input[type="number"], select {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            color: #212529;
+            padding: 5px;
+            border-radius: 4px;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            background: #0d6efd;
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+
+        button:hover { background: #0b5ed7; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5c636a; }
+        .btn-ide { background: #198754; }
+        .btn-ide:hover { background: #157347; }
+
+        /* Scrollable Terminal Output Box */
+        .terminal-box {
+            flex: 1;
+            background: #1e1e1e;
+            border: 1px solid #ced4da;
+            color: #00ff66;
+            padding: 12px;
+            font-size: 0.85rem;
+            overflow-y: scroll !important; /* Forces scrollbar */
+            border-radius: 6px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            max-height: calc(100vh - 430px);
+        }
+
+        .term-err { color: #ff6b6b; }
+        .term-info { color: #4dabf7; }
+        .term-head { color: #ffd43b; }
+        .term-ack { color: #a6e3a1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SLIDING WINDOW PROTOCOL // VISUAL ANIMATED SIMULATOR</h1>
+        <span style="color: #6c757d; font-weight: 600;">Data Link Layer (Go-Back-N)</span>
+    </header>
+
+    <div class="container">
+        <!-- LEFT PANEL: FULLY SCROLLABLE SOURCE CODE WITH PER-LINE SPANS -->
+        <div class="panel left-panel">
+            <div class="panel-header">
+                <span class="panel-title">Source Code (SlidingWindow.java)</span>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="copyCode()">📋 Copy Code</button>
+                    <button class="btn btn-ide" onclick="openExternalIDE()">External IDE ↗</button>
+                </div>
+            </div>
+            
+            <!-- Dedicated Scrollable Container -->
+            <div class="code-scroll-box" id="codeContainer">
+                <span class="code-line" id="line1"><span class="kwd">import</span> java.util.Random;</span>
+                <span class="code-line" id="line2"><span class="kwd">import</span> java.util.Scanner;</span>
+                <span class="code-line" id="line3"></span>
+                <span class="code-line" id="line4"><span class="kwd">public class</span> <span class="cls">SlidingWindow</span> {</span>
+                <span class="code-line" id="line5">    <span class="kwd">public static void</span> main(String[] args) {</span>
+                <span class="code-line" id="line6">        <span class="kwd">int</span> totalFrames = 8;</span>
+                <span class="code-line" id="line7">        <span class="kwd">int</span> windowSize = 4;</span>
+                <span class="code-line" id="line8">        <span class="kwd">int</span> sent = 0;</span>
+                <span class="code-line" id="line9">        <span class="kwd">int</span> ack = 0;</span>
+                <span class="code-line" id="line10">        Random random = <span class="kwd">new</span> Random();</span>
+                <span class="code-line" id="line11"></span>
+                <span class="code-line" id="line12">        System.out.println(<span class="str">"=== STARTING SLIDING WINDOW SIMULATION ==="</span>);</span>
+                <span class="code-line" id="line13"></span>
+                <span class="code-line" id="line14">        <span class="com">// Main Loop: Continue until all frames are ACKed</span></span>
+                <span class="code-line" id="line15">        <span class="kwd">while</span> (ack &lt; totalFrames) {</span>
+                <span class="code-line" id="line16">            </span>
+                <span class="code-line" id="line17">            <span class="com">// 1. TRANSMIT WINDOW</span></span>
+                <span class="code-line" id="line18">            <span class="kwd">for</span> (<span class="kwd">int</span> i = sent; i &lt; ack + windowSize &amp;&amp; i &lt; totalFrames; i++) {</span>
+                <span class="code-line" id="line19">                System.out.println(<span class="str">"[SENDER] Transmitted Frame "</span> + i);</span>
+                <span class="code-line" id="line20">                sent++;</span>
+                <span class="code-line" id="line21">            }</span>
+                <span class="code-line" id="line22"></span>
+                <span class="code-line" id="line23">            <span class="com">// 2. RECEIVE ACKNOWLEDGMENTS</span></span>
+                <span class="code-line" id="line24">            <span class="kwd">for</span> (<span class="kwd">int</span> i = ack; i &lt; sent; i++) {</span>
+                <span class="code-line" id="line25">                <span class="kwd">boolean</span> isLost = random.nextInt(10) &lt; 2; <span class="com">// Simulated Loss</span></span>
+                <span class="code-line" id="line26">                </span>
+                <span class="code-line" id="line27">                <span class="kwd">if</span> (!isLost) {</span>
+                <span class="code-line" id="line28">                    System.out.println(<span class="str">"[RECEIVER] Frame "</span> + i + <span class="str">" OK -&gt; Sent ACK "</span> + (i + 1));</span>
+                <span class="code-line" id="line29">                    ack++;</span>
+                <span class="code-line" id="line30">                } <span class="kwd">else</span> {</span>
+                <span class="code-line" id="line31">                    System.out.println(<span class="str">"[CHANNEL] ❌ Frame/ACK "</span> + i + <span class="str">" LOST!"</span>);</span>
+                <span class="code-line" id="line32">                    System.out.println(<span class="str">"[SENDER] ⏰ Timeout! Resending from Frame "</span> + ack);</span>
+                <span class="code-line" id="line33">                    sent = ack; <span class="com">// Go-Back-N Window Reset</span></span>
+                <span class="code-line" id="line34">                    <span class="kwd">break</span>;</span>
+                <span class="code-line" id="line35">                }</span>
+                <span class="code-line" id="line36">            }</span>
+                <span class="code-line" id="line37">        }</span>
+                <span class="code-line" id="line38">        System.out.println(<span class="str">"🎉 TRANSMISSION COMPLETE!"</span>);</span>
+                <span class="code-line" id="line39">    }</span>
+                <span class="code-line" id="line40">}</span>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: CONTROLS, ANIMATION CANVAS & CONSOLE -->
+        <div class="panel right-panel">
+            <div class="panel-header">
+                <span class="panel-title">Visual Simulation &amp; Console</span>
+                <div class="btn-group">
+                    <button onclick="startStepByStepExecution()">▶ Animated Run</button>
+                    <button class="btn-secondary" onclick="runInstantExecution()">⚡ Instant Output</button>
+                    <button class="btn btn-ide" onclick="openExternalIDE()">External IDE ↗</button>
+                </div>
+            </div>
+
+            <!-- Visual Animation Canvas -->
+            <div class="canvas-box">
+                <canvas id="windowCanvas" width="450" height="200"></canvas>
+            </div>
+
+            <div class="controls">
+                <label>
+                    Total Frames:
+                    <input type="number" id="totalFrames" value="8" min="1" max="12" onchange="drawInitialWindow()">
+                </label>
+                <label>
+                    Window Size (W):
+                    <input type="number" id="windowSize" value="4" min="1" max="6" onchange="drawInitialWindow()">
+                </label>
+                <label>
+                    Loss Probability (%):
+                    <input type="number" id="lossRate" value="20" min="0" max="80" step="10">
+                </label>
+                <label>
+                    Animation Speed:
+                    <select id="animSpeed">
+                        <option value="600">Normal (600ms)</option>
+                        <option value="300">Fast (300ms)</option>
+                        <option value="1200">Slow (1.2s)</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="panel-title" style="margin-top: 2px;">Standard Output (stdout)</div>
+            
+            <div class="terminal-box" id="console">
+&gt; Ready. Click "ANIMATED RUN" to step through execution with visual window graphics and line highlighting.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('windowCanvas');
+        const ctx = canvas.getContext('2d');
+
+        window.onload = () => {
+            drawInitialWindow();
+        };
+
+        function drawInitialWindow() {
+            const totalFrames = parseInt(document.getElementById('totalFrames').value) || 8;
+            const windowSize = parseInt(document.getElementById('windowSize').value) || 4;
+            drawSlidingWindowGraphic(totalFrames, windowSize, 0, 0, -1, "IDLE");
+        }
+
+        function copyCode() {
+            const rawCode = document.getElementById('codeContainer').innerText;
+            navigator.clipboard.writeText(rawCode);
+            alert("Java source code copied to clipboard!");
+        }
+
+        function openExternalIDE() {
+            window.open('https://www.jdoodle.com/online-java-compiler/', '_blank');
+        }
+
+        // Highlights specific line in source panel with vivid yellow and auto-scrolls
+        function highlightYellowLine(lineNumber) {
+            document.querySelectorAll('.highlight-yellow').forEach(el => el.classList.remove('highlight-yellow'));
+
+            const targetLine = document.getElementById(`line${lineNumber}`);
+            if (targetLine) {
+                targetLine.classList.add('highlight-yellow');
+                targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // 2D Canvas Renderer for Sliding Window Protocol Graphics
+        function drawSlidingWindowGraphic(total, windowSize, ack, sent, activeFrame, status) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Sender & Receiver System Nodes
+            ctx.fillStyle = '#0d6efd';
+            ctx.fillRect(15, 20, 75, 45);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 11px Consolas';
+            ctx.fillText('SENDER', 30, 47);
+
+            ctx.fillStyle = '#198754';
+            ctx.fillRect(360, 20, 75, 45);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 11px Consolas';
+            ctx.fillText('RECEIVER', 370, 47);
+
+            // Network Pipe
+            ctx.strokeStyle = '#e9ecef';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(90, 42);
+            ctx.lineTo(360, 42);
+            ctx.stroke();
+
+            // 2. Draw Frame Queue Stream
+            const startX = 25;
+            const frameW = 35;
+            const gap = 8;
+            const frameY = 110;
+
+            for (let i = 0; i < total; i++) {
+                let x = startX + i * (frameW + gap);
+
+                if (i < ack) {
+                    ctx.fillStyle = '#a6e3a1'; // Delivered / ACKed (Green)
+                    ctx.strokeStyle = '#198754';
+                } else if (i >= ack && i < sent) {
+                    ctx.fillStyle = '#4dabf7'; // Transmitted / UnACKed (Blue)
+                    ctx.strokeStyle = '#0d6efd';
+                } else {
+                    ctx.fillStyle = '#ffffff'; // Pending (White)
+                    ctx.strokeStyle = '#ced4da';
+                }
+
+                ctx.lineWidth = 2;
+                ctx.fillRect(x, frameY, frameW, 35);
+                ctx.strokeRect(x, frameY, frameW, 35);
+
+                ctx.fillStyle = (i < ack || (i >= ack && i < sent)) ? '#000000' : '#495057';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText(`F${i}`, x + 10, frameY + 22);
+            }
+
+            // 3. Draw Sliding Window Frame Box (Gold Border)
+            let winX = startX + ack * (frameW + gap) - 4;
+            let winWidth = windowSize * (frameW + gap) - gap + 8;
+            
+            ctx.strokeStyle = '#d4af37'; // Gold Highlight
+            ctx.lineWidth = 3;
+            ctx.strokeRect(winX, frameY - 6, winWidth, 47);
+
+            ctx.fillStyle = '#d4af37';
+            ctx.font = 'bold 10px Consolas';
+            ctx.fillText(`WINDOW (W=${windowSize})`, winX, frameY - 10);
+
+            // 4. Draw In-Flight Active Packet / ACK animation
+            if (activeFrame >= 0) {
+                if (status === "TRANSMIT") {
+                    ctx.fillStyle = '#0d6efd';
+                    ctx.fillRect(200, 30, 50, 25);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 10px Consolas';
+                    ctx.fillText(`F${activeFrame} ➔`, 210, 46);
+
+                    ctx.fillStyle = '#0d6efd';
+                    ctx.font = '11px Consolas';
+                    ctx.fillText(`Transmitting Frame ${activeFrame}...`, 140, 185);
+                } 
+                else if (status === "ACK") {
+                    ctx.fillStyle = '#198754';
+                    ctx.fillRect(200, 30, 60, 25);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 10px Consolas';
+                    ctx.fillText(`ACK ${activeFrame + 1} 🠔`, 205, 46);
+
+                    ctx.fillStyle = '#198754';
+                    ctx.font = 'bold 11px Consolas';
+                    ctx.fillText(`ACK ${activeFrame + 1} Received OK!`, 150, 185);
+                } 
+                else if (status === "LOST") {
+                    ctx.fillStyle = '#dc3545';
+                    ctx.fillRect(200, 30, 55, 25);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 10px Consolas';
+                    ctx.fillText(`❌ LOST`, 210, 46);
+
+                    ctx.fillStyle = '#dc3545';
+                    ctx.font = 'bold 11px Consolas';
+                    ctx.fillText(`Frame/ACK ${activeFrame} Lost! Go-Back-N Timeout!`, 110, 185);
+                }
+            } else if (status === "COMPLETE") {
+                ctx.fillStyle = '#198754';
+                ctx.font = 'bold 12px Consolas';
+                ctx.fillText("🎉 All Frames Delivered Successfully!", 130, 185);
+            }
+        }
+
+        // Step-by-Step Animated Execution with Yellow Line-by-Line Highlighting
+        async function startStepByStepExecution() {
+            const consoleEl = document.getElementById('console');
+            const totalFrames = parseInt(document.getElementById('totalFrames').value);
+            const windowSize = parseInt(document.getElementById('windowSize').value);
+            const lossRate = parseInt(document.getElementById('lossRate').value) / 100;
+            const delayMs = parseInt(document.getElementById('animSpeed').value);
+
+            consoleEl.innerHTML = '';
+            
+            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+            highlightYellowLine(5);
+            log("<span class='term-head'>[EXECUTING] SlidingWindow.main()...</span>\n");
+            drawSlidingWindowGraphic(totalFrames, windowSize, 0, 0, -1, "IDLE");
+            await sleep(delayMs);
+
+            let sent = 0;
+            let ack = 0;
+
+            highlightYellowLine(15);
+            await sleep(delayMs);
+
+            while (ack < totalFrames) {
+                // Step 1: Transmit Window
+                highlightYellowLine(18);
+                await sleep(delayMs);
+
+                let startSent = sent;
+                for (let i = startSent; i < ack + windowSize && i < totalFrames; i++) {
+                    highlightYellowLine(19);
+                    log(`[SENDER] Transmitted Frame ${i}`);
+                    sent++;
+                    drawSlidingWindowGraphic(totalFrames, windowSize, ack, sent, i, "TRANSMIT");
+                    await sleep(delayMs);
+                }
+
+                // Step 2: Receive ACKs
+                highlightYellowLine(24);
+                await sleep(delayMs);
+
+                let currentSent = sent;
+                for (let i = ack; i < currentSent; i++) {
+                    highlightYellowLine(25);
+                    let isLost = Math.random() < lossRate;
+                    await sleep(delayMs);
+
+                    if (!isLost) {
+                        highlightYellowLine(28);
+                        log(`[RECEIVER] Frame ${i} OK -> Sent ACK ${i + 1}`, 'term-ack');
+                        ack++;
+                        drawSlidingWindowGraphic(totalFrames, windowSize, ack, sent, i, "ACK");
+                        await sleep(delayMs);
+                    } else {
+                        highlightYellowLine(31);
+                        log(`[CHANNEL] ❌ Frame/ACK ${i} LOST!`, 'term-err');
+                        drawSlidingWindowGraphic(totalFrames, windowSize, ack, sent, i, "LOST");
+                        await sleep(delayMs);
+
+                        highlightYellowLine(33);
+                        log(`[SENDER] ⏰ Timeout! Resending from Frame ${ack} (Go-Back-N)`, 'term-info');
+                        sent = ack; // Reset Go-Back-N window
+                        drawSlidingWindowGraphic(totalFrames, windowSize, ack, sent, -1, "IDLE");
+                        await sleep(delayMs);
+                        break;
+                    }
+                }
+                log("");
+            }
+
+            highlightYellowLine(38);
+            log(`<span class='term-ack'>🎉 TRANSMISSION COMPLETE: All ${totalFrames} frames delivered successfully!</span>`);
+            drawSlidingWindowGraphic(totalFrames, windowSize, ack, sent, -1, "COMPLETE");
+        }
+
+        // Instant Execution Mode
+        function runInstantExecution() {
+            const consoleEl = document.getElementById('console');
+            const totalFrames = parseInt(document.getElementById('totalFrames').value);
+            const windowSize = parseInt(document.getElementById('windowSize').value);
+            const lossRate = parseInt(document.getElementById('lossRate').value) / 100;
+
+            consoleEl.innerHTML = '';
+            highlightYellowLine(15);
+
+            let sent = 0;
+            let ack = 0;
+
+            log("<span class='term-head'>[INSTANT RUN OUTPUT]</span>\n");
+
+            while (ack < totalFrames) {
+                for (let i = sent; i < ack + windowSize && i < totalFrames; i++) {
+                    log(`[SENDER] Transmitted Frame ${i}`);
+                    sent++;
+                }
+
+                for (let i = ack; i < sent; i++) {
+                    let isLost = Math.random() < lossRate;
+                    if (!isLost) {
+                        log(`[RECEIVER] Frame ${i} OK -> Sent ACK ${i + 1}`, 'term-ack');
+                        ack++;
+                    } else {
+                        log(`[CHANNEL] ❌ Frame/ACK ${i} LOST!`, 'term-err');
+                        log(`[SENDER] ⏰ Timeout! Resending from Frame ${ack}`, 'term-info');
+                        sent = ack;
+                        break;
+                    }
+                }
+                log("");
+            }
+            log(`<span class='term-ack'>🎉 ALL ${totalFrames} FRAMES SUCCESSFULLY DELIVERED!</span>`);
+            drawSlidingWindowGraphic(totalFrames, windowSize, ack, sent, -1, "COMPLETE");
+        }
+
+        function log(msg, cls = "") {
+            const consoleEl = document.getElementById('console');
+            consoleEl.innerHTML += `<div class="${cls}">${msg}</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+    </script>
+</body>
+</html>

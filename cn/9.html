@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSA Public-Key Cryptography Visual Simulator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 12px 20px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 50px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            color: #0d6efd;
+            font-weight: 700;
+        }
+
+        /* Split Screen Container */
+        .container {
+            display: flex;
+            height: calc(100vh - 50px);
+            width: 100vw;
+        }
+
+        .panel {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            border-right: 2px solid #e9ecef;
+            background-color: #ffffff;
+        }
+
+        .right-panel {
+            background-color: #f8f9fa;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+            height: 35px;
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #343a40;
+            text-transform: uppercase;
+        }
+
+        /* Dedicated Scrollable Code Box */
+        .code-scroll-box {
+            flex: 1;
+            border: 1px solid #ced4da;
+            background: #ffffff;
+            border-radius: 6px;
+            overflow-y: scroll !important; /* Forces scrollbar */
+            overflow-x: auto;
+            position: relative;
+            max-height: calc(100vh - 120px);
+            padding: 10px 0;
+        }
+
+        .code-line {
+            display: block;
+            padding: 2px 15px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            white-space: pre;
+            color: #24292e;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Syntax Color Tokens */
+        .kwd { color: #d73a49; font-weight: bold; } /* Keywords */
+        .str { color: #032f62; } /* Strings */
+        .cls { color: #6f42c1; font-weight: bold; } /* Classes */
+        .com { color: #6a737d; font-style: italic; } /* Comments */
+
+        /* 🟡 VIVID HIGH-CONTRAST YELLOW HIGHLIGHTER FOR LINE-BY-LINE EXECUTION */
+        .highlight-yellow {
+            background-color: #ffff00 !important; /* Pure Yellow */
+            color: #000000 !important;           /* Black Text for high contrast */
+            border-left: 6px solid #d4af37 !important; /* Gold Left Border */
+            font-weight: bold !important;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.15);
+        }
+
+        .highlight-yellow span {
+            color: #000000 !important; /* Keeps code tokens black when line is highlighted */
+        }
+
+        /* Visual Animation Canvas Box */
+        .canvas-box {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            height: 180px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Controls Area */
+        .controls {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            padding: 10px;
+            border-radius: 6px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: #495057;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        input[type="text"], select {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            color: #212529;
+            padding: 5px;
+            border-radius: 4px;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            background: #0d6efd;
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+
+        button:hover { background: #0b5ed7; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5c636a; }
+        .btn-ide { background: #198754; }
+        .btn-ide:hover { background: #157347; }
+
+        /* Scrollable Terminal Output Box */
+        .terminal-box {
+            flex: 1;
+            background: #1e1e1e;
+            border: 1px solid #ced4da;
+            color: #00ff66;
+            padding: 12px;
+            font-size: 0.85rem;
+            overflow-y: scroll !important; /* Forces scrollbar */
+            border-radius: 6px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            max-height: calc(100vh - 410px);
+        }
+
+        .term-err { color: #ff6b6b; }
+        .term-info { color: #4dabf7; }
+        .term-head { color: #ffd43b; }
+        .term-ack { color: #a6e3a1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>PUBLIC KEY CRYPTOGRAPHY // RSA ALGORITHM VISUAL SIMULATOR</h1>
+        <span style="color: #6c757d; font-weight: 600;">Asymmetric Encryption &amp; Decryption</span>
+    </header>
+
+    <div class="container">
+        <!-- LEFT PANEL: FULLY SCROLLABLE SOURCE CODE WITH INDIVIDUAL LINE SPANS -->
+        <div class="panel left-panel">
+            <div class="panel-header">
+                <span class="panel-title">Source Code (RSAAlgorithm.java)</span>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="copyCode()">📋 Copy Code</button>
+                    <button class="btn btn-ide" onclick="openExternalIDE()">External IDE ↗</button>
+                </div>
+            </div>
+            
+            <!-- Dedicated Scrollable Container -->
+            <div class="code-scroll-box" id="codeContainer">
+                <span class="code-line" id="line1"><span class="kwd">import</span> java.math.BigInteger;</span>
+                <span class="code-line" id="line2"><span class="kwd">import</span> java.util.Scanner;</span>
+                <span class="code-line" id="line3"></span>
+                <span class="code-line" id="line4"><span class="kwd">public class</span> <span class="cls">RSAAlgorithm</span> {</span>
+                <span class="code-line" id="line5">    <span class="kwd">public static void</span> main(String[] args) {</span>
+                <span class="code-line" id="line6">        <span class="com">// Step 1: Select two prime numbers (p and q)</span></span>
+                <span class="code-line" id="line7">        BigInteger p = BigInteger.valueOf(61);</span>
+                <span class="code-line" id="line8">        BigInteger q = BigInteger.valueOf(53);</span>
+                <span class="code-line" id="line9"></span>
+                <span class="code-line" id="line10">        <span class="com">// Step 2: Compute n = p * q</span></span>
+                <span class="code-line" id="line11">        BigInteger n = p.multiply(q);</span>
+                <span class="code-line" id="line12"></span>
+                <span class="code-line" id="line13">        <span class="com">// Step 3: Compute Euler's Totient phi(n) = (p-1)*(q-1)</span></span>
+                <span class="code-line" id="line14">        BigInteger phi = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));</span>
+                <span class="code-line" id="line15"></span>
+                <span class="code-line" id="line16">        <span class="com">// Step 4: Choose public key exponent 'e' such that 1 &lt; e &lt; phi and gcd(e, phi) = 1</span></span>
+                <span class="code-line" id="line17">        BigInteger e = BigInteger.valueOf(17);</span>
+                <span class="code-line" id="line18"></span>
+                <span class="code-line" id="line19">        <span class="com">// Step 5: Calculate private key exponent 'd' such that (d * e) % phi = 1</span></span>
+                <span class="code-line" id="line20">        BigInteger d = e.modInverse(phi);</span>
+                <span class="code-line" id="line21"></span>
+                <span class="code-line" id="line22">        System.out.println(<span class="str">"Public Key (e, n) : ("</span> + e + <span class="str">", "</span> + n + <span class="str">")"</span>);</span>
+                <span class="code-line" id="line23">        System.out.println(<span class="str">"Private Key (d, n): ("</span> + d + <span class="str">", "</span> + n + <span class="str">")"</span>);</span>
+                <span class="code-line" id="line24"></span>
+                <span class="code-line" id="line25">        <span class="com">// Input message string</span></span>
+                <span class="code-line" id="line26">        String message = <span class="str">"HELLO"</span>;</span>
+                <span class="code-line" id="line27">        System.out.println(<span class="str">"\nOriginal Message: "</span> + message);</span>
+                <span class="code-line" id="line28"></span>
+                <span class="code-line" id="line29">        <span class="com">// Step 6: Encryption: Cipher = (Message^e) % n</span></span>
+                <span class="code-line" id="line30">        <span class="kwd">byte</span>[] bytes = message.getBytes();</span>
+                <span class="code-line" id="line31">        BigInteger[] encrypted = <span class="kwd">new</span> BigInteger[bytes.length];</span>
+                <span class="code-line" id="line32">        <span class="kwd">for</span> (<span class="kwd">int</span> i = 0; i &lt; bytes.length; i++) {</span>
+                <span class="code-line" id="line33">            BigInteger msgVal = BigInteger.valueOf(bytes[i]);</span>
+                <span class="code-line" id="line34">            encrypted[i] = msgVal.modPow(e, n);</span>
+                <span class="code-line" id="line35">        }</span>
+                <span class="code-line" id="line36">        System.out.println(<span class="str">"Encrypted Ciphertext: "</span> + java.util.Arrays.toString(encrypted));</span>
+                <span class="code-line" id="line37"></span>
+                <span class="code-line" id="line38">        <span class="com">// Step 7: Decryption: Plaintext = (Cipher^d) % n</span></span>
+                <span class="code-line" id="line39">        <span class="kwd">byte</span>[] decryptedBytes = <span class="kwd">new byte</span>[encrypted.length];</span>
+                <span class="code-line" id="line40">        <span class="kwd">for</span> (<span class="kwd">int</span> i = 0; i &lt; encrypted.length; i++) {</span>
+                <span class="code-line" id="line41">            BigInteger decryptedVal = encrypted[i].modPow(d, n);</span>
+                <span class="code-line" id="line42">            decryptedBytes[i] = decryptedVal.byteValue();</span>
+                <span class="code-line" id="line43">        }</span>
+                <span class="code-line" id="line44">        String decryptedMessage = <span class="kwd">new</span> String(decryptedBytes);</span>
+                <span class="code-line" id="line45">        System.out.println(<span class="str">"Decrypted Message   : "</span> + decryptedMessage);</span>
+                <span class="code-line" id="line46">    }</span>
+                <span class="code-line" id="line47">}</span>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: CONTROLS, ANIMATION CANVAS & CONSOLE -->
+        <div class="panel right-panel">
+            <div class="panel-header">
+                <span class="panel-title">Visual Simulation &amp; Console</span>
+                <div class="btn-group">
+                    <button onclick="startStepByStepExecution()">▶ Animated Run</button>
+                    <button class="btn-secondary" onclick="runInstantExecution()">⚡ Instant Output</button>
+                    <button class="btn btn-ide" onclick="openExternalIDE()">External IDE ↗</button>
+                </div>
+            </div>
+
+            <!-- Visual Animation Canvas -->
+            <div class="canvas-box">
+                <canvas id="rsaCanvas" width="450" height="180"></canvas>
+            </div>
+
+            <div class="controls">
+                <label>
+                    Input Text Message:
+                    <input type="text" id="msgInput" value="HELLO">
+                </label>
+                <label>
+                    Prime Pair (p, q):
+                    <select id="primeSelect">
+                        <option value="61,53">p = 61, q = 53 (Standard Small Primes)</option>
+                        <option value="47,59">p = 47, q = 59 (Alternative Primes)</option>
+                        <option value="83,89">p = 83, q = 89 (Larger Primes)</option>
+                    </select>
+                </label>
+                <label>
+                    Animation Speed:
+                    <select id="animSpeed">
+                        <option value="600">Normal (600ms)</option>
+                        <option value="300">Fast (300ms)</option>
+                        <option value="1200">Slow (1.2s)</option>
+                    </select>
+                </label>
+                <label>
+                    Action:
+                    <button style="margin-top:2px;" onclick="startStepByStepExecution()">Encrypt / Decrypt</button>
+                </label>
+            </div>
+
+            <div class="panel-title" style="margin-top: 2px;">Standard Output (stdout)</div>
+            
+            <div class="terminal-box" id="console">
+&gt; Ready. Click "ANIMATED RUN" to step through RSA key generation, encryption, and decryption with line-by-line yellow highlighting.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('rsaCanvas');
+        const ctx = canvas.getContext('2d');
+
+        window.onload = () => {
+            drawRSASimulation("IDLE", "", "", "", "", "");
+        };
+
+        function copyCode() {
+            const rawCode = document.getElementById('codeContainer').innerText;
+            navigator.clipboard.writeText(rawCode);
+            alert("Java source code copied to clipboard!");
+        }
+
+        function openExternalIDE() {
+            window.open('https://www.jdoodle.com/online-java-compiler/', '_blank');
+        }
+
+        // Applies Bright Yellow Highlight to Executing Line & Scrolls to It
+        function highlightYellowLine(lineNumber) {
+            document.querySelectorAll('.highlight-yellow').forEach(el => el.classList.remove('highlight-yellow'));
+
+            const targetLine = document.getElementById(`line${lineNumber}`);
+            if (targetLine) {
+                targetLine.classList.add('highlight-yellow');
+                targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // 2D Canvas Renderer for RSA Encryption/Decryption Animation
+        function drawRSASimulation(stage, charVal, asciiVal, cipherVal, pubKey, privKey) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Alice (Sender)
+            ctx.fillStyle = '#0d6efd';
+            ctx.fillRect(20, 40, 80, 100);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px Consolas';
+            ctx.fillText('ALICE', 40, 65);
+            ctx.font = '10px Consolas';
+            ctx.fillText('(Sender)', 38, 80);
+
+            // 2. Draw Bob (Receiver)
+            ctx.fillStyle = '#198754';
+            ctx.fillRect(350, 40, 80, 100);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px Consolas';
+            ctx.fillText('BOB', 375, 65);
+            ctx.font = '10px Consolas';
+            ctx.fillText('(Receiver)', 365, 80);
+
+            // 3. Network Pipe / Channel in Middle
+            ctx.strokeStyle = '#ced4da';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(100, 90);
+            ctx.lineTo(350, 90);
+            ctx.stroke();
+
+            // 4. Render Stage Specific Visual Payload Blocks
+            if (stage === "KEYGEN") {
+                ctx.fillStyle = '#ffd43b';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText(`🔑 Public: ${pubKey}`, 120, 45);
+                ctx.fillStyle = '#ff6b6b';
+                ctx.fillText(`🔐 Private: ${privKey}`, 240, 45);
+            } 
+            else if (stage === "ENCRYPT") {
+                // Moving character payload block
+                ctx.fillStyle = '#0d6efd';
+                ctx.fillRect(130, 70, 60, 40);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText(`'${charVal}'`, 150, 88);
+                ctx.fillText(`M=${asciiVal}`, 142, 102);
+
+                ctx.fillStyle = '#343a40';
+                ctx.font = '11px Consolas';
+                ctx.fillText(`C = ${asciiVal}^e mod n = ${cipherVal}`, 115, 145);
+            } 
+            else if (stage === "TRANSMIT") {
+                // Cipher packet on the network pipe
+                ctx.fillStyle = '#ffc107';
+                ctx.fillRect(210, 70, 50, 40);
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText(`[${cipherVal}]`, 218, 93);
+
+                ctx.fillStyle = '#6c757d';
+                ctx.font = '11px Consolas';
+                ctx.fillText("🔒 Ciphertext Payload Transmitting...", 120, 145);
+            } 
+            else if (stage === "DECRYPT") {
+                // Decrypted character arriving at Bob
+                ctx.fillStyle = '#198754';
+                ctx.fillRect(270, 70, 60, 40);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText(`'${charVal}'`, 290, 88);
+                ctx.fillText(`M=${asciiVal}`, 282, 102);
+
+                ctx.fillStyle = '#343a40';
+                ctx.font = '11px Consolas';
+                ctx.fillText(`M = ${cipherVal}^d mod n = ${asciiVal} ('${charVal}')`, 115, 145);
+            }
+            else if (stage === "COMPLETE") {
+                ctx.fillStyle = '#198754';
+                ctx.font = 'bold 13px Consolas';
+                ctx.fillText("🎉 Transmission & Decryption Successful!", 100, 145);
+            }
+        }
+
+        // Helper: Modular exponentiation power
+        function modPow(base, exp, modulus) {
+            let res = 1n;
+            base = base % modulus;
+            while (exp > 0n) {
+                if (exp % 2n === 1n) res = (res * base) % modulus;
+                base = (base * base) % modulus;
+                exp = exp / 2n;
+            }
+            return res;
+        }
+
+        // Helper: Extended Euclidean Algorithm for Mod Inverse
+        function modInverse(e, phi) {
+            let m0 = phi, t, q;
+            let x0 = 0n, x1 = 1n;
+            if (phi === 1n) return 0n;
+            while (e > 1n) {
+                q = e / phi;
+                t = phi;
+                phi = e % phi;
+                e = t;
+                t = x0;
+                x0 = x1 - q * x0;
+                x1 = t;
+            }
+            if (x1 < 0n) x1 += m0;
+            return x1;
+        }
+
+        // Animated Execution with Line-by-Line Yellow Highlighting & Canvas Animation
+        async function startStepByStepExecution() {
+            const consoleEl = document.getElementById('console');
+            const msgStr = document.getElementById('msgInput').value || "HELLO";
+            const primePair = document.getElementById('primeSelect').value.split(',');
+            const delayMs = parseInt(document.getElementById('animSpeed').value);
+
+            const pVal = BigInt(primePair[0]);
+            const qVal = BigInt(primePair[1]);
+
+            consoleEl.innerHTML = '';
+            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+            highlightYellowLine(5);
+            log("<span class='term-head'>[EXECUTING] RSAAlgorithm.main()...</span>\n");
+            await sleep(delayMs);
+
+            // Step 1: Prime selection
+            highlightYellowLine(7);
+            log(`[STEP 1] Selected Primes: p = ${pVal}, q = ${qVal}`);
+            await sleep(delayMs);
+
+            // Step 2: Compute n
+            highlightYellowLine(11);
+            const nVal = pVal * qVal;
+            log(`[STEP 2] Calculated Modulus n = p * q = ${nVal}`);
+            await sleep(delayMs);
+
+            // Step 3: Compute phi(n)
+            highlightYellowLine(14);
+            const phiVal = (pVal - 1n) * (qVal - 1n);
+            log(`[STEP 3] Calculated Euler's Totient phi(n) = (p-1)*(q-1) = ${phiVal}`);
+            await sleep(delayMs);
+
+            // Step 4: Choose Public Exponent e
+            highlightYellowLine(17);
+            const eVal = 17n; // Standard public exponent
+            log(`[STEP 4] Selected Public Exponent e = ${eVal} (gcd(e, phi) = 1)`);
+            await sleep(delayMs);
+
+            // Step 5: Compute Private Exponent d
+            highlightYellowLine(20);
+            const dVal = modInverse(eVal, phiVal);
+            log(`[STEP 5] Calculated Private Key Exponent d = e⁻¹ mod phi = ${dVal}`);
+            drawRSASimulation("KEYGEN", "", "", "", `(${eVal},${nVal})`, `(${dVal},${nVal})`);
+            await sleep(delayMs);
+
+            highlightYellowLine(22);
+            log(`\n<span class='term-info'>🔑 PUBLIC KEY  (e, n): (${eVal}, ${nVal})</span>`);
+            log(`<span class='term-info'>🔐 PRIVATE KEY (d, n): (${dVal}, ${nVal})</span>\n`);
+            await sleep(delayMs);
+
+            // Step 6: Encryption
+            highlightYellowLine(27);
+            log(`[INPUT] Plaintext Message: "${msgStr}"`);
+            await sleep(delayMs);
+
+            highlightYellowLine(32);
+            log("<span class='term-head'>--- ENCRYPTING CHARACTERS (Alice) ---</span>");
+            let encryptedArray = [];
+            for (let i = 0; i < msgStr.length; i++) {
+                highlightYellowLine(34);
+                let charCode = BigInt(msgStr.charCodeAt(i));
+                let cipherVal = modPow(charCode, eVal, nVal);
+                encryptedArray.push(cipherVal);
+
+                drawRSASimulation("ENCRYPT", msgStr[i], charCode, cipherVal, "", "");
+                log(`Char '${msgStr[i]}' (ASCII ${charCode}) -> Cipher Value: ${cipherVal}`);
+                await sleep(delayMs);
+
+                drawRSASimulation("TRANSMIT", msgStr[i], charCode, cipherVal, "", "");
+                await sleep(delayMs / 2);
+            }
+
+            highlightYellowLine(36);
+            log(`\n<span class='term-ack'>🔒 ENCRYPTED CIPHERTEXT ARRAY: [${encryptedArray.join(', ')}]</span>\n`);
+            await sleep(delayMs);
+
+            // Step 7: Decryption
+            highlightYellowLine(40);
+            log("<span class='term-head'>--- DECRYPTING CIPHERTEXT (Bob) ---</span>");
+            let decryptedChars = [];
+            for (let i = 0; i < encryptedArray.length; i++) {
+                highlightYellowLine(41);
+                let cipherVal = encryptedArray[i];
+                let decryptedVal = modPow(cipherVal, dVal, nVal);
+                let charStr = String.fromCharCode(Number(decryptedVal));
+                decryptedChars.push(charStr);
+
+                drawRSASimulation("DECRYPT", charStr, decryptedVal, cipherVal, "", "");
+                log(`Cipher Value ${cipherVal} -> Decrypted ASCII ${decryptedVal} ('${charStr}')`);
+                await sleep(delayMs);
+            }
+
+            highlightYellowLine(45);
+            log(`\n<span class='term-ack'>🎉 DECRYPTED PLAINTEXT MESSAGE: "${decryptedChars.join('')}"</span>`);
+            drawRSASimulation("COMPLETE", "", "", "", "", "");
+        }
+
+        // Instant Run Engine
+        function runInstantExecution() {
+            const consoleEl = document.getElementById('console');
+            const msgStr = document.getElementById('msgInput').value || "HELLO";
+            const primePair = document.getElementById('primeSelect').value.split(',');
+
+            const pVal = BigInt(primePair[0]);
+            const qVal = BigInt(primePair[1]);
+            const nVal = pVal * qVal;
+            const phiVal = (pVal - 1n) * (qVal - 1n);
+            const eVal = 17n;
+            const dVal = modInverse(eVal, phiVal);
+
+            consoleEl.innerHTML = '';
+            highlightYellowLine(5);
+
+            log("<span class='term-head'>[INSTANT RUN OUTPUT]</span>\n");
+            log(`Primes: p = ${pVal}, q = ${qVal}`);
+            log(`Modulus n = ${nVal}, Euler Totient phi(n) = ${phiVal}`);
+            log(`Public Key  (e, n): (${eVal}, ${nVal})`);
+            log(`Private Key (d, n): (${dVal}, ${nVal})\n`);
+
+            log(`Original Message: "${msgStr}"`);
+
+            let encrypted = [];
+            for (let i = 0; i < msgStr.length; i++) {
+                let charCode = BigInt(msgStr.charCodeAt(i));
+                encrypted.push(modPow(charCode, eVal, nVal));
+            }
+            log(`Encrypted Ciphertext: [${encrypted.join(', ')}]`);
+
+            let decryptedBytes = [];
+            for (let i = 0; i < encrypted.length; i++) {
+                let decVal = modPow(encrypted[i], dVal, nVal);
+                decryptedBytes.push(String.fromCharCode(Number(decVal)));
+            }
+            log(`Decrypted Message   : "${decryptedBytes.join('')}"`);
+
+            drawRSASimulation("COMPLETE", "", "", "", "", "");
+        }
+
+        function log(msg, cls = "") {
+            const consoleEl = document.getElementById('console');
+            consoleEl.innerHTML += `<div class="${cls}">${msg}</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight; // Auto-scroll console
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bellman-Ford &amp; Path Vector Routing Algorithm - Visual Simulator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 12px 20px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 50px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            color: #0d6efd;
+            font-weight: 700;
+        }
+
+        /* Split Screen Container */
+        .container {
+            display: flex;
+            height: calc(100vh - 50px);
+            width: 100vw;
+        }
+
+        .panel {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            border-right: 2px solid #e9ecef;
+            background-color: #ffffff;
+        }
+
+        .right-panel {
+            background-color: #f8f9fa;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+            height: 35px;
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #343a40;
+            text-transform: uppercase;
+        }
+
+        /* Dedicated Scrollable Code Box */
+        .code-scroll-box {
+            flex: 1;
+            border: 1px solid #ced4da;
+            background: #ffffff;
+            border-radius: 6px;
+            overflow-y: scroll !important; /* Force vertical scrollbar */
+            overflow-x: auto;
+            position: relative;
+            max-height: calc(100vh - 120px);
+            padding: 10px 0;
+        }
+
+        .code-line {
+            display: block;
+            padding: 2px 15px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            white-space: pre;
+            color: #24292e;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Syntax Color Tokens */
+        .kwd { color: #d73a49; font-weight: bold; } /* Keywords */
+        .str { color: #032f62; } /* Strings */
+        .cls { color: #6f42c1; font-weight: bold; } /* Classes */
+        .com { color: #6a737d; font-style: italic; } /* Comments */
+
+        /* 🟡 VIVID HIGH-CONTRAST YELLOW HIGHLIGHTER FOR LINE-BY-LINE EXECUTION */
+        .highlight-yellow {
+            background-color: #ffff00 !important; /* Pure Yellow */
+            color: #000000 !important;           /* Black Text for high contrast */
+            border-left: 6px solid #d4af37 !important; /* Gold Left Border */
+            font-weight: bold !important;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.15);
+        }
+
+        .highlight-yellow span {
+            color: #000000 !important; /* Keeps code tokens black when line is highlighted */
+        }
+
+        /* Visual Animation Canvas Box */
+        .canvas-box {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            height: 200px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Controls Area */
+        .controls {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            padding: 10px;
+            border-radius: 6px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: #495057;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        input[type="number"], select {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            color: #212529;
+            padding: 5px;
+            border-radius: 4px;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            background: #0d6efd;
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+
+        button:hover { background: #0b5ed7; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5c636a; }
+        .btn-ide { background: #198754; }
+        .btn-ide:hover { background: #157347; }
+
+        /* Scrollable Terminal Output Box */
+        .terminal-box {
+            flex: 1;
+            background: #1e1e1e;
+            border: 1px solid #ced4da;
+            color: #00ff66;
+            padding: 12px;
+            font-size: 0.85rem;
+            overflow-y: scroll !important; /* Force vertical scrollbar */
+            border-radius: 6px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            max-height: calc(100vh - 430px);
+        }
+
+        .term-err { color: #ff6b6b; }
+        .term-info { color: #4dabf7; }
+        .term-head { color: #ffd43b; }
+        .term-ack { color: #a6e3a1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>NETWORK ROUTING // BELLMAN-FORD &amp; PATH VECTOR ALGORITHM</h1>
+        <span style="color: #6c757d; font-weight: 600;">Distance Vector Routing Simulation</span>
+    </header>
+
+    <div class="container">
+        <!-- LEFT PANEL: FULLY SCROLLABLE SOURCE CODE WITH INDIVIDUAL LINE SPANS -->
+        <div class="panel left-panel">
+            <div class="panel-header">
+                <span class="panel-title">Source Code (BellmanFordRouting.java)</span>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="copyCode()">📋 Copy Code</button>
+                    <button class="btn btn-ide" onclick="openExternalIDE()">External IDE ↗</button>
+                </div>
+            </div>
+            
+            <!-- Dedicated Scrollable Container -->
+            <div class="code-scroll-box" id="codeContainer">
+                <span class="code-line" id="line1"><span class="kwd">import</span> java.util.Arrays;</span>
+                <span class="code-line" id="line2"></span>
+                <span class="code-line" id="line3"><span class="kwd">public class</span> <span class="cls">BellmanFordRouting</span> {</span>
+                <span class="code-line" id="line4">    <span class="kwd">static class</span> <span class="cls">Edge</span> {</span>
+                <span class="code-line" id="line5">        <span class="kwd">int</span> src, dest, weight;</span>
+                <span class="code-line" id="line6">        Edge(<span class="kwd">int</span> s, <span class="kwd">int</span> d, <span class="kwd">int</span> w) {</span>
+                <span class="code-line" id="line7">            src = s; dest = d; weight = w;</span>
+                <span class="code-line" id="line8">        }</span>
+                <span class="code-line" id="line9">    }</span>
+                <span class="code-line" id="line10"></span>
+                <span class="code-line" id="line11">    <span class="kwd">public static void</span> bellmanFord(<span class="kwd">int</span> V, <span class="kwd">int</span> E, Edge[] edges, <span class="kwd">int</span> sourceNode) {</span>
+                <span class="code-line" id="line12">        <span class="kwd">int</span>[] dist = <span class="kwd">new int</span>[V];</span>
+                <span class="code-line" id="line13">        <span class="kwd">int</span>[] parent = <span class="kwd">new int</span>[V];</span>
+                <span class="code-line" id="line14"></span>
+                <span class="code-line" id="line15">        <span class="com">// Step 1: Initialize distances from source to all other vertices as INFINITY</span></span>
+                <span class="code-line" id="line16">        Arrays.fill(dist, 99999);</span>
+                <span class="code-line" id="line17">        Arrays.fill(parent, -1);</span>
+                <span class="code-line" id="line18">        dist[sourceNode] = 0;</span>
+                <span class="code-line" id="line19"></span>
+                <span class="code-line" id="line20">        <span class="com">// Step 2: Relax all edges |V| - 1 times (Distance Vector Update)</span></span>
+                <span class="code-line" id="line21">        <span class="kwd">for</span> (<span class="kwd">int</span> i = 1; i &lt; V; ++i) {</span>
+                <span class="code-line" id="line22">            <span class="kwd">for</span> (<span class="kwd">int</span> j = 0; j &lt; E; ++j) {</span>
+                <span class="code-line" id="line23">                <span class="kwd">int</span> u = edges[j].src;</span>
+                <span class="code-line" id="line24">                <span class="kwd">int</span> v = edges[j].dest;</span>
+                <span class="code-line" id="line25">                <span class="kwd">int</span> weight = edges[j].weight;</span>
+                <span class="code-line" id="line26"></span>
+                <span class="code-line" id="line27">                <span class="kwd">if</span> (dist[u] != 99999 &amp;&amp; dist[u] + weight &lt; dist[v]) {</span>
+                <span class="code-line" id="line28">                    dist[v] = dist[u] + weight;</span>
+                <span class="code-line" id="line29">                    parent[v] = u;</span>
+                <span class="code-line" id="line30">                }</span>
+                <span class="code-line" id="line31">            }</span>
+                <span class="code-line" id="line32">        }</span>
+                <span class="code-line" id="line33"></span>
+                <span class="code-line" id="line34">        <span class="com">// Step 3: Check for negative-weight cycles</span></span>
+                <span class="code-line" id="line35">        <span class="kwd">for</span> (<span class="kwd">int</span> j = 0; j &lt; E; ++j) {</span>
+                <span class="code-line" id="line36">            <span class="kwd">int</span> u = edges[j].src;</span>
+                <span class="code-line" id="line37">            <span class="kwd">int</span> v = edges[j].dest;</span>
+                <span class="code-line" id="line38">            <span class="kwd">int</span> weight = edges[j].weight;</span>
+                <span class="code-line" id="line39">            <span class="kwd">if</span> (dist[u] != 99999 &amp;&amp; dist[u] + weight &lt; dist[v]) {</span>
+                <span class="code-line" id="line40">                System.out.println(<span class="str">"Graph contains negative weight cycle!"</span>);</span>
+                <span class="code-line" id="line41">                <span class="kwd">return</span>;</span>
+                <span class="code-line" id="line42">            }</span>
+                <span class="code-line" id="line43">        }</span>
+                <span class="code-line" id="line44"></span>
+                <span class="code-line" id="line45">        <span class="com">// Output Final Path Vector Routing Table</span></span>
+                <span class="code-line" id="line46">        System.out.println(<span class="str">"\n=== FINAL ROUTING TABLE (From Node "</span> + sourceNode + <span class="str">") ==="</span>);</span>
+                <span class="code-line" id="line47">        <span class="kwd">for</span> (<span class="kwd">int</span> i = 0; i &lt; V; ++i) {</span>
+                <span class="code-line" id="line48">            System.out.println(<span class="str">"Node "</span> + sourceNode + <span class="str">" -&gt; Node "</span> + i + <span class="str">" | Min Cost: "</span> + dist[i]);</span>
+                <span class="code-line" id="line49">        }</span>
+                <span class="code-line" id="line50">    }</span>
+                <span class="code-line" id="line51">}</span>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: CONTROLS, ANIMATION CANVAS & CONSOLE -->
+        <div class="panel right-panel">
+            <div class="panel-header">
+                <span class="panel-title">Visual Simulation &amp; Console</span>
+                <div class="btn-group">
+                    <button onclick="startStepByStepExecution()">▶ Animated Run</button>
+                    <button class="btn-secondary" onclick="runInstantExecution()">⚡ Instant Output</button>
+                    <button class="btn btn-ide" onclick="openExternalIDE()">External IDE ↗</button>
+                </div>
+            </div>
+
+            <!-- Visual Animation Canvas -->
+            <div class="canvas-box">
+                <canvas id="graphCanvas" width="450" height="200"></canvas>
+            </div>
+
+            <div class="controls">
+                <label>
+                    Source Node:
+                    <select id="sourceNode" onchange="drawInitialGraph()">
+                        <option value="0">Node 0 (Router A)</option>
+                        <option value="1">Node 1 (Router B)</option>
+                        <option value="2">Node 2 (Router C)</option>
+                        <option value="3">Node 3 (Router D)</option>
+                        <option value="4">Node 4 (Router E)</option>
+                    </select>
+                </label>
+                <label>
+                    Topology Preset:
+                    <select id="topologyType" onchange="drawInitialGraph()">
+                        <option value="standard">Standard Network (5 Nodes, 8 Edges)</option>
+                        <option value="negative">Network with Negative Link Weights</option>
+                    </select>
+                </label>
+                <label>
+                    Animation Speed:
+                    <select id="animSpeed">
+                        <option value="500">Normal (500ms)</option>
+                        <option value="250">Fast (250ms)</option>
+                        <option value="1000">Slow (1s)</option>
+                    </select>
+                </label>
+                <label>
+                    Action:
+                    <button style="margin-top:2px;" onclick="startStepByStepExecution()">Re-run Simulation</button>
+                </label>
+            </div>
+
+            <div class="panel-title" style="margin-top: 2px;">Standard Output (stdout)</div>
+            
+            <div class="terminal-box" id="console">
+&gt; Ready. Click "ANIMATED RUN" to step through Bellman-Ford execution with line-by-line yellow highlighting.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Node Layout Coordinates for Canvas Visualization
+        const nodePositions = [
+            { x: 60,  y: 100 }, // Node 0
+            { x: 180, y: 40  }, // Node 1
+            { x: 180, y: 160 }, // Node 2
+            { x: 300, y: 160 }, // Node 3
+            { x: 300, y: 40  }  // Node 4
+        ];
+
+        window.onload = () => {
+            drawInitialGraph();
+        };
+
+        function drawInitialGraph() {
+            const src = parseInt(document.getElementById('sourceNode').value);
+            const topologyType = document.getElementById('topologyType').value;
+            const net = getTopologyEdges(topologyType);
+            let dist = new Array(net.V).fill(99999);
+            dist[src] = 0;
+            drawNetworkGraph(net.edges, dist, src, -1, -1);
+        }
+
+        function copyCode() {
+            const rawCode = document.getElementById('codeContainer').innerText;
+            navigator.clipboard.writeText(rawCode);
+            alert("Java source code copied to clipboard!");
+        }
+
+        function openExternalIDE() {
+            window.open('https://www.jdoodle.com/online-java-compiler/', '_blank');
+        }
+
+        // Applies Bright Yellow Highlight to Executing Line & Scrolls to It
+        function highlightYellowLine(lineNumber) {
+            document.querySelectorAll('.highlight-yellow').forEach(el => el.classList.remove('highlight-yellow'));
+
+            const targetLine = document.getElementById(`line${lineNumber}`);
+            if (targetLine) {
+                targetLine.classList.add('highlight-yellow');
+                targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Get Edges based on selected topology
+        function getTopologyEdges(type) {
+            if (type === "standard") {
+                return {
+                    V: 5,
+                    E: 8,
+                    edges: [
+                        { src: 0, dest: 1, weight: -1 },
+                        { src: 0, dest: 2, weight: 4 },
+                        { src: 1, dest: 2, weight: 3 },
+                        { src: 1, dest: 3, weight: 2 },
+                        { src: 1, dest: 4, weight: 2 },
+                        { src: 3, dest: 2, weight: 5 },
+                        { src: 3, dest: 1, weight: 1 },
+                        { src: 4, dest: 3, weight: -3 }
+                    ]
+                };
+            } else {
+                return {
+                    V: 5,
+                    E: 7,
+                    edges: [
+                        { src: 0, dest: 1, weight: 6 },
+                        { src: 0, dest: 2, weight: 7 },
+                        { src: 1, dest: 2, weight: 8 },
+                        { src: 1, dest: 3, weight: 5 },
+                        { src: 1, dest: 4, weight: -4 },
+                        { src: 2, dest: 3, weight: -3 },
+                        { src: 2, dest: 4, weight: 9 }
+                    ]
+                };
+            }
+        }
+
+        // 2D Canvas Renderer for Network Topology Graph Animation
+        function drawNetworkGraph(edges, distArray, sourceNode, activeSrc, activeDest) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Edges (Links)
+            edges.forEach(edge => {
+                const p1 = nodePositions[edge.src];
+                const p2 = nodePositions[edge.dest];
+                const isActive = (edge.src === activeSrc && edge.dest === activeDest);
+
+                ctx.strokeStyle = isActive ? '#ffc107' : '#ced4da';
+                ctx.lineWidth = isActive ? 4 : 2;
+
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+
+                // Draw Directed Arrowhead
+                const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+                const headLen = 8;
+                const arrowX = p2.x - 22 * Math.cos(angle);
+                const arrowY = p2.y - 22 * Math.sin(angle);
+
+                ctx.fillStyle = isActive ? '#ffc107' : '#6c757d';
+                ctx.beginPath();
+                ctx.moveTo(arrowX, arrowY);
+                ctx.lineTo(arrowX - headLen * Math.cos(angle - Math.PI / 6), arrowY - headLen * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(arrowX - headLen * Math.cos(angle + Math.PI / 6), arrowY - headLen * Math.sin(angle + Math.PI / 6));
+                ctx.fill();
+
+                // Draw Edge Weight Badge
+                const midX = (p1.x + p2.x) / 2;
+                const midY = (p1.y + p2.y) / 2;
+                ctx.fillStyle = isActive ? '#ffc107' : '#ffffff';
+                ctx.fillRect(midX - 10, midY - 10, 20, 14);
+                ctx.strokeStyle = isActive ? '#d4af37' : '#adb5bd';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(midX - 10, midY - 10, 20, 14);
+
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 10px Consolas';
+                ctx.fillText(edge.weight, midX - 6, midY + 1);
+            });
+
+            // 2. Draw Nodes (Routers)
+            nodePositions.forEach((pos, idx) => {
+                const isSource = (idx === sourceNode);
+                const isTarget = (idx === activeDest);
+
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 18, 0, Math.PI * 2);
+                ctx.fillStyle = isSource ? '#ffc107' : (isTarget ? '#198754' : '#0d6efd');
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Node ID Text
+                ctx.fillStyle = isSource ? '#000000' : '#ffffff';
+                ctx.font = 'bold 12px Consolas';
+                ctx.fillText(`R${idx}`, pos.x - 7, pos.y + 4);
+
+                // Distance Vector Cost Badge
+                const costVal = distArray[idx] === 99999 ? '∞' : distArray[idx];
+                ctx.fillStyle = '#212529';
+                ctx.font = 'bold 11px Consolas';
+                ctx.fillText(`d=${costVal}`, pos.x - 12, pos.y - 23);
+            });
+        }
+
+        // Animated Execution with Line-by-Line Yellow Highlighting
+        async function startStepByStepExecution() {
+            const consoleEl = document.getElementById('console');
+            const sourceNode = parseInt(document.getElementById('sourceNode').value);
+            const topologyType = document.getElementById('topologyType').value;
+            const delayMs = parseInt(document.getElementById('animSpeed').value);
+
+            const net = getTopologyEdges(topologyType);
+            const V = net.V;
+            const E = net.E;
+            const edges = net.edges;
+
+            consoleEl.innerHTML = '';
+            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+            highlightYellowLine(11);
+            log(`<span class='term-head'>[EXECUTING] BellmanFordRouting.bellmanFord(V=${V}, E=${E}, Source=${sourceNode})...</span>\n`);
+            await sleep(delayMs);
+
+            // Step 1: Initialize Distances
+            highlightYellowLine(16);
+            let dist = new Array(V).fill(99999);
+            let parent = new Array(V).fill(-1);
+            dist[sourceNode] = 0;
+            log(`[INIT] Distance array initialized. Source Node ${sourceNode} set to 0, rest set to ∞.`);
+            drawNetworkGraph(edges, dist, sourceNode, -1, -1);
+            await sleep(delayMs);
+
+            // Step 2: Relax Edges |V| - 1 times
+            highlightYellowLine(21);
+            log(`\n<span class='term-info'>--- STARTING DISTANCE VECTOR RELAXATION PHASES (|V|-1 = ${V - 1} Iterations) ---</span>`);
+            await sleep(delayMs);
+
+            for (let i = 1; i < V; ++i) {
+                log(`\n<span class='term-head'>>>> RELAXATION PASS ${i} OF ${V - 1} <<<</span>`);
+                let updatedInThisPass = false;
+
+                for (let j = 0; j < E; ++j) {
+                    highlightYellowLine(23);
+                    let u = edges[j].src;
+                    let v = edges[j].dest;
+                    let weight = edges[j].weight;
+
+                    drawNetworkGraph(edges, dist, sourceNode, u, v);
+
+                    highlightYellowLine(27);
+                    if (dist[u] !== 99999 && dist[u] + weight < dist[v]) {
+                        highlightYellowLine(28);
+                        let oldDist = dist[v] === 99999 ? "∞" : dist[v];
+                        dist[v] = dist[u] + weight;
+                        parent[v] = u;
+                        updatedInThisPass = true;
+
+                        log(`[UPDATE] Path via Node ${u} to Node ${v}: Cost improved from ${oldDist} -> ${dist[v]} (Weight: ${weight})`, 'term-ack');
+                        drawNetworkGraph(edges, dist, sourceNode, u, v);
+                        await sleep(delayMs);
+                    } else {
+                        await sleep(delayMs / 2);
+                    }
+                }
+
+                if (!updatedInThisPass) {
+                    log(`[CONVERGED] Distance vectors stabilized early at Pass ${i}. No further updates.`, 'term-info');
+                    drawNetworkGraph(edges, dist, sourceNode, -1, -1);
+                    break;
+                }
+            }
+
+            // Step 3: Check for Negative Cycles
+            highlightYellowLine(35);
+            log(`\n<span class='term-info'>--- CHECKING FOR NEGATIVE WEIGHT CYCLES ---</span>`);
+            await sleep(delayMs);
+
+            let hasNegativeCycle = false;
+            for (let j = 0; j < E; ++j) {
+                let u = edges[j].src;
+                let v = edges[j].dest;
+                let weight = edges[j].weight;
+                if (dist[u] !== 99999 && dist[u] + weight < dist[v]) {
+                    highlightYellowLine(40);
+                    log(`[ERROR] ❌ Negative weight cycle detected between Node ${u} and Node ${v}!`, 'term-err');
+                    hasNegativeCycle = true;
+                    drawNetworkGraph(edges, dist, sourceNode, u, v);
+                    break;
+                }
+            }
+
+            if (!hasNegativeCycle) {
+                highlightYellowLine(46);
+                log(`\n<span class='term-ack'>=== FINAL PATH VECTOR ROUTING TABLE (From Source Node ${sourceNode}) ===</span>`);
+                for (let i = 0; i < V; ++i) {
+                    let costStr = dist[i] === 99999 ? "UNREACHABLE" : dist[i];
+                    log(`Source: Node ${sourceNode} | Destination: Node ${i} | Minimum Cost: ${costStr}`);
+                }
+                drawNetworkGraph(edges, dist, sourceNode, -1, -1);
+            }
+        }
+
+        // Instant Run Engine
+        function runInstantExecution() {
+            const consoleEl = document.getElementById('console');
+            const sourceNode = parseInt(document.getElementById('sourceNode').value);
+            const topologyType = document.getElementById('topologyType').value;
+
+            const net = getTopologyEdges(topologyType);
+            const V = net.V;
+            const E = net.E;
+            const edges = net.edges;
+
+            consoleEl.innerHTML = '';
+            highlightYellowLine(11);
+
+            log("<span class='term-head'>[INSTANT RUN OUTPUT]</span>\n");
+
+            let dist = new Array(V).fill(99999);
+            dist[sourceNode] = 0;
+
+            for (let i = 1; i < V; ++i) {
+                for (let j = 0; j < E; ++j) {
+                    let u = edges[j].src;
+                    let v = edges[j].dest;
+                    let weight = edges[j].weight;
+                    if (dist[u] !== 99999 && dist[u] + weight < dist[v]) {
+                        dist[v] = dist[u] + weight;
+                    }
+                }
+            }
+
+            log(`\n<span class='term-ack'>=== FINAL ROUTING TABLE (From Source Node ${sourceNode}) ===</span>`);
+            for (let i = 0; i < V; ++i) {
+                let costStr = dist[i] === 99999 ? "UNREACHABLE" : dist[i];
+                log(`Source: Node ${sourceNode} -> Destination: Node ${i} | Min Cost: ${costStr}`);
+            }
+
+            drawNetworkGraph(edges, dist, sourceNode, -1, -1);
+        }
+
+        function log(msg, cls = "") {
+            const consoleEl = document.getElementById('console');
+            consoleEl.innerHTML += `<div class="${cls}">${msg}</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight; // Auto-scrolls console
+        }
+    </script>
+</body>
+</html>
