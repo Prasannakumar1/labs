@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Network Laboratory (BCS502)</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f4f4;
+            margin: 20px;
+        }
+        h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 12px;
+            vertical-align: middle;
+        }
+        th {
+            background: #007BFF;
+            color: #fff;
+            text-align: center;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .code-col {
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .sl-col {
+            text-align: center;
+            font-weight: bold;
+            width: 8%;
+        }
+        .part-header {
+            background: #003366;
+            color: white;
+            font-size: 16px;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .action-link a {
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .action-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header style="background:#003366; color:white; padding:10px 20px;">
+    <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+            <!-- Logo -->
+            <td width="120" align="center">
+                <img src="https://rymec.edu.in/wp-content/themes/ryse/assets/images/logos.gif"
+                     alt="RYMEC Logo"
+                     style="width:100px; height:auto;">
+            </td>
+
+            <!-- College Name -->
+     <td align="center" style="color: blue;">
+    <h2 style="margin: 0; font-size: 28px;">
+        Veerashaiva Vidyavardhaka Sangha's
+        <br>
+        Rao Bahadur Y. Mahabaleswarappa Engineering College, Ballari
+    </h2>
+        Affiliated to VTU, Belagavi | Approved by AICTE, New Delhi |
+        NAAC A+ Accredited
+
+    <h1 style="margin: 0; font-size: 24px;">
+        Department of Computer Science &amp; Engineering
+        <br>
+        <span style="font-size: 20px;">
+            (CSE, CSE (Data Science) &amp; CSE (Cyber Security))
+        </span>
+    </h1>
+</td>
+        </tr>
+    </table>
+</header>
+
+    <br>
+    <h2><b>Sem:</b> V &nbsp;&nbsp;|&nbsp;&nbsp; Computer Science &amp; Engineering Laboratories</h2>
+    <h3><b>Course Title:</b> Computer Network Laboratory (Subject Code: <b>BCS502</b>)</h3>
+    <br>
+
+    <!-- Lab Experiments Table -->
+    <table>
+        <thead>
+            <tr>
+                <th class="sl-col">Exp No.</th>
+                <th>Experiment Description</th>
+                <th width="15%">Category</th>
+                <th width="12%">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Part A / Simulation Experiments -->
+            <tr>
+                <td colspan="4" class="part-header"><b>PART A: Network Simulation Experiments (NS2/NS3 or Cisco Packet Tracer)</b></td>
+            </tr>
+            <tr>
+                <td class="sl-col">1</td>
+                <td>Implement three nodes point-to-point network with duplex links between them. Set the queue size, vary the bandwidth, and find the number of packets dropped.</td>
+                <td align="center">Simulation</td>
+                <td align="center" class="action-link"><a href="cn/1.html">View Code</a></td>
+            </tr>
+            <tr>
+                <td class="sl-col">2</td>
+                <td>Implement transmission of ping messages/trace route over a network topology consisting of 6 nodes and find the number of packets dropped due to congestion.</td>
+                <td align="center">Simulation</td>
+                <td align="center" class="action-link"><a href="cn/2.html">View Code</a></td>
+            </tr>
+            <tr>
+                <td class="sl-col">3</td>
+                <td>Implement an Ethernet LAN using <i>n</i> nodes and set multiple traffic nodes and plot congestion window for different source / destination.</td>
+                <td align="center">Simulation</td>
+                <td align="center" class="action-link"><a href="cn/3.html">View Code</a></td>
+            </tr>
+
+            <!-- Part B / Programming Experiments -->
+            <tr>
+                <td colspan="4" class="part-header"><b>PART B: Network Programming Experiments (Java)</b></td>
+            </tr>
+            <tr>
+                <td class="sl-col">4</td>
+                <td>Develop a program for error detecting code using CRC-CCITT (16-bits).</td>
+                <td align="center">Java</td>
+                <td align="center" class="action-link"><a href="cn/4.html">View Code</a></td>
+            </tr>
+            <tr>
+                <td class="sl-col">5</td>
+                <td>Develop a program to implement a sliding window protocol in the data link layer.</td>
+                <td align="center">Java</td>
+                <td align="center" class="action-link"><a href="cn/5.html">View Code</a></td>
+            </tr>
+            <tr>
+                <td class="sl-col">6</td>
+                <td>Develop a program to find the shortest path between vertices using the Bellman-Ford and path vector routing algorithm.</td>
+                <td align="center">Java</td>
+                <td align="center" class="action-link"><a href="cn/6.html">View Code</a></td>
+            </tr>
+            <tr>
+                <td class="sl-col">7</td>
+                <td>Using TCP/IP sockets, write a client–server program to make the client send the file name and to make the server send back the contents of the requested file if present.</td>
+                <td align="center">Socket Programming</td>
+                <td align="center" class="action-link"><a href="cn/7.html">View Code</a></td>
+            </tr>
+            <tr>
+                <td class="sl-col">8</td>
+                <td>Develop a program on a datagram socket for client/server to display the messages on client side, typed at the server side.</td>
+                <td align="center">UDP Socket</td>
+                <td align="center" class="action-link"><a href="cn/8.html">View Code</a></td>
+            </tr>
+            <tr>
+                <td class="sl-col">9</td>
+                <td>Develop a program for a simple RSA algorithm to encrypt and decrypt the data.</td>
+                <td align="center">Cryptography</td>
+                <td align="center" class="action-link"><a href="cn/9.html">View Code</a></td>
+            </tr>
+            <tr>
+                <td class="sl-col">10</td>
+                <td>Develop a program for congestion control using a leaky bucket algorithm.</td>
+                <td align="center">Network Algorithm</td>
+                <td align="center" class="action-link"><a href="cn/10.html">View Code</a></td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>
