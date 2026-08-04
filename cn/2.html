@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>6-Node Network Simulation - Side-by-Side View</title>
+    <title>6-Node Network Simulation - NS2 & AWK View</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -22,7 +22,7 @@
             display: flex;
             gap: 15px;
             flex: 1;
-            min-height: 0; /* Prevents overflow */
+            min-height: 0;
         }
 
         .panel {
@@ -123,8 +123,8 @@
     <div class="main-container">
         <!-- LEFT SIDE: Code View -->
         <div class="panel left-panel">
-            <h2>Simulation Source Code (HTML / JS)</h2>
-            <pre class="code-box" id="codeDisplay">Loading code...</pre>
+            <h2>NS2 Simulation (.tcl) & Trace Parser (.awk)</h2>
+            <pre class="code-box" id="codeDisplay"></pre>
         </div>
 
         <!-- RIGHT SIDE: Simulation View -->
@@ -155,9 +155,120 @@
         </div>
     </div>
 
+<script id="ns2SourceCode" type="text/plain">
+===================================================================
+1. NS2 SCRIPT (network_sim.tcl)
+===================================================================
+# Create Simulator Object
+set ns [new Simulator]
+
+# Open Trace and NAM files
+set tracefile [open out.tr w]
+$ns trace-all $tracefile
+set namfile [open out.nam w]
+$ns namtrace-all $namfile
+
+# Finish Procedure
+proc finish {} {
+    global ns tracefile namfile
+    $ns flush-trace
+    close $tracefile
+    close $namfile
+    exec nam out.nam &
+    exit 0
+}
+
+# Create 6 Nodes
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+set n3 [$ns node]
+set n4 [$ns node]
+set n5 [$ns node]
+
+# Create Duplex Links with DropTail Queues (Max Queue Size: 2)
+$ns duplex-link $n0 $n1 2Mb 10ms DropTail
+$ns duplex-link $n0 $n2 2Mb 10ms DropTail
+$ns duplex-link $n1 $n3 2Mb 10ms DropTail
+$ns duplex-link $n2 $n4 2Mb 10ms DropTail
+$ns duplex-link $n3 $n5 2Mb 10ms DropTail
+$ns duplex-link $n4 $n5 2Mb 10ms DropTail
+
+$ns queue-limit $n0 $n1 2
+$ns queue-limit $n0 $n2 2
+$ns queue-limit $n1 $n3 2
+$ns queue-limit $n2 $n4 2
+$ns queue-limit $n3 $n5 2
+$ns queue-limit $n4 $n5 2
+
+# Set Up UDP Agent and CBR Traffic from n0 to n5
+set udp0 [new Agent/UDP]
+$ns attach-agent $n0 $udp0
+
+set null0 [new Agent/Null]
+$ns attach-agent $n5 $null0
+$ns connect $udp0 $null0
+
+set cbr0 [new Application/Traffic/CBR]
+$cbr0 set packetSize_ 500
+$cbr0 set interval_ 0.005
+$cbr0 attach-agent $udp0
+
+# Schedule Events
+$ns at 0.5 "$cbr0 start"
+$ns at 4.5 "$cbr0 stop"
+$ns at 5.0 "finish"
+
+$ns run
+
+
+===================================================================
+2. AWK ANALYSIS SCRIPT (analyze_trace.awk)
+===================================================================
+BEGIN {
+    sent_packets = 0;
+    received_packets = 0;
+    dropped_packets = 0;
+}
+
+{
+    event = $1;
+    time = $2;
+    from_node = $3;
+    to_node = $4;
+    pkt_type = $5;
+    pkt_size = $6;
+
+    # Track packet events
+    if (event == "+" && from_node == 0) {
+        sent_packets++;
+    }
+    else if (event == "r" && to_node == 5) {
+        received_packets++;
+    }
+    else if (event == "d") {
+        dropped_packets++;
+    }
+}
+
+END {
+    print "\n--- NS2 SIMULATION SUMMARY ---";
+    print "Total Packets Sent     : " sent_packets;
+    print "Successful Received    : " received_packets;
+    print "Dropped Packets        : " dropped_packets;
+    
+    if (sent_packets > 0) {
+        loss_rate = (dropped_packets / sent_packets) * 100;
+        printf("Packet Loss Rate       : %.2f%%\n", loss_rate);
+    } else {
+        print "Packet Loss Rate       : 0.00%";
+    }
+}
+</script>
+
 <script>
-    // Auto-populate the left-side code box with this script's contents for visualization
-    document.getElementById('codeDisplay').textContent = document.documentElement.outerHTML;
+    // Populate code viewer with the NS2 and AWK code block
+    document.getElementById('codeDisplay').textContent = document.getElementById('ns2SourceCode').textContent.trim();
 
     const canvas = document.getElementById('netCanvas');
     const ctx = canvas.getContext('2d');
