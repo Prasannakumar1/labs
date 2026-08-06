@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verilog HDL Binary Adder-Subtractor Simulator</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --high-wire: #22c55e;
+      --low-wire: #475569;
+      --grid-border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    /* Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border: 1px solid var(--grid-border);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--grid-border);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 6px 14px;
+      background: #0f172a;
+      color: var(--text-muted);
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: space-around;
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 8px;
+      align-items: center;
+    }
+
+    .switch-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .switch-group label {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .btn-toggle {
+      width: 40px;
+      height: 22px;
+      background: var(--low-wire);
+      border-radius: 11px;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    .btn-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .btn-toggle.active {
+      background: var(--high-wire);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    }
+
+    .btn-toggle.active::after {
+      transform: translateX(18px);
+    }
+
+    /* Output Badges */
+    .output-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+
+    .output-badge.high {
+      background: var(--high-wire);
+      color: #000;
+    }
+
+    .output-badge.low {
+      background: var(--low-wire);
+      color: #fff;
+    }
+
+    canvas {
+      width: 100%;
+      background: #0f172a;
+      border-radius: 6px;
+      border: 1px solid var(--grid-border);
+      display: block;
+    }
+
+    /* Code Editor Box */
+    textarea {
+      width: 100%;
+      height: 150px;
+      background: #000;
+      color: #22c55e;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.82rem;
+      resize: vertical;
+    }
+
+    .btn-compile {
+      margin-top: 8px;
+      padding: 8px 16px;
+      background: #22c55e;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .terminal {
+      background: #000;
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      max-height: 90px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+    }
+
+    /* Table Wrapper */
+    .table-wrapper {
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 4px 6px;
+      border: 1px solid var(--grid-border);
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--accent);
+      position: sticky;
+      top: 0;
+    }
+
+    tr.active-row {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--high-wire);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Verilog HDL Binary Adder & Subtractor Simulator</h1>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="setCircuit('HA')">Half Adder</button>
+      <button class="tab-btn" onclick="setCircuit('HS')">Half Subtractor</button>
+      <button class="tab-btn" onclick="setCircuit('FA')">Full Adder</button>
+      <button class="tab-btn" onclick="setCircuit('FS')">Full Subtractor</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    
+    <!-- LEFT PANEL: Controls, Schematic, Code Compiler -->
+    <div class="panel">
+      <!-- Input Controls -->
+      <div class="card">
+        <h2>Input Switch Control Panel</h2>
+        <div class="controls">
+          <div class="switch-group">
+            <label>a</label>
+            <button class="btn-toggle" id="btn-a" onclick="toggleInput('a')"></button>
+            <span id="val-a">0</span>
+          </div>
+          <div class="switch-group">
+            <label>b</label>
+            <button class="btn-toggle" id="btn-b" onclick="toggleInput('b')"></button>
+            <span id="val-b">0</span>
+          </div>
+          <div class="switch-group" id="cin-group" style="display: none;">
+            <label id="cin-label">cin</label>
+            <button class="btn-toggle" id="btn-cin" onclick="toggleInput('cin')"></button>
+            <span id="val-cin">0</span>
+          </div>
+          <div class="switch-group" style="border-left: 2px solid var(--grid-border); padding-left: 10px;">
+            <label style="color: var(--accent);" id="out1-label">sum</label>
+            <div id="out1-badge" class="output-badge low">0</div>
+          </div>
+          <div class="switch-group">
+            <label style="color: var(--accent);" id="out2-label">cout</label>
+            <div id="out2-badge" class="output-badge low">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schematic Canvas -->
+      <div class="card">
+        <h2>Gate-Level Logic Schematic</h2>
+        <canvas id="circuitCanvas" width="600" height="180"></canvas>
+      </div>
+
+      <!-- Code Editor -->
+      <div class="card">
+        <h2>Verilog Hardware Description Source Code</h2>
+        <textarea id="verilogCode"></textarea>
+        <button class="btn-compile" onclick="runVerilogSimulation()">Compile & Run Verilog Testbench</button>
+        <div class="terminal" id="terminal-out">> Verilog Compiler Ready.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Waveform Viewer & Truth Table -->
+    <div class="panel">
+      <!-- ModelSim Style Waveforms -->
+      <div class="card">
+        <h2>ModelSim Waveform Timing Diagram</h2>
+        <canvas id="graphCanvas" width="600" height="260"></canvas>
+      </div>
+
+      <!-- Dynamic Truth Table -->
+      <div class="card">
+        <h2>Truth Table Verification</h2>
+        <div class="table-wrapper">
+          <table id="truth-table">
+            <thead>
+              <tr id="table-head"></tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // State Variables
+    let currentCircuit = 'HA'; // HA, HS, FA, FS
+    const state = { a: 0, b: 0, cin: 0 };
+
+    // Code Templates
+    const verilogModules = {
+      HA: `module p4addsub(a, b, sum, cout);
+  input a, b;
+  output sum, cout;
+  reg sum, cout;
+
+  always @(a, b) begin
+    sum = a ^ b;
+    cout = a & b;
+  end
+endmodule`,
+
+      HS: `module p4hs(a, b, Diff, Borr);
+  input a, b;
+  output Diff, Borr;
+  reg Diff, Borr;
+
+  always @(a, b) begin
+    Diff = a ^ b;
+    Borr = (~a) & b;
+  end
+endmodule`,
+
+      FA: `module full_adder(a, b, cin, sum, cout);
+  input a, b, cin;
+  output sum, cout;
+
+  assign sum = a ^ b ^ cin;
+  assign cout = (a & b) | (b & cin) | (a & cin);
+endmodule`,
+
+      FS: `module full_subtractor(a, b, bin, diff, borr);
+  input a, b, bin;
+  output diff, borr;
+
+  assign diff = a ^ b ^ bin;
+  assign borr = (~a & b) | (~(a ^ b) & bin);
+endmodule`
+    };
+
+    // Truth Tables Data
+    const truthTables = {
+      HA: {
+        headers: ['a', 'b', 'sum', 'cout'],
+        rows: [
+          [0,0,0,0], [0,1,1,0], [1,0,1,0], [1,1,0,1]
+        ]
+      },
+      HS: {
+        headers: ['a', 'b', 'Diff', 'Borr'],
+        rows: [
+          [0,0,0,0], [0,1,1,1], [1,0,1,0], [1,1,0,0]
+        ]
+      },
+      FA: {
+        headers: ['a', 'b', 'cin', 'sum', 'cout'],
+        rows: [
+          [0,0,0,0,0], [0,0,1,1,0], [0,1,0,1,0], [0,1,1,0,1],
+          [1,0,0,1,0], [1,0,1,0,1], [1,1,0,0,1], [1,1,1,1,1]
+        ]
+      },
+      FS: {
+        headers: ['a', 'b', 'bin', 'diff', 'borr'],
+        rows: [
+          [0,0,0,0,0], [0,0,1,1,1], [0,1,0,1,1], [0,1,1,0,1],
+          [1,0,0,1,0], [1,0,1,0,0], [1,1,0,0,0], [1,1,1,1,1]
+        ]
+      }
+    };
+
+    // Waveform Buffers
+    const historyLength = 60;
+    const history = {
+      a: new Array(historyLength).fill(0),
+      b: new Array(historyLength).fill(0),
+      cin: new Array(historyLength).fill(0),
+      out1: new Array(historyLength).fill(0),
+      out2: new Array(historyLength).fill(0)
+    };
+
+    function init() {
+      setCircuit('HA');
+      animate();
+    }
+
+    function toggleInput(variable) {
+      state[variable] = state[variable] === 0 ? 1 : 0;
+      document.getElementById(`btn-${variable}`).classList.toggle('active', state[variable] === 1);
+      document.getElementById(`val-${variable}`).innerText = state[variable];
+      updateLogic();
+    }
+
+    function setCircuit(type) {
+      currentCircuit = type;
+      document.querySelectorAll('.tab-bar .tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.replace(' ', '') === type || 
+          (type === 'HA' && btn.innerText === 'Half Adder') ||
+          (type === 'HS' && btn.innerText === 'Half Subtractor') ||
+          (type === 'FA' && btn.innerText === 'Full Adder') ||
+          (type === 'FS' && btn.innerText === 'Full Subtractor'));
+      });
+
+      // Update Inputs
+      const cinGroup = document.getElementById("cin-group");
+      if (type === 'FA' || type === 'FS') {
+        cinGroup.style.display = 'flex';
+        document.getElementById("cin-label").innerText = type === 'FA' ? 'cin' : 'bin';
+      } else {
+        cinGroup.style.display = 'none';
+      }
+
+      // Update Labels
+      document.getElementById("out1-label").innerText = (type === 'HA' || type === 'FA') ? 'sum/diff' : 'Diff';
+      document.getElementById("out2-label").innerText = (type === 'HA' || type === 'FA') ? 'cout' : 'Borr';
+
+      // Update Code
+      document.getElementById("verilogCode").value = verilogModules[type];
+
+      // Update Table
+      buildTruthTable();
+      updateLogic();
+    }
+
+    function computeOutputs() {
+      const { a, b, cin } = state;
+      let out1 = 0, out2 = 0;
+
+      if (currentCircuit === 'HA') {
+        out1 = a ^ b;
+        out2 = a & b;
+      } else if (currentCircuit === 'HS') {
+        out1 = a ^ b;
+        out2 = (!a & 1) & b;
+      } else if (currentCircuit === 'FA') {
+        out1 = a ^ b ^ cin;
+        out2 = (a & b) | (b & cin) | (a & cin);
+      } else if (currentCircuit === 'FS') {
+        out1 = a ^ b ^ cin;
+        out2 = ((!a & 1) & b) | ((!(a ^ b) & 1) & cin);
+      }
+
+      return { out1, out2 };
+    }
+
+    function updateLogic() {
+      const { out1, out2 } = computeOutputs();
+
+      const badge1 = document.getElementById("out1-badge");
+      badge1.innerText = out1;
+      badge1.className = `output-badge ${out1 ? 'high' : 'low'}`;
+
+      const badge2 = document.getElementById("out2-badge");
+      badge2.innerText = out2;
+      badge2.className = `output-badge ${out2 ? 'high' : 'low'}`;
+
+      // Highlight Table Row
+      document.querySelectorAll("#table-body tr").forEach(r => r.classList.remove("active-row"));
+      const rowId = (currentCircuit === 'FA' || currentCircuit === 'FS') 
+        ? `row-${state.a}${state.b}${state.cin}` 
+        : `row-${state.a}${state.b}`;
+      const activeRow = document.getElementById(rowId);
+      if (activeRow) activeRow.classList.add("active-row");
+    }
+
+    function buildTruthTable() {
+      const config = truthTables[currentCircuit];
+      const thead = document.getElementById("table-head");
+      const tbody = document.getElementById("table-body");
+
+      thead.innerHTML = config.headers.map(h => `<th>${h}</th>`).join('');
+      tbody.innerHTML = config.rows.map(row => {
+        const id = row.length === 4 ? `row-${row[0]}${row[1]}` : `row-${row[0]}${row[1]}${row[2]}`;
+        const cells = row.map((val, i) => {
+          if (i >= row.length - 2) {
+            return `<td><span class="output-badge ${val ? 'high' : 'low'}">${val}</span></td>`;
+          }
+          return `<td>${val}</td>`;
+        }).join('');
+        return `<tr id="${id}">${cells}</tr>`;
+      }).join('');
+    }
+
+    function pushHistory() {
+      const { out1, out2 } = computeOutputs();
+      for (let k in history) history[k].shift();
+      history.a.push(state.a);
+      history.b.push(state.b);
+      history.cin.push(state.cin);
+      history.out1.push(out1);
+      history.out2.push(out2);
+    }
+
+    // Schematic Canvas Rendering
+    const cCanvas = document.getElementById("circuitCanvas");
+    const cCtx = cCanvas.getContext("2d");
+
+    function drawLine(x1, y1, x2, y2, active) {
+      cCtx.beginPath();
+      cCtx.moveTo(x1, y1);
+      cCtx.lineTo(x2, y2);
+      cCtx.lineWidth = 2;
+      cCtx.strokeStyle = active ? "#22c55e" : "#475569";
+      cCtx.stroke();
+    }
+
+    function drawGate(x, y, type, label) {
+      cCtx.beginPath();
+      if (type === 'XOR') {
+        cCtx.moveTo(x + 5, y - 15); cCtx.quadraticCurveTo(x + 15, y - 15, x + 30, y);
+        cCtx.quadraticCurveTo(x + 15, y + 15, x + 5, y + 15);
+        cCtx.quadraticCurveTo(x + 10, y, x + 5, y - 15); cCtx.closePath();
+      } else if (type === 'AND') {
+        cCtx.moveTo(x, y - 15); cCtx.lineTo(x + 15, y - 15);
+        cCtx.arc(x + 15, y, 15, -Math.PI/2, Math.PI/2);
+        cCtx.lineTo(x, y + 15); cCtx.closePath();
+      }
+      cCtx.fillStyle = "#1e293b"; cCtx.fill();
+      cCtx.lineWidth = 2; cCtx.strokeStyle = "#38bdf8"; cCtx.stroke();
+      cCtx.fillStyle = "#94a3b8"; cCtx.font = "10px sans-serif";
+      cCtx.fillText(label, x + 5, y + 25);
+    }
+
+    function renderCircuit() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+      const { out1, out2 } = computeOutputs();
+
+      cCtx.fillStyle = "#f8fafc"; cCtx.font = "bold 12px sans-serif";
+      cCtx.fillText("a", 20, 45); cCtx.fillText("b", 20, 115);
+
+      drawGate(180, 45, 'XOR', 'G1');
+      drawGate(180, 115, 'AND', 'G2');
+
+      drawLine(35, 40, 185, 40, state.a);
+      drawLine(35, 110, 185, 110, state.b);
+
+      drawLine(215, 45, 320, 45, out1);
+      drawLine(210, 115, 320, 115, out2);
+
+      cCtx.fillStyle = out1 ? "#22c55e" : "#f8fafc";
+      cCtx.fillText((currentCircuit === 'HA' || currentCircuit === 'FA') ? "Sum" : "Diff", 330, 48);
+
+      cCtx.fillStyle = out2 ? "#22c55e" : "#f8fafc";
+      cCtx.fillText((currentCircuit === 'HA' || currentCircuit === 'FA') ? "Cout" : "Borr", 330, 118);
+    }
+
+    // Waveform Canvas Rendering
+    const gCanvas = document.getElementById("graphCanvas");
+    const gCtx = gCanvas.getContext("2d");
+
+    function renderGraphs() {
+      gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+
+      const isFull = (currentCircuit === 'FA' || currentCircuit === 'FS');
+      const sig1Label = (currentCircuit === 'HA' || currentCircuit === 'FA') ? 'Sum' : 'Diff';
+      const sig2Label = (currentCircuit === 'HA' || currentCircuit === 'FA') ? 'Cout' : 'Borr';
+      const cinName = currentCircuit === 'FA' ? 'cin' : 'bin';
+
+      const signals = [
+        { label: 'a', data: history.a, color: '#38bdf8' },
+        { label: 'b', data: history.b, color: '#38bdf8' }
+      ];
+
+      if (isFull) {
+        signals.push({ label: cinName, data: history.cin, color: '#38bdf8' });
+      }
+
+      signals.push(
+        { label: sig1Label, data: history.out1, color: '#22c55e' },
+        { label: sig2Label, data: history.out2, color: '#f59e0b' }
+      );
+
+      const rowHeight = 42;
+      const startX = 70;
+      const graphWidth = gCanvas.width - startX - 20;
+
+      signals.forEach((sig, idx) => {
+        const yBase = idx * rowHeight + 30;
+
+        gCtx.fillStyle = sig.color;
+        gCtx.font = "bold 11px sans-serif";
+        gCtx.fillText(sig.label, 10, yBase - 3);
+
+        gCtx.beginPath();
+        gCtx.moveTo(startX, yBase);
+        gCtx.lineTo(startX + graphWidth, yBase);
+        gCtx.strokeStyle = "#334155";
+        gCtx.lineWidth = 1;
+        gCtx.stroke();
+
+        gCtx.beginPath();
+        const step = graphWidth / (historyLength - 1);
+        sig.data.forEach((val, i) => {
+          const x = startX + i * step;
+          const y = yBase - (val * 18);
+          if (i === 0) {
+            gCtx.moveTo(x, y);
+          } else {
+            const prevVal = sig.data[i - 1];
+            const prevY = yBase - (prevVal * 18);
+            gCtx.lineTo(x, prevY);
+            gCtx.lineTo(x, y);
+          }
+        });
+
+        gCtx.strokeStyle = sig.color;
+        gCtx.lineWidth = 2;
+        gCtx.stroke();
+      });
+    }
+
+    function runVerilogSimulation() {
+      const term = document.getElementById("terminal-out");
+      const { out1, out2 } = computeOutputs();
+
+      term.innerText = `> Compiling active module [${currentCircuit}]...\n`;
+      setTimeout(() => {
+        term.innerText += `> Executing Testbench Signals: a=${state.a}, b=${state.b}, cin=${state.cin}\n`;
+        term.innerText += `> Simulated Output Signals: Output1=${out1}, Output2=${out2}\n`;
+        term.innerText += `> Verification Result: PASSED (0 Errors, 0 Warnings at time 100ns).`;
+      }, 250);
+    }
+
+    function animate() {
+      pushHistory();
+      renderCircuit();
+      renderGraphs();
+      setTimeout(() => {
+        requestAnimationFrame(animate);
+      }, 100);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

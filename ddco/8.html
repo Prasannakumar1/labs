@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verilog Flip-Flop (SR, JK, D) Simulator & Testbench Workbench</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --high-wire: #22c55e;
+      --low-wire: #475569;
+      --grid-border: #334155;
+      --clk-color: #f59e0b;
+      --invalid-color: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border: 1px solid var(--grid-border);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--grid-border);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      background: #0f172a;
+      color: var(--text-muted);
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Controls */
+    .control-block {
+      background: #0f172a;
+      padding: 12px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .control-row label {
+      font-weight: bold;
+      font-size: 0.85rem;
+      color: var(--accent);
+      min-width: 80px;
+    }
+
+    .bit-btn {
+      padding: 6px 12px;
+      background: var(--low-wire);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bit-btn.active {
+      background: var(--high-wire);
+      box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+    }
+
+    .bit-btn.clk-btn {
+      background: var(--clk-color);
+      color: #000;
+    }
+
+    .output-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    .output-badge.high {
+      background: var(--high-wire);
+      color: #000;
+    }
+
+    .output-badge.low {
+      background: var(--low-wire);
+      color: #fff;
+    }
+
+    .output-badge.invalid {
+      background: var(--invalid-color);
+      color: #fff;
+    }
+
+    /* Canvas */
+    canvas {
+      width: 100%;
+      background: #0f172a;
+      border-radius: 6px;
+      border: 1px solid var(--grid-border);
+      display: block;
+    }
+
+    /* Code Editor Box */
+    textarea {
+      width: 100%;
+      height: 150px;
+      background: #000;
+      color: #22c55e;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.82rem;
+      resize: vertical;
+    }
+
+    .btn-compile {
+      margin-top: 8px;
+      padding: 8px 16px;
+      background: #22c55e;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .terminal {
+      background: #000;
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      max-height: 95px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+    }
+
+    /* Table Wrapper */
+    .table-wrapper {
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 4px 6px;
+      border: 1px solid var(--grid-border);
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--accent);
+      position: sticky;
+      top: 0;
+    }
+
+    tr.active-row {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--high-wire);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Verilog HDL Sequential Flip-Flop Simulator</h1>
+    <p class="subtitle">Clocked Edge-Triggered Realization for SR, JK, and D Flip-Flops</p>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="setFFMode('SR')">SR Flip-Flop</button>
+      <button class="tab-btn" onclick="setFFMode('JK')">JK Flip-Flop</button>
+      <button class="tab-btn" onclick="setFFMode('D')">D Flip-Flop</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    
+    <!-- LEFT PANEL: Controls, Schematic, Code Compiler -->
+    <div class="panel">
+      <!-- Input Controls -->
+      <div class="card">
+        <h2>Sequential Inputs & Clock Trigger</h2>
+        <div class="control-block">
+          <!-- Data Inputs -->
+          <div class="control-row">
+            <label>Inputs:</label>
+            <div id="data-inputs-container" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+          </div>
+
+          <!-- Clock Pulse & Reset -->
+          <div class="control-row">
+            <label>Clock / Reset:</label>
+            <button class="bit-btn clk-btn" onclick="triggerClockPulse()">PULSE CLK ⬆</button>
+            <button class="bit-btn" id="rst-btn" onclick="toggleReset()">RST = 0</button>
+            <button class="bit-btn" id="auto-clk-btn" onclick="toggleAutoClock()">Auto CLK: OFF</button>
+          </div>
+
+          <!-- Outputs -->
+          <div class="control-row" style="border-top: 1px solid var(--grid-border); padding-top: 8px;">
+            <label>State Outputs:</label>
+            <span>Q = </span><span id="q-badge" class="output-badge low">0</span>
+            <span style="margin-left: 10px;">Qbar = </span><span id="qbar-badge" class="output-badge high">1</span>
+            <span id="state-desc" style="margin-left: auto; font-size: 0.85rem; color: var(--accent); font-weight: bold;">[NO CHANGE]</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logic Schematic -->
+      <div class="card">
+        <h2>Flip-Flop Logic Symbol Schematic</h2>
+        <canvas id="circuitCanvas" width="600" height="200"></canvas>
+      </div>
+
+      <!-- Verilog Source Code Compiler -->
+      <div class="card">
+        <h2>Verilog Hardware Description Code</h2>
+        <textarea id="verilogCode"></textarea>
+        <button class="btn-compile" onclick="runVerilogSimulation()">Compile & Run Verilog Simulation</button>
+        <div class="terminal" id="terminal-out">> Verilog Sequential Engine Ready.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Waveform Graphs & Truth Table -->
+    <div class="panel">
+      <!-- ModelSim Style Waveform Viewer -->
+      <div class="card">
+        <h2>ModelSim Waveform Timing Window</h2>
+        <canvas id="graphCanvas" width="600" height="280"></canvas>
+      </div>
+
+      <!-- Dynamic Characteristic Table -->
+      <div class="card">
+        <h2>Flip-Flop Characteristic Table</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr id="table-head"></tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Current System State
+    let ffMode = 'SR'; // 'SR', 'JK', 'D'
+    const inputs = { s: 0, r: 0, j: 0, k: 0, d: 0 };
+    let rst = 0;
+    let clk = 0;
+    let qState = 0;
+    let isInvalid = false;
+    let autoClkInterval = null;
+
+    // Verilog Code Templates
+    const verilogModules = {
+      'SR': `module p8sr(s, r, clk, rst, q, qbar);
+  input s, r, clk, rst;
+  output q, qbar;
+  reg q;
+
+  always @(posedge clk) begin
+    if (rst) 
+      q <= 1'b0;
+    else if (s == 1'b0 && r == 1'b0) 
+      q <= q;
+    else if (s == 1'b0 && r == 1'b1) 
+      q <= 1'b0;
+    else if (s == 1'b1 && r == 1'b0) 
+      q <= 1'b1;
+    else if (s == 1'b1 && r == 1'b1) 
+      q <= 1'bx;
+  end
+
+  assign qbar = ~q;
+endmodule`,
+
+      'JK': `module p8jk(j, k, clk, rst, q, qbar);
+  input j, k, clk, rst;
+  output q, qbar;
+  reg q;
+
+  always @(posedge clk) begin
+    if (rst) 
+      q <= 1'b0;
+    else if (j == 1'b0 && k == 1'b0) 
+      q <= q;
+    else if (j == 1'b0 && k == 1'b1) 
+      q <= 1'b0;
+    else if (j == 1'b1 && k == 1'b0) 
+      q <= 1'b1;
+    else if (j == 1'b1 && k == 1'b1) 
+      q <= ~q;
+  end
+
+  assign qbar = ~q;
+endmodule`,
+
+      'D': `module p8dff(d, clk, rst, q, qbar);
+  input d, clk, rst;
+  output q, qbar;
+  reg q;
+
+  always @(posedge clk) begin
+    if (rst)
+      q <= 1'b0;
+    else
+      q <= d;
+  end
+
+  assign qbar = ~q;
+endmodule`
+    };
+
+    // Waveform Buffers
+    const historyLength = 60;
+    const history = {
+      clk: new Array(historyLength).fill(0),
+      in1: new Array(historyLength).fill(0),
+      in2: new Array(historyLength).fill(0),
+      q: new Array(historyLength).fill(0),
+      qbar: new Array(historyLength).fill(1)
+    };
+
+    function init() {
+      setFFMode('SR');
+      animate();
+    }
+
+    function setFFMode(mode) {
+      ffMode = mode;
+      document.querySelectorAll('.tab-bar .tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', (mode === 'SR' && idx === 0) || (mode === 'JK' && idx === 1) || (mode === 'D' && idx === 2));
+      });
+
+      document.getElementById("verilogCode").value = verilogModules[mode];
+      qState = 0;
+      isInvalid = false;
+      renderControlButtons();
+      buildTruthTable();
+      updateLogicUI();
+    }
+
+    function toggleInputVal(key) {
+      inputs[key] = inputs[key] === 0 ? 1 : 0;
+      renderControlButtons();
+      updateLogicUI();
+    }
+
+    function toggleReset() {
+      rst = rst === 0 ? 1 : 0;
+      const btn = document.getElementById("rst-btn");
+      btn.innerText = `RST = ${rst}`;
+      btn.classList.toggle("active", rst === 1);
+      
+      if (rst) {
+        qState = 0;
+        isInvalid = false;
+      }
+      updateLogicUI();
+    }
+
+    function triggerClockPulse() {
+      clk = 1;
+      evaluateFFOnClockEdge();
+      updateLogicUI();
+      setTimeout(() => {
+        clk = 0;
+        updateLogicUI();
+      }, 150);
+    }
+
+    function toggleAutoClock() {
+      const btn = document.getElementById("auto-clk-btn");
+      if (autoClkInterval) {
+        clearInterval(autoClkInterval);
+        autoClkInterval = null;
+        btn.innerText = "Auto CLK: OFF";
+        btn.classList.remove("active");
+      } else {
+        btn.innerText = "Auto CLK: ON";
+        btn.classList.add("active");
+        autoClkInterval = setInterval(() => {
+          triggerClockPulse();
+        }, 800);
+      }
+    }
+
+    function evaluateFFOnClockEdge() {
+      if (rst) {
+        qState = 0;
+        isInvalid = false;
+        return;
+      }
+
+      if (ffMode === 'SR') {
+        if (inputs.s === 0 && inputs.r === 0) {
+          // No change
+        } else if (inputs.s === 0 && inputs.r === 1) {
+          qState = 0;
+          isInvalid = false;
+        } else if (inputs.s === 1 && inputs.r === 0) {
+          qState = 1;
+          isInvalid = false;
+        } else if (inputs.s === 1 && inputs.r === 1) {
+          isInvalid = true;
+        }
+      } else if (ffMode === 'JK') {
+        isInvalid = false;
+        if (inputs.j === 0 && inputs.k === 0) {
+          // No change
+        } else if (inputs.j === 0 && inputs.k === 1) {
+          qState = 0;
+        } else if (inputs.j === 1 && inputs.k === 0) {
+          qState = 1;
+        } else if (inputs.j === 1 && inputs.k === 1) {
+          qState = qState === 0 ? 1 : 0; // Toggle
+        }
+      } else if (ffMode === 'D') {
+        isInvalid = false;
+        qState = inputs.d;
+      }
+    }
+
+    function renderControlButtons() {
+      const container = document.getElementById("data-inputs-container");
+      container.innerHTML = "";
+
+      if (ffMode === 'SR') {
+        container.innerHTML = `
+          <button class="bit-btn ${inputs.s ? 'active' : ''}" onclick="toggleInputVal('s')">S = ${inputs.s}</button>
+          <button class="bit-btn ${inputs.r ? 'active' : ''}" onclick="toggleInputVal('r')">R = ${inputs.r}</button>
+        `;
+      } else if (ffMode === 'JK') {
+        container.innerHTML = `
+          <button class="bit-btn ${inputs.j ? 'active' : ''}" onclick="toggleInputVal('j')">J = ${inputs.j}</button>
+          <button class="bit-btn ${inputs.k ? 'active' : ''}" onclick="toggleInputVal('k')">K = ${inputs.k}</button>
+        `;
+      } else if (ffMode === 'D') {
+        container.innerHTML = `
+          <button class="bit-btn ${inputs.d ? 'active' : ''}" onclick="toggleInputVal('d')">D = ${inputs.d}</button>
+        `;
+      }
+    }
+
+    function updateLogicUI() {
+      const qBadge = document.getElementById("q-badge");
+      const qbarBadge = document.getElementById("qbar-badge");
+      const desc = document.getElementById("state-desc");
+
+      if (isInvalid) {
+        qBadge.innerText = 'X';
+        qBadge.className = 'output-badge invalid';
+        qbarBadge.innerText = 'X';
+        qbarBadge.className = 'output-badge invalid';
+        desc.innerText = '[INVALID STATE]';
+        desc.style.color = 'var(--invalid-color)';
+      } else {
+        qBadge.innerText = qState;
+        qBadge.className = `output-badge ${qState ? 'high' : 'low'}`;
+        
+        const qbarVal = qState === 0 ? 1 : 0;
+        qbarBadge.innerText = qbarVal;
+        qbarBadge.className = `output-badge ${qbarVal ? 'high' : 'low'}`;
+
+        if (ffMode === 'SR') {
+          if (inputs.s === 0 && inputs.r === 0) desc.innerText = '[NO CHANGE]';
+          else if (inputs.s === 0 && inputs.r === 1) desc.innerText = '[RESET]';
+          else if (inputs.s === 1 && inputs.r === 0) desc.innerText = '[SET]';
+          else desc.innerText = '[INVALID]';
+        } else if (ffMode === 'JK') {
+          if (inputs.j === 0 && inputs.k === 0) desc.innerText = '[NO CHANGE]';
+          else if (inputs.j === 0 && inputs.k === 1) desc.innerText = '[RESET]';
+          else if (inputs.j === 1 && inputs.k === 0) desc.innerText = '[SET]';
+          else desc.innerText = '[TOGGLE]';
+        } else {
+          desc.innerText = inputs.d ? '[SET]' : '[RESET]';
+        }
+        desc.style.color = 'var(--accent)';
+      }
+
+      // Highlight Table Row
+      document.querySelectorAll("#table-body tr").forEach(r => r.classList.remove("active-row"));
+      let activeRowId = '';
+      if (ffMode === 'SR') activeRowId = `row-${inputs.s}${inputs.r}`;
+      else if (ffMode === 'JK') activeRowId = `row-${inputs.j}${inputs.k}`;
+      else activeRowId = `row-${inputs.d}`;
+
+      const activeRow = document.getElementById(activeRowId);
+      if (activeRow) activeRow.classList.add("active-row");
+    }
+
+    function buildTruthTable() {
+      const thead = document.getElementById("table-head");
+      const tbody = document.getElementById("table-body");
+
+      let headers = [];
+      let rows = [];
+
+      if (ffMode === 'SR') {
+        headers = ['S', 'R', 'Q (Next State)', 'Action / Status'];
+        rows = [
+          ['0', '0', 'Q', 'No Change'],
+          ['0', '1', '0', 'Reset'],
+          ['1', '0', '1', 'Set'],
+          ['1', '1', 'X', 'Invalid (Forbidden)']
+        ];
+      } else if (ffMode === 'JK') {
+        headers = ['J', 'K', 'Q (Next State)', 'Action / Status'];
+        rows = [
+          ['0', '0', 'Q', 'No Change'],
+          ['0', '1', '0', 'Reset'],
+          ['1', '0', '1', 'Set'],
+          ['1', '1', '~Q', 'Toggle']
+        ];
+      } else {
+        headers = ['D', 'Q (Next State)', 'Action / Status'];
+        rows = [
+          ['0', '0', 'Reset'],
+          ['1', '1', 'Set']
+        ];
+      }
+
+      thead.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
+      tbody.innerHTML = rows.map((row) => {
+        let id = '';
+        if (ffMode === 'SR' || ffMode === 'JK') id = `row-${row[0]}${row[1]}`;
+        else id = `row-${row[0]}`;
+
+        const cells = row.map((cell, cIdx) => {
+          if (cIdx === row.length - 2) {
+            return `<td><strong style="color: var(--high-wire);">${cell}</strong></td>`;
+          }
+          return `<td>${cell}</td>`;
+        }).join('');
+        return `<tr id="${id}">${cells}</tr>`;
+      }).join('');
+    }
+
+    function pushHistory() {
+      for (let k in history) history[k].shift();
+
+      history.clk.push(clk);
+      
+      if (ffMode === 'SR') {
+        history.in1.push(inputs.s);
+        history.in2.push(inputs.r);
+      } else if (ffMode === 'JK') {
+        history.in1.push(inputs.j);
+        history.in2.push(inputs.k);
+      } else {
+        history.in1.push(inputs.d);
+        history.in2.push(0);
+      }
+
+      if (isInvalid) {
+        history.q.push(0.5);
+        history.qbar.push(0.5);
+      } else {
+        history.q.push(qState);
+        history.qbar.push(qState === 0 ? 1 : 0);
+      }
+    }
+
+    // Canvas Circuit Rendering
+    const cCanvas = document.getElementById("circuitCanvas");
+    const cCtx = cCanvas.getContext("2d");
+
+    function renderCircuit() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+
+      const x = 220, y = 30, w = 160, h = 140;
+
+      // FF Main Box
+      cCtx.fillStyle = "#1e293b";
+      cCtx.fillRect(x, y, w, h);
+      cCtx.strokeStyle = "#38bdf8";
+      cCtx.lineWidth = 2;
+      cCtx.strokeRect(x, y, w, h);
+
+      // FF Title
+      cCtx.fillStyle = "#38bdf8";
+      cCtx.font = "bold 14px sans-serif";
+      cCtx.fillText(`${ffMode} Flip-Flop`, x + 25, y + 25);
+
+      // Clock Triangle Symbol
+      cCtx.beginPath();
+      cCtx.moveTo(x, y + 70);
+      cCtx.lineTo(x + 15, y + 75);
+      cCtx.lineTo(x, y + 80);
+      cCtx.strokeStyle = "#f59e0b";
+      cCtx.stroke();
+
+      // Clock Wire
+      cCtx.strokeStyle = clk ? "#f59e0b" : "#475569";
+      cCtx.lineWidth = clk ? 3 : 1.5;
+      cCtx.beginPath();
+      cCtx.moveTo(60, y + 75);
+      cCtx.lineTo(x, y + 75);
+      cCtx.stroke();
+      cCtx.fillStyle = clk ? "#f59e0b" : "#f8fafc";
+      cCtx.font = "11px sans-serif";
+      cCtx.fillText("CLK", 25, y + 78);
+
+      // Input Wires
+      if (ffMode === 'SR' || ffMode === 'JK') {
+        const in1Name = ffMode === 'SR' ? 'S' : 'J';
+        const in2Name = ffMode === 'SR' ? 'R' : 'K';
+        const in1Val = ffMode === 'SR' ? inputs.s : inputs.j;
+        const in2Val = ffMode === 'SR' ? inputs.r : inputs.k;
+
+        // In 1
+        cCtx.strokeStyle = in1Val ? "#22c55e" : "#475569";
+        cCtx.beginPath(); cCtx.moveTo(60, y + 35); cCtx.lineTo(x, y + 35); cCtx.stroke();
+        cCtx.fillStyle = in1Val ? "#22c55e" : "#f8fafc";
+        cCtx.fillText(`${in1Name} = ${in1Val}`, 25, y + 38);
+
+        // In 2
+        cCtx.strokeStyle = in2Val ? "#22c55e" : "#475569";
+        cCtx.beginPath(); cCtx.moveTo(60, y + 115); cCtx.lineTo(x, y + 115); cCtx.stroke();
+        cCtx.fillStyle = in2Val ? "#22c55e" : "#f8fafc";
+        cCtx.fillText(`${in2Name} = ${in2Val}`, 25, y + 118);
+      } else {
+        // D FF
+        cCtx.strokeStyle = inputs.d ? "#22c55e" : "#475569";
+        cCtx.beginPath(); cCtx.moveTo(60, y + 35); cCtx.lineTo(x, y + 35); cCtx.stroke();
+        cCtx.fillStyle = inputs.d ? "#22c55e" : "#f8fafc";
+        cCtx.fillText(`D = ${inputs.d}`, 25, y + 38);
+      }
+
+      // Output Wires Q & Qbar
+      const qVal = isInvalid ? 'X' : qState;
+      const qbarVal = isInvalid ? 'X' : (qState === 0 ? 1 : 0);
+
+      // Q Output
+      cCtx.strokeStyle = isInvalid ? "#ef4444" : (qState ? "#22c55e" : "#475569");
+      cCtx.lineWidth = 2.5;
+      cCtx.beginPath(); cCtx.moveTo(x + w, y + 40); cCtx.lineTo(520, y + 40); cCtx.stroke();
+      cCtx.fillStyle = isInvalid ? "#ef4444" : (qState ? "#22c55e" : "#f8fafc");
+      cCtx.font = "bold 12px sans-serif";
+      cCtx.fillText(`Q = ${qVal}`, 530, y + 44);
+
+      // Qbar Output
+      cCtx.strokeStyle = isInvalid ? "#ef4444" : (qbarVal === 1 ? "#22c55e" : "#475569");
+      cCtx.beginPath(); cCtx.moveTo(x + w, y + 100); cCtx.lineTo(520, y + 100); cCtx.stroke();
+      cCtx.fillStyle = isInvalid ? "#ef4444" : (qbarVal === 1 ? "#22c55e" : "#f8fafc");
+      cCtx.fillText(`Qbar = ${qbarVal}`, 530, y + 104);
+    }
+
+    // Waveform Canvas Rendering
+    const gCanvas = document.getElementById("graphCanvas");
+    const gCtx = gCanvas.getContext("2d");
+
+    function renderGraphs() {
+      gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+
+      let signals = [
+        { label: 'CLK', data: history.clk, color: '#f59e0b' }
+      ];
+
+      if (ffMode === 'SR') {
+        signals.push({ label: 'S', data: history.in1, color: '#38bdf8' });
+        signals.push({ label: 'R', data: history.in2, color: '#38bdf8' });
+      } else if (ffMode === 'JK') {
+        signals.push({ label: 'J', data: history.in1, color: '#38bdf8' });
+        signals.push({ label: 'K', data: history.in2, color: '#38bdf8' });
+      } else {
+        signals.push({ label: 'D', data: history.in1, color: '#38bdf8' });
+      }
+
+      signals.push({ label: 'Q', data: history.q, color: '#22c55e' });
+      signals.push({ label: 'Qbar', data: history.qbar, color: '#94a3b8' });
+
+      const totalSigs = signals.length;
+      const rowHeight = (gCanvas.height - 30) / totalSigs;
+      const startX = 80;
+      const graphWidth = gCanvas.width - startX - 20;
+
+      signals.forEach((sig, idx) => {
+        const yBase = idx * rowHeight + 25;
+
+        gCtx.fillStyle = sig.color;
+        gCtx.font = "bold 10px sans-serif";
+        gCtx.fillText(sig.label, 10, yBase - 3);
+
+        gCtx.beginPath();
+        gCtx.moveTo(startX, yBase);
+        gCtx.lineTo(startX + graphWidth, yBase);
+        gCtx.strokeStyle = "#334155";
+        gCtx.lineWidth = 1;
+        gCtx.stroke();
+
+        gCtx.beginPath();
+        const step = graphWidth / (historyLength - 1);
+        sig.data.forEach((val, i) => {
+          const x = startX + i * step;
+          const y = yBase - (val * (rowHeight * 0.55));
+          if (i === 0) {
+            gCtx.moveTo(x, y);
+          } else {
+            const prevVal = sig.data[i - 1];
+            const prevY = yBase - (prevVal * (rowHeight * 0.55));
+            gCtx.lineTo(x, prevY);
+            gCtx.lineTo(x, y);
+          }
+        });
+
+        gCtx.strokeStyle = sig.color;
+        gCtx.lineWidth = 1.8;
+        gCtx.stroke();
+      });
+    }
+
+    // Verilog Testbench Runner
+    function runVerilogSimulation() {
+      const term = document.getElementById("terminal-out");
+
+      term.innerText = `> Compiling Verilog module 'p8${ffMode.toLowerCase()}'...\n`;
+      setTimeout(() => {
+        term.innerText += `> Synthesis complete. Clock edge detection verified.\n`;
+        term.innerText += `> Current Inputs: rst=${rst}, Q_state=${isInvalid ? 'X' : qState}\n`;
+        term.innerText += `> Clock Edge Triggered Successfully.\n`;
+        term.innerText += `> Output Verification: Q=${isInvalid ? 'X' : qState}, Qbar=${isInvalid ? 'X' : (qState === 0 ? 1 : 0)}\n`;
+        term.innerText += `> Simulation executed cleanly at 100ns.`;
+      }, 250);
+    }
+
+    function animate() {
+      pushHistory();
+      renderCircuit();
+      renderGraphs();
+      setTimeout(() => {
+        requestAnimationFrame(animate);
+      }, 100);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

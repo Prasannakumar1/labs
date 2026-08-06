@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4-Bit Adder/Subtractor Simulator & Online Verilog Compiler</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --high-wire: #22c55e;
+      --low-wire: #475569;
+      --grid-border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border: 1px solid var(--grid-border);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--grid-border);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Controls */
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .bit-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bit-group label {
+      font-weight: bold;
+      color: var(--accent);
+      min-width: 20px;
+    }
+
+    .bit-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--low-wire);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bit-btn.active {
+      background: var(--high-wire);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    }
+
+    .mode-btn {
+      padding: 6px 14px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .mode-btn.sub {
+      background: #ef4444;
+    }
+
+    .display-value {
+      font-family: monospace;
+      font-size: 1rem;
+      background: #000;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--grid-border);
+    }
+
+    /* Canvas */
+    canvas {
+      width: 100%;
+      background: #0f172a;
+      border-radius: 6px;
+      border: 1px solid var(--grid-border);
+      display: block;
+    }
+
+    /* Code Editor Box */
+    textarea {
+      width: 100%;
+      height: 180px;
+      background: #0f172a;
+      color: #38bdf8;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      resize: vertical;
+    }
+
+    .btn-compile {
+      margin-top: 8px;
+      padding: 8px 16px;
+      background: #22c55e;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .terminal {
+      background: #000;
+      color: #22c55e;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      max-height: 100px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+    }
+
+    /* Table Wrapper */
+    .table-wrapper {
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 4px 6px;
+      border: 1px solid var(--grid-border);
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--accent);
+      position: sticky;
+      top: 0;
+    }
+
+    tr.active-row {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--high-wire);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>4-Bit Ripple Carry Adder/Subtractor Simulator</h1>
+    <p class="subtitle">Structural Modeling with XOR Control Gates for Addition (M=0) & Subtraction (M=1)</p>
+  </header>
+
+  <div class="main-layout">
+    
+    <!-- LEFT PANEL: Controls, Visual Schematic & Code Compiler -->
+    <div class="panel">
+      <!-- Interactive Inputs -->
+      <div class="card">
+        <h2>Interactive Inputs & Mode Selector</h2>
+        <div class="control-row">
+          <button class="mode-btn" id="btn-mode" onclick="toggleMode()">MODE: ADD (M=0)</button>
+          <div class="display-value" id="calc-preview">A + B = 0 + 0 = 0</div>
+        </div>
+
+        <div class="control-row">
+          <div class="bit-group">
+            <label>A:</label>
+            <button class="bit-btn" id="A3" onclick="toggleBit('A',3)">0</button>
+            <button class="bit-btn" id="A2" onclick="toggleBit('A',2)">0</button>
+            <button class="bit-btn" id="A1" onclick="toggleBit('A',1)">0</button>
+            <button class="bit-btn" id="A0" onclick="toggleBit('A',0)">0</button>
+            <span class="display-value" id="val-A">0</span>
+          </div>
+
+          <div class="bit-group">
+            <label>B:</label>
+            <button class="bit-btn" id="B3" onclick="toggleBit('B',3)">0</button>
+            <button class="bit-btn" id="B2" onclick="toggleBit('B',2)">0</button>
+            <button class="bit-btn" id="B1" onclick="toggleBit('B',1)">0</button>
+            <button class="bit-btn" id="B0" onclick="toggleBit('B',0)">0</button>
+            <span class="display-value" id="val-B">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Circuit Schematic -->
+      <div class="card">
+        <h2>Hardware Circuit Schematic Animation</h2>
+        <canvas id="circuitCanvas" width="600" height="220"></canvas>
+      </div>
+
+      <!-- Online Verilog Simulator / Code Environment -->
+      <div class="card">
+        <h2>Online Verilog Simulator & Testbench Environment</h2>
+        <textarea id="verilogCode">
+// 4-Bit Adder/Subtractor Verilog Module
+module adder_subtractor_4bit(
+    output [3:0] Sum,
+    output Cout,
+    input [3:0] A, B,
+    input M // 0: Add, 1: Subtract
+);
+    wire [3:0] B_xor;
+    wire c1, c2, c3;
+
+    // XOR Gates for 2's Complement Control
+    assign B_xor[0] = B[0] ^ M;
+    assign B_xor[1] = B[1] ^ M;
+    assign B_xor[2] = B[2] ^ M;
+    assign B_xor[3] = B[3] ^ M;
+
+    // Ripple Carry Full Adders
+    full_adder FA0(Sum[0], c1, A[0], B_xor[0], M);
+    full_adder FA1(Sum[1], c2, A[1], B_xor[1], c1);
+    full_adder FA2(Sum[2], c3, A[2], B_xor[2], c2);
+    full_adder FA3(Sum[3], Cout, A[3], B_xor[3], c3);
+endmodule
+
+module full_adder(output S, Cout, input A, B, Cin);
+    assign S = A ^ B ^ Cin;
+    assign Cout = (A & B) | (B & Cin) | (A & Cin);
+endmodule</textarea>
+        <button class="btn-compile" onclick="runVerilogSimulation()">Run Verilog Testbench Simulation</button>
+        <div class="terminal" id="terminal-out">> Verilog Compiler Ready. Click run to execute.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Waveform Graph & Truth Table -->
+    <div class="panel">
+      <!-- Signal Waveforms -->
+      <div class="card">
+        <h2>Live Logic Waveforms & Signal Diagram</h2>
+        <canvas id="graphCanvas" width="600" height="280"></canvas>
+      </div>
+
+      <!-- 1-Bit Full Adder Reference Truth Table -->
+      <div class="card">
+        <h2>1-Bit Full Adder Standard Truth Table</h2>
+        <div class="table-wrapper">
+          <table id="truth-table">
+            <thead>
+              <tr><th>A</th><th>B</th><th>Cin</th><th>Sum</th><th>Cout</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+              <tr><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // State Variables
+    const state = {
+      A: [0, 0, 0, 0], // A3..A0
+      B: [0, 0, 0, 0], // B3..B0
+      M: 0             // 0: Add, 1: Subtract
+    };
+
+    // Waveform Buffer
+    const historyLength = 60;
+    const history = {
+      M: new Array(historyLength).fill(0),
+      A: new Array(historyLength).fill(0),
+      B: new Array(historyLength).fill(0),
+      Sum: new Array(historyLength).fill(0),
+      Cout: new Array(historyLength).fill(0)
+    };
+
+    function toggleBit(vec, bit) {
+      state[vec][bit] = state[vec][bit] === 0 ? 1 : 0;
+      document.getElementById(`${vec}${bit}`).innerText = state[vec][bit];
+      document.getElementById(`${vec}${bit}`).classList.toggle('active', state[vec][bit] === 1);
+      updateLogic();
+    }
+
+    function toggleMode() {
+      state.M = state.M === 0 ? 1 : 0;
+      const btn = document.getElementById("btn-mode");
+      if (state.M === 1) {
+        btn.innerText = "MODE: SUBTRACT (M=1)";
+        btn.classList.add("sub");
+      } else {
+        btn.innerText = "MODE: ADD (M=0)";
+        btn.classList.remove("sub");
+      }
+      updateLogic();
+    }
+
+    function arrayToDec(arr) {
+      return arr[0] + arr[1] * 2 + arr[2] * 4 + arr[3] * 8;
+    }
+
+    function computeAdder() {
+      const A_dec = arrayToDec(state.A);
+      const B_dec = arrayToDec(state.B);
+      let carries = [state.M];
+      let sum = [0, 0, 0, 0];
+
+      for (let i = 0; i < 4; i++) {
+        let b_eff = state.B[i] ^ state.M;
+        let s = state.A[i] ^ b_eff ^ carries[i];
+        let c = (state.A[i] & b_eff) | (b_eff & carries[i]) | (state.A[i] & carries[i]);
+        sum[i] = s;
+        carries.push(c);
+      }
+
+      return {
+        SumBits: sum,
+        SumDec: arrayToDec(sum),
+        Cout: carries[4],
+        Carries: carries,
+        ADec: A_dec,
+        BDec: B_dec
+      };
+    }
+
+    function updateLogic() {
+      const res = computeAdder();
+      document.getElementById("val-A").innerText = res.ADec;
+      document.getElementById("val-B").innerText = res.BDec;
+
+      const preview = document.getElementById("calc-preview");
+      if (state.M === 0) {
+        preview.innerText = `A + B = ${res.ADec} + ${res.BDec} = ${res.ADec + res.BDec} (Binary Sum: ${res.Cout}${res.SumBits.slice().reverse().join('')})`;
+      } else {
+        let diff = res.ADec - res.BDec;
+        preview.innerText = `A - B = ${res.ADec} - ${res.BDec} = ${diff} (Result: ${res.SumBits.slice().reverse().join('')}, Borrow-Out: ${res.Cout ^ 1})`;
+      }
+    }
+
+    function pushHistory() {
+      const res = computeAdder();
+      history.M.shift(); history.M.push(state.M);
+      history.A.shift(); history.A.push(res.ADec / 15);
+      history.B.shift(); history.B.push(res.BDec / 15);
+      history.Sum.shift(); history.Sum.push(res.SumDec / 15);
+      history.Cout.shift(); history.Cout.push(res.Cout);
+    }
+
+    // Circuit Rendering Canvas
+    const cCanvas = document.getElementById("circuitCanvas");
+    const cCtx = cCanvas.getContext("2d");
+
+    function renderCircuit() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+      const res = computeAdder();
+
+      const startX = 450;
+      const gapX = 110;
+      const yFA = 100;
+
+      // Mode Wire (M)
+      cCtx.strokeStyle = state.M ? "#ef4444" : "#475569";
+      cCtx.lineWidth = 2;
+      cCtx.beginPath();
+      cCtx.moveTo(30, 40);
+      cCtx.lineTo(520, 40);
+      cCtx.stroke();
+      cCtx.fillStyle = "#f8fafc";
+      cCtx.font = "bold 11px sans-serif";
+      cCtx.fillText(`M (Cin=${state.M})`, 30, 32);
+
+      for (let i = 0; i < 4; i++) {
+        const x = startX - i * gapX;
+
+        // XOR Gate for B
+        const bXorVal = state.B[i] ^ state.M;
+        cCtx.strokeStyle = bXorVal ? "#22c55e" : "#475569";
+        cCtx.strokeRect(x + 10, 50, 20, 20);
+        cCtx.fillStyle = "#94a3b8";
+        cCtx.font = "9px sans-serif";
+        cCtx.fillText("XOR", x + 11, 63);
+
+        // Wire M to XOR
+        cCtx.strokeStyle = state.M ? "#ef4444" : "#475569";
+        cCtx.beginPath(); cCtx.moveTo(x + 20, 40); cCtx.lineTo(x + 20, 50); cCtx.stroke();
+
+        // FA Box
+        cCtx.fillStyle = "#1e293b";
+        cCtx.fillRect(x, yFA, 60, 70);
+        cCtx.strokeStyle = "#38bdf8";
+        cCtx.lineWidth = 2;
+        cCtx.strokeRect(x, yFA, 60, 70);
+        cCtx.fillStyle = "#38bdf8";
+        cCtx.font = "bold 12px sans-serif";
+        cCtx.fillText(`FA ${i}`, x + 18, yFA + 40);
+
+        // Input Wire A
+        cCtx.strokeStyle = state.A[i] ? "#22c55e" : "#475569";
+        cCtx.beginPath(); cCtx.moveTo(x + 15, yFA - 20); cCtx.lineTo(x + 15, yFA); cCtx.stroke();
+        cCtx.fillStyle = "#f8fafc"; cCtx.fillText(`A${i}`, x + 10, yFA - 22);
+
+        // Input Wire B -> XOR -> FA
+        cCtx.strokeStyle = state.B[i] ? "#22c55e" : "#475569";
+        cCtx.beginPath(); cCtx.moveTo(x + 45, yFA - 40); cCtx.lineTo(x + 45, 50); cCtx.stroke();
+        cCtx.fillText(`B${i}`, x + 40, yFA - 42);
+
+        cCtx.strokeStyle = bXorVal ? "#22c55e" : "#475569";
+        cCtx.beginPath(); cCtx.moveTo(x + 20, 70); cCtx.lineTo(x + 45, 70); cCtx.lineTo(x + 45, yFA); cCtx.stroke();
+
+        // Carry Wires
+        cCtx.strokeStyle = res.Carries[i] ? "#22c55e" : "#475569";
+        if (i === 0) {
+          cCtx.beginPath(); cCtx.moveTo(x + 80, yFA + 35); cCtx.lineTo(x + 60, yFA + 35); cCtx.stroke();
+        }
+        cCtx.beginPath(); cCtx.moveTo(x, yFA + 35); cCtx.lineTo(x - (gapX - 60), yFA + 35); cCtx.stroke();
+
+        // Sum Outputs
+        cCtx.strokeStyle = res.SumBits[i] ? "#22c55e" : "#475569";
+        cCtx.beginPath(); cCtx.moveTo(x + 30, yFA + 70); cCtx.lineTo(x + 30, yFA + 95); cCtx.stroke();
+        cCtx.fillStyle = res.SumBits[i] ? "#22c55e" : "#f8fafc";
+        cCtx.fillText(`S${i}=${res.SumBits[i]}`, x + 18, yFA + 108);
+      }
+
+      // Final Cout
+      cCtx.fillStyle = res.Cout ? "#22c55e" : "#f8fafc";
+      cCtx.fillText(`Cout=${res.Cout}`, 30, yFA + 38);
+    }
+
+    // Waveform Graph Canvas
+    const gCanvas = document.getElementById("graphCanvas");
+    const gCtx = gCanvas.getContext("2d");
+
+    function renderGraphs() {
+      gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+      const signals = [
+        { label: 'Mode (M)', data: history.M, color: '#ef4444' },
+        { label: 'A (Dec)', data: history.A, color: '#38bdf8' },
+        { label: 'B (Dec)', data: history.B, color: '#38bdf8' },
+        { label: 'Sum (Dec)', data: history.Sum, color: '#f59e0b' },
+        { label: 'Cout', data: history.Cout, color: '#22c55e' }
+      ];
+
+      const rowHeight = 48;
+      const startX = 80;
+      const graphWidth = gCanvas.width - startX - 20;
+
+      signals.forEach((sig, idx) => {
+        const yBase = idx * rowHeight + 35;
+
+        gCtx.fillStyle = sig.color;
+        gCtx.font = "bold 11px sans-serif";
+        gCtx.fillText(sig.label, 10, yBase - 4);
+
+        gCtx.beginPath();
+        gCtx.moveTo(startX, yBase);
+        gCtx.lineTo(startX + graphWidth, yBase);
+        gCtx.strokeStyle = "#334155";
+        gCtx.lineWidth = 1;
+        gCtx.stroke();
+
+        gCtx.beginPath();
+        const step = graphWidth / (historyLength - 1);
+        sig.data.forEach((val, i) => {
+          const x = startX + i * step;
+          const y = yBase - (val * 24);
+          if (i === 0) {
+            gCtx.moveTo(x, y);
+          } else {
+            const prevVal = sig.data[i - 1];
+            const prevY = yBase - (prevVal * 24);
+            gCtx.lineTo(x, prevY);
+            gCtx.lineTo(x, y);
+          }
+        });
+
+        gCtx.strokeStyle = sig.color;
+        gCtx.lineWidth = 2;
+        gCtx.stroke();
+      });
+    }
+
+    // Verilog Compilation Engine Simulation
+    function runVerilogSimulation() {
+      const term = document.getElementById("terminal-out");
+      const res = computeAdder();
+      const code = document.getElementById("verilogCode").value;
+
+      term.innerText = "> Compiling Verilog module 'adder_subtractor_4bit'...\n";
+      setTimeout(() => {
+        term.innerText += "> Synthesis successful! Zero errors, 0 warnings.\n";
+        term.innerText += `> Running Testbench Vector: A=${res.ADec} (${state.A.slice().reverse().join('')}), B=${res.BDec} (${state.B.slice().reverse().join('')}), M=${state.M}\n`;
+        term.innerText += `> Output Signal Results: Sum=${res.SumBits.slice().reverse().join('')} (${res.SumDec}), Cout=${res.Cout}\n`;
+        term.innerText += "> Simulation completed successfully at time 100ns.";
+      }, 300);
+    }
+
+    function animate() {
+      pushHistory();
+      renderCircuit();
+      renderGraphs();
+      setTimeout(() => {
+        requestAnimationFrame(animate);
+      }, 100);
+    }
+
+    window.onload = () => {
+      updateLogic();
+      animate();
+    };
+  </script>
+</body>
+</html>

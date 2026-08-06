@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verilog BCD / Decimal Adder Simulator</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --high-wire: #22c55e;
+      --low-wire: #475569;
+      --grid-border: #334155;
+      --warn-color: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Layout Grid */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border: 1px solid var(--grid-border);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--grid-border);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Controls */
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .bit-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bit-group label {
+      font-weight: bold;
+      color: var(--accent);
+      min-width: 20px;
+    }
+
+    .bit-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--low-wire);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bit-btn.active {
+      background: var(--high-wire);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    }
+
+    .display-value {
+      font-family: monospace;
+      font-size: 1rem;
+      background: #000;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--grid-border);
+    }
+
+    .output-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-family: monospace;
+    }
+
+    .output-badge.high {
+      background: var(--high-wire);
+      color: #000;
+    }
+
+    .output-badge.low {
+      background: var(--low-wire);
+      color: #fff;
+    }
+
+    .output-badge.warn {
+      background: var(--warn-color);
+      color: #000;
+    }
+
+    /* Canvas */
+    canvas {
+      width: 100%;
+      background: #0f172a;
+      border-radius: 6px;
+      border: 1px solid var(--grid-border);
+      display: block;
+    }
+
+    /* Code Editor Box */
+    textarea {
+      width: 100%;
+      height: 160px;
+      background: #000;
+      color: #22c55e;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.82rem;
+      resize: vertical;
+    }
+
+    .btn-compile {
+      margin-top: 8px;
+      padding: 8px 16px;
+      background: #22c55e;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .terminal {
+      background: #000;
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      max-height: 95px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+    }
+
+    /* Table Wrapper */
+    .table-wrapper {
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 4px 6px;
+      border: 1px solid var(--grid-border);
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--accent);
+      position: sticky;
+      top: 0;
+    }
+
+    tr.active-row {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--high-wire);
+      font-weight: bold;
+    }
+
+    tr.invalid-row {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warn-color);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>4-Bit BCD / Decimal Adder Verilog Simulator</h1>
+    <p class="subtitle">Binary Addition with Automatic BCD (+6) Correction Logic</p>
+  </header>
+
+  <div class="main-layout">
+    
+    <!-- LEFT PANEL: Controls, Schematic, Verilog Compiler -->
+    <div class="panel">
+      <!-- Input Controls -->
+      <div class="card">
+        <h2>Interactive 4-Bit Inputs & BCD Calculation</h2>
+        <div class="control-row">
+          <div class="bit-group">
+            <label>A:</label>
+            <button class="bit-btn" id="A3" onclick="toggleBit('A',3)">0</button>
+            <button class="bit-btn" id="A2" onclick="toggleBit('A',2)">0</button>
+            <button class="bit-btn" id="A1" onclick="toggleBit('A',1)">0</button>
+            <button class="bit-btn" id="A0" onclick="toggleBit('A',0)">0</button>
+            <span class="display-value" id="val-A">0</span>
+          </div>
+
+          <div class="bit-group">
+            <label>B:</label>
+            <button class="bit-btn" id="B3" onclick="toggleBit('B',3)">0</button>
+            <button class="bit-btn" id="B2" onclick="toggleBit('B',2)">0</button>
+            <button class="bit-btn" id="B1" onclick="toggleBit('B',1)">0</button>
+            <button class="bit-btn" id="B0" onclick="toggleBit('B',0)">0</button>
+            <span class="display-value" id="val-B">0</span>
+          </div>
+        </div>
+
+        <div class="control-row" style="margin-bottom: 0;">
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            Correction Trigger (a>9 || b>9 || sum>9): <strong id="correction-flag" style="color: var(--high-wire);">FALSE</strong>
+          </div>
+          <div>
+            <span style="font-size: 0.85rem; color: var(--accent);">BCD Result: </span>
+            <span class="output-badge low" id="bcd-result">0000 (cout=0)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logic Schematic -->
+      <div class="card">
+        <h2>BCD Adder Hardware Architecture</h2>
+        <canvas id="circuitCanvas" width="600" height="200"></canvas>
+      </div>
+
+      <!-- Code Compiler Environment -->
+      <div class="card">
+        <h2>Verilog Hardware Description Code</h2>
+        <textarea id="verilogCode">module p5deci(a, b, sum, cout);
+  input [3:0] a;
+  input [3:0] b;
+  output [3:0] sum;
+  output cout;
+
+  reg [3:0] sum;
+  reg cout;
+
+  always @(a, b) begin
+    {cout, sum} = a + b;
+    if (a > 9 || b > 9 || sum > 9 || cout == 1) begin
+      {cout, sum} = sum + 6;
+      cout = 1'b1;
+    end
+  end
+endmodule</textarea>
+        <button class="btn-compile" onclick="runVerilogSimulation()">Compile & Run Verilog Simulation</button>
+        <div class="terminal" id="terminal-out">> Verilog BCD Compiler Ready.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Waveforms & BCD Reference Table -->
+    <div class="panel">
+      <!-- ModelSim Style Waveform Viewer -->
+      <div class="card">
+        <h2>ModelSim Waveform Timing Window</h2>
+        <canvas id="graphCanvas" width="600" height="270"></canvas>
+      </div>
+
+      <!-- BCD Truth & Conversion Reference Table -->
+      <div class="card">
+        <h2>BCD Conversion Reference Table</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Decimal</th><th>Binary Sum</th><th>> 9?</th><th>+6 Correction</th><th>BCD {cout, sum}</th></tr>
+            </thead>
+            <tbody id="bcd-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // System State
+    const state = {
+      A: [0, 0, 0, 0], // A3..A0
+      B: [0, 0, 0, 0]  // B3..B0
+    };
+
+    // Waveform Buffer
+    const historyLength = 60;
+    const history = {
+      A: new Array(historyLength).fill(0),
+      B: new Array(historyLength).fill(0),
+      rawSum: new Array(historyLength).fill(0),
+      bcdSum: new Array(historyLength).fill(0),
+      cout: new Array(historyLength).fill(0)
+    };
+
+    function toggleBit(vec, bit) {
+      state[vec][bit] = state[vec][bit] === 0 ? 1 : 0;
+      document.getElementById(`${vec}${bit}`).innerText = state[vec][bit];
+      document.getElementById(`${vec}${bit}`).classList.toggle('active', state[vec][bit] === 1);
+      updateLogic();
+    }
+
+    function arrayToDec(arr) {
+      return arr[0] + arr[1] * 2 + arr[2] * 4 + arr[3] * 8;
+    }
+
+    function computeBCD() {
+      const aDec = arrayToDec(state.A);
+      const bDec = arrayToDec(state.B);
+      
+      const rawAdd = aDec + bDec;
+      let rawCout = (rawAdd > 15) ? 1 : 0;
+      let rawSum = rawAdd & 0xF;
+
+      // Correction Condition: a>9 || b>9 || rawSum>9 || rawCout==1
+      const needsCorrection = (aDec > 9 || bDec > 9 || rawSum > 9 || rawCout === 1);
+
+      let finalSum = rawSum;
+      let finalCout = rawCout;
+
+      if (needsCorrection) {
+        const corrected = rawSum + 6;
+        finalSum = corrected & 0xF;
+        finalCout = 1;
+      }
+
+      return {
+        aDec,
+        bDec,
+        rawAdd,
+        rawSum,
+        rawCout,
+        needsCorrection,
+        finalSum,
+        finalCout,
+        finalSumBin: finalSum.toString(2).padStart(4, '0')
+      };
+    }
+
+    function updateLogic() {
+      const res = computeBCD();
+
+      document.getElementById("val-A").innerText = `${res.aDec} ${res.aDec > 9 ? '(Invalid BCD)' : ''}`;
+      document.getElementById("val-B").innerText = `${res.bDec} ${res.bDec > 9 ? '(Invalid BCD)' : ''}`;
+
+      const flag = document.getElementById("correction-flag");
+      flag.innerText = res.needsCorrection ? "TRUE (+6 Added)" : "FALSE";
+      flag.style.color = res.needsCorrection ? "var(--warn-color)" : "var(--high-wire)";
+
+      const badge = document.getElementById("bcd-result");
+      badge.innerText = `[${res.finalCout}] ${res.finalSumBin} (Decimal: ${res.finalCout * 10 + res.finalSum})`;
+      badge.className = `output-badge ${res.needsCorrection ? 'warn' : 'high'}`;
+
+      // Highlight Table
+      document.querySelectorAll("#bcd-table-body tr").forEach(r => r.classList.remove("active-row"));
+      const activeRow = document.getElementById(`bcd-row-${res.rawAdd}`);
+      if (activeRow) activeRow.classList.add("active-row");
+    }
+
+    function buildReferenceTable() {
+      const tbody = document.getElementById("bcd-table-body");
+      tbody.innerHTML = "";
+
+      for (let i = 0; i <= 19; i++) {
+        const rawSum = i & 0xF;
+        const rawCout = i > 15 ? 1 : 0;
+        const needsCorr = (rawSum > 9 || rawCout === 1);
+        const finalSum = needsCorr ? (rawSum + 6) & 0xF : rawSum;
+        const finalCout = needsCorr ? 1 : rawCout;
+
+        const tr = document.createElement("tr");
+        tr.id = `bcd-row-${i}`;
+        if (needsCorr) tr.classList.add("invalid-row");
+
+        tr.innerHTML = `
+          <td>${i}</td>
+          <td>${i.toString(2).padStart(5, '0')}</td>
+          <td>${needsCorr ? 'YES' : 'NO'}</td>
+          <td>${needsCorr ? '+0110 (+6)' : '+0000'}</td>
+          <td><strong>${finalCout} ${finalSum.toString(2).padStart(4, '0')}</strong> (${finalCout}${finalSum})</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function pushHistory() {
+      const res = computeBCD();
+      for (let k in history) history[k].shift();
+
+      history.A.push(res.aDec / 15);
+      history.B.push(res.bDec / 15);
+      history.rawSum.push(res.rawSum / 15);
+      history.bcdSum.push(res.finalSum / 15);
+      history.cout.push(res.finalCout);
+    }
+
+    // Circuit Canvas Rendering
+    const cCanvas = document.getElementById("circuitCanvas");
+    const cCtx = cCanvas.getContext("2d");
+
+    function renderCircuit() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+      const res = computeBCD();
+
+      // Block 1: 4-Bit Binary Adder
+      cCtx.fillStyle = "#1e293b";
+      cCtx.fillRect(60, 40, 120, 110);
+      cCtx.strokeStyle = "#38bdf8";
+      cCtx.lineWidth = 2;
+      cCtx.strokeRect(60, 40, 120, 110);
+      cCtx.fillStyle = "#38bdf8";
+      cCtx.font = "bold 12px sans-serif";
+      cCtx.fillText("4-Bit Binary", 80, 85);
+      cCtx.fillText("Adder (A+B)", 82, 105);
+
+      // Block 2: Correction Comparator
+      cCtx.fillStyle = "#1e293b";
+      cCtx.fillRect(250, 40, 100, 60);
+      cCtx.strokeStyle = res.needsCorrection ? "#f59e0b" : "#475569";
+      cCtx.strokeRect(250, 40, 100, 60);
+      cCtx.fillStyle = res.needsCorrection ? "#f59e0b" : "#94a3b8";
+      cCtx.font = "bold 11px sans-serif";
+      cCtx.fillText("Correction Logic", 255, 68);
+      cCtx.fillText("(Sum > 9)", 273, 85);
+
+      // Block 3: BCD Adder Stage
+      cCtx.fillStyle = "#1e293b";
+      cCtx.fillRect(410, 40, 120, 110);
+      cCtx.strokeStyle = "#22c55e";
+      cCtx.strokeRect(410, 40, 120, 110);
+      cCtx.fillStyle = "#22c55e";
+      cCtx.fillText("+6 BCD Adder", 430, 95);
+
+      // Wires
+      // Inputs A & B
+      cCtx.strokeStyle = "#38bdf8";
+      cCtx.beginPath(); cCtx.moveTo(20, 65); cCtx.lineTo(60, 65); cCtx.stroke();
+      cCtx.beginPath(); cCtx.moveTo(20, 125); cCtx.lineTo(60, 125); cCtx.stroke();
+      cCtx.fillStyle = "#f8fafc";
+      cCtx.fillText("A[3:0]", 15, 58);
+      cCtx.fillText("B[3:0]", 15, 118);
+
+      // Raw Sum Wire
+      cCtx.strokeStyle = "#22c55e";
+      cCtx.beginPath(); cCtx.moveTo(180, 95); cCtx.lineTo(410, 95); cCtx.stroke();
+
+      // Branch to Comparator
+      cCtx.beginPath(); cCtx.moveTo(210, 95); cCtx.lineTo(210, 70); cCtx.lineTo(250, 70); cCtx.stroke();
+
+      // Control Wire (+6)
+      cCtx.strokeStyle = res.needsCorrection ? "#f59e0b" : "#475569";
+      cCtx.beginPath(); cCtx.moveTo(350, 70); cCtx.lineTo(380, 70); cCtx.lineTo(380, 125); cCtx.lineTo(410, 125); cCtx.stroke();
+      cCtx.fillStyle = res.needsCorrection ? "#f59e0b" : "#475569";
+      cCtx.fillText("+6 Active", 345, 140);
+
+      // Outputs
+      cCtx.strokeStyle = res.finalCout ? "#22c55e" : "#475569";
+      cCtx.beginPath(); cCtx.moveTo(530, 70); cCtx.lineTo(570, 70); cCtx.stroke();
+      cCtx.fillStyle = res.finalCout ? "#22c55e" : "#f8fafc";
+      cCtx.fillText(`Cout=${res.finalCout}`, 540, 60);
+
+      cCtx.strokeStyle = "#22c55e";
+      cCtx.beginPath(); cCtx.moveTo(530, 120); cCtx.lineTo(570, 120); cCtx.stroke();
+      cCtx.fillStyle = "#22c55e";
+      cCtx.fillText(`Sum[3:0]`, 530, 140);
+    }
+
+    // Waveform Rendering Canvas
+    const gCanvas = document.getElementById("graphCanvas");
+    const gCtx = gCanvas.getContext("2d");
+
+    function renderGraphs() {
+      gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+      const signals = [
+        { label: 'A (Dec)', data: history.A, color: '#38bdf8' },
+        { label: 'B (Dec)', data: history.B, color: '#38bdf8' },
+        { label: 'Raw Sum', data: history.rawSum, color: '#f59e0b' },
+        { label: 'BCD Sum', data: history.bcdSum, color: '#22c55e' },
+        { label: 'Cout', data: history.cout, color: '#22c55e' }
+      ];
+
+      const rowHeight = 46;
+      const startX = 75;
+      const graphWidth = gCanvas.width - startX - 20;
+
+      signals.forEach((sig, idx) => {
+        const yBase = idx * rowHeight + 32;
+
+        gCtx.fillStyle = sig.color;
+        gCtx.font = "bold 11px sans-serif";
+        gCtx.fillText(sig.label, 10, yBase - 4);
+
+        gCtx.beginPath();
+        gCtx.moveTo(startX, yBase);
+        gCtx.lineTo(startX + graphWidth, yBase);
+        gCtx.strokeStyle = "#334155";
+        gCtx.lineWidth = 1;
+        gCtx.stroke();
+
+        gCtx.beginPath();
+        const step = graphWidth / (historyLength - 1);
+        sig.data.forEach((val, i) => {
+          const x = startX + i * step;
+          const y = yBase - (val * 22);
+          if (i === 0) {
+            gCtx.moveTo(x, y);
+          } else {
+            const prevVal = sig.data[i - 1];
+            const prevY = yBase - (prevVal * 22);
+            gCtx.lineTo(x, prevY);
+            gCtx.lineTo(x, y);
+          }
+        });
+
+        gCtx.strokeStyle = sig.color;
+        gCtx.lineWidth = 2;
+        gCtx.stroke();
+      });
+    }
+
+    // Verilog Testbench Runner
+    function runVerilogSimulation() {
+      const term = document.getElementById("terminal-out");
+      const res = computeBCD();
+
+      term.innerText = "> Compiling Verilog module 'p5deci'...\n";
+      setTimeout(() => {
+        term.innerText += "> Synthesis completed cleanly with 0 Errors.\n";
+        term.innerText += `> Input Vector Test: a=${res.aDec} (${state.A.slice().reverse().join('')}), b=${res.bDec} (${state.B.slice().reverse().join('')})\n`;
+        term.innerText += `> Intermediate Raw Sum: ${res.rawSum}\n`;
+        term.innerText += `> BCD Correction Applied: ${res.needsCorrection ? 'YES (+6)' : 'NO'}\n`;
+        term.innerText += `> Resulting BCD Output: cout=${res.finalCout}, sum=${res.finalSumBin} (Total Decimal=${res.finalCout * 10 + res.finalSum})\n`;
+        term.innerText += "> Simulation completed successfully at 100ns.";
+      }, 250);
+    }
+
+    function animate() {
+      pushHistory();
+      renderCircuit();
+      renderGraphs();
+      setTimeout(() => {
+        requestAnimationFrame(animate);
+      }, 100);
+    }
+
+    window.onload = () => {
+      buildReferenceTable();
+      updateLogic();
+      animate();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Design and Computer Organization Laboratory (BCS302)</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f4f4;
+            margin: 20px;
+        }
+        h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 12px;
+            vertical-align: middle;
+        }
+        th {
+            background: #007BFF;
+            color: #fff;
+            text-align: center;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .sl-col {
+            text-align: center;
+            font-weight: bold;
+            width: 8%;
+        }
+        .part-header {
+            background: #003366;
+            color: white;
+            font-size: 16px;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .action-btn {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+        .action-btn:hover {
+            background: #0056b3;
+        }
+        .question-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+        .question-btn:hover {
+            background: #1e7e34;
+        }
+
+        /* Modal Popup Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 4% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 900px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover {
+            color: #000;
+        }
+        .q-box {
+            background: #f8f9fa;
+            border-left: 4px solid #007BFF;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 0 6px 6px 0;
+        }
+        .q-title {
+            font-weight: bold;
+            color: #003366;
+            margin-bottom: 5px;
+        }
+        .q-ans {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header style="background:#003366; color:white; padding:10px 20px;">
+        <table width="100%" cellspacing="0" cellpadding="0" style="box-shadow:none; margin:0; background:transparent;">
+            <tr>
+                <td width="120" align="center" style="border:none;">
+                    <img src="https://rymec.edu.in/wp-content/themes/ryse/assets/images/logos.gif"
+                         alt="RYMEC Logo"
+                         style="width:100px; height:auto;">
+                </td>
+                <td align="center" style="border:none; color: white;">
+                    <h2 style="margin: 0; font-size: 26px; color: white;">
+                        Veerashaiva Vidyavardhaka Sangha's
+                        <br>
+                        Rao Bahadur Y. Mahabaleswarappa Engineering College, Ballari
+                    </h2>
+                    <span style="font-size: 13px;">Affiliated to VTU, Belagavi | Approved by AICTE, New Delhi | NAAC A+ Accredited</span>
+                    <h1 style="margin: 5px 0 0 0; font-size: 22px; color: #38bdf8;">
+                        Department of Computer Science &amp; Engineering
+                        <br>
+                        <span style="font-size: 18px; color: white;">
+                            (CSE, CSE (Data Science) &amp; CSE (Cyber Security))
+                        </span>
+                    </h1>
+                </td>
+            </tr>
+        </table>
+    </header>
+
+    <br>
+    <h2><b>Sem:</b> III &nbsp;&nbsp;|&nbsp;&nbsp; Digital Design and Computer Organization Laboratory (Subject Code: <b>BCS302</b>)</h2>
+    
+    <br>
+
+    <!-- Lab Experiments Table -->
+    <table>
+        <thead>
+            <tr>
+                <th class="sl-col">Exp No.</th>
+                <th>Experiment Description</th>
+                <th width="18%">Category</th>
+                <th width="24%">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Part A -->
+            <tr>
+                <td colspan="4" class="part-header"><b>PART A: Logic Simplification &amp; Basic Digital Gate Realization</b></td>
+            </tr>
+            <tr>
+                <td class="sl-col">1</td>
+                <td>Given a 4-variable logic expression, simplify it using Karnaugh Map (K-Map) technique and simulate the same using basic logic gates (IC 7404, IC 7408, IC 7432).</td>
+                <td align="center">Logic Gate Realization</td>
+                <td align="center">
+                    <div class="btn-group">
+                        <a href="ddco/1.html" class="action-btn">View Code</a>
+                        <button class="question-btn" onclick="openQuestionsModal(1)">Questions</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="sl-col">2</td>
+                <td>Design a 4-bit Full Adder and Subtractor circuit and simulate the same using basic logic gates and XOR control line (M).</td>
+                <td align="center">Combinational Circuit</td>
+                <td align="center">
+                    <div class="btn-group">
+                        <a href="ddco/2.html" class="action-btn">View Code</a>
+                        <button class="question-btn" onclick="openQuestionsModal(2)">Questions</button>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- Part B -->
+            <tr>
+                <td colspan="4" class="part-header"><b>PART B: Verilog HDL Hardware Description &amp; Simulation</b></td>
+            </tr>
+            <tr>
+                <td class="sl-col">3</td>
+                <td>Design Verilog HDL to implement simple logic circuits using Structural, Data Flow, and Behavioral Modeling styles.</td>
+                <td align="center">Verilog HDL</td>
+                <td align="center">
+                    <div class="btn-group">
+                        <a href="ddco/3.html" class="action-btn">View Code</a>
+                        <button class="question-btn" onclick="openQuestionsModal(3)">Questions</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="sl-col">4</td>
+                <td>Design Verilog HDL to implement Binary Adder-Subtractor circuits: Half Adder, Full Adder, Half Subtractor, and Full Subtractor.</td>
+                <td align="center">Verilog HDL</td>
+                <td align="center">
+                    <div class="btn-group">
+                        <a href="ddco/4.html" class="action-btn">View Code</a>
+                        <button class="question-btn" onclick="openQuestionsModal(4)">Questions</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="sl-col">5</td>
+                <td>Design Verilog HDL to implement a 4-bit BCD / Decimal Adder with automatic +6 correction logic.</td>
+                <td align="center">Verilog HDL</td>
+                <td align="center">
+                    <div class="btn-group">
+                        <a href="ddco/5.html" class="action-btn">View Code</a>
+                        <button class="question-btn" onclick="openQuestionsModal(5)">Questions</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="sl-col">6</td>
+                <td>Design Verilog program to implement different types of Multiplexers: 2:1 MUX, 4:1 MUX, and 8:1 MUX.</td>
+                <td align="center">Verilog HDL</td>
+                <td align="center">
+                    <div class="btn-group">
+                        <a href="ddco/6.html" class="action-btn">View Code</a>
+                        <button class="question-btn" onclick="openQuestionsModal(6)">Questions</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="sl-col">7</td>
+                <td>Design Verilog program to implement different types of De-Multiplexers: 1:2 DEMUX, 1:4 DEMUX, and 1:8 DEMUX.</td>
+                <td align="center">Verilog HDL</td>
+                <td align="center">
+                    <div class="btn-group">
+                        <a href="ddco/7.html" class="action-btn">View Code</a>
+                        <button class="question-btn" onclick="openQuestionsModal(7)">Questions</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="sl-col">8</td>
+                <td>Design Verilog program for implementing various types of Flip-Flops such as SR, JK, and D Flip-Flops with clock and reset.</td>
+                <td align="center">Verilog HDL (Sequential)</td>
+                <td align="center">
+                    <div class="btn-group">
+                        <a href="ddco/8.html" class="action-btn">View Code</a>
+                        <button class="question-btn" onclick="openQuestionsModal(8)">Questions</button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Questions Modal Dialog Window -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeQuestionsModal()">&times;</span>
+            <h3 id="qModalTitle" style="text-align:left; color:#003366; margin-top:0;">Experiment Questions</h3>
+            <div id="questionsContainer">
+                <!-- Dynamically Inserted Questions -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const experimentQuestions = {
+            1: {
+                title: "Experiment 1: 4-Variable Logic Simplification & Circuit Realization",
+                questions: [
+                    {
+                        q: "Q1: What is a Karnaugh Map (K-Map) and why is Gray Code used in its cell layout?",
+                        a: "A K-Map is a graphical tool used to simplify Boolean expressions. Gray Code is used because adjacent cells differ by only one bit position, ensuring that terms in adjacent cells can be simplified using the Boolean identity (A + A' = 1)."
+                    },
+                    {
+                        q: "Q2: What logic ICs are used to realize the simplified function Y = A·B' + C·D'?",
+                        a: "IC 7404 (Hex Inverter) for complementing B and D, IC 7408 (Quad 2-Input AND) for product terms A·B' and C·D', and IC 7432 (Quad 2-Input OR) for summing the terms."
+                    }
+                ]
+            },
+            2: {
+                title: "Experiment 2: 4-Bit Full Adder & Subtractor",
+                questions: [
+                    {
+                        q: "Q1: How does a single control line (M) convert a 4-bit parallel adder into a subtractor?",
+                        a: "When M = 0, XOR gates pass B unchanged and Cin = 0 (Addition). When M = 1, XOR gates complement B (1's complement) and Cin = 1, performing 2's complement subtraction (A + ~B + 1)."
+                    },
+                    {
+                        q: "Q2: What is the main disadvantage of a Ripple Carry Adder?",
+                        a: "Propagation delay, because each Full Adder stage must wait for the carry out from the previous stage before generating its correct sum and carry."
+                    }
+                ]
+            },
+            3: {
+                title: "Experiment 3: Verilog Modeling Styles",
+                questions: [
+                    {
+                        q: "Q1: Differentiate between Structural, Dataflow, and Behavioral modeling styles in Verilog.",
+                        a: "Structural uses gate primitives or module instantiation (netlist view). Dataflow uses concurrent 'assign' statements with continuous expressions. Behavioral uses procedural blocks ('always', 'initial') to describe functionality higher-level control."
+                    },
+                    {
+                        q: "Q2: What is the difference between reg and wire data types?",
+                        a: "'wire' is used to connect signals in structural or dataflow modeling and does not hold state. 'reg' holds a value in behavioral procedural blocks until a new value is assigned."
+                    }
+                ]
+            },
+            4: {
+                title: "Experiment 4: Binary Adder-Subtractor Circuits",
+                questions: [
+                    {
+                        q: "Q1: What is the difference between a Half Adder and a Full Adder?",
+                        a: "A Half Adder adds two 1-bit numbers without considering an incoming carry. A Full Adder adds two 1-bit numbers along with an incoming carry bit (Cin)."
+                    },
+                    {
+                        q: "Q2: Derive the Boolean expression for Borrow Out in a Half Subtractor.",
+                        a: "Borrow = ~A · B, where A is the minuend and B is the subtrahend."
+                    }
+                ]
+            },
+            5: {
+                title: "Experiment 5: 4-Bit BCD / Decimal Adder",
+                questions: [
+                    {
+                        q: "Q1: Why is +6 (0110 in binary) added to an invalid BCD sum?",
+                        a: "Since 4-bit binary counts up to 15 (16 states) while BCD counts only up to 9 (10 states), the 6 unused states (10 through 15) are skipped by adding +6 whenever the sum exceeds 9 or produces a binary carry."
+                    },
+                    {
+                        q: "Q2: What is the logical condition required to detect an invalid BCD sum in hardware?",
+                        a: "Condition = Cout | (S3 · S2) | (S3 · S1)."
+                    }
+                ]
+            },
+            6: {
+                title: "Experiment 6: Multiplexers (2:1, 4:1, 8:1 MUX)",
+                questions: [
+                    {
+                        q: "Q1: What is a Multiplexer and what is its primary function?",
+                        a: "A Multiplexer (MUX) or Data Selector routes one of several input lines to a single output line based on the state of control/select lines."
+                    },
+                    {
+                        q: "Q2: How many select lines are required for an N:1 Multiplexer?",
+                        a: "m select lines where N = 2^m."
+                    }
+                ]
+            },
+            7: {
+                title: "Experiment 7: De-Multiplexers (1:2, 1:4, 1:8 DEMUX)",
+                questions: [
+                    {
+                        q: "Q1: Differentiate between a Multiplexer and a De-Multiplexer.",
+                        a: "A Multiplexer routes many inputs to one output (N to 1), whereas a De-Multiplexer routes a single input to one of many outputs (1 to N)."
+                    },
+                    {
+                        q: "Q2: How can a De-Multiplexer act as a Decoder?",
+                        a: "By setting the single data input (D) continuously to logic HIGH (1), the select lines act as binary inputs, and the outputs behave as decoded minterms."
+                    }
+                ]
+            },
+            8: {
+                title: "Experiment 8: Sequential Flip-Flops (SR, JK, D)",
+                questions: [
+                    {
+                        q: "Q1: How does a JK Flip-Flop eliminate the invalid state found in an SR Flip-Flop?",
+                        a: "In an SR Flip-Flop, S=1 and R=1 creates an invalid/forbidden state. In a JK Flip-Flop, J=1 and K=1 causes the output to toggle (~Q)."
+                    },
+                    {
+                        q: "Q2: What is the purpose of the D Flip-Flop?",
+                        a: "The D (Data/Delay) Flip-Flop captures the input value at the active clock edge and delays it until the next clock cycle, commonly used in memory registers and shift registers."
+                    }
+                ]
+            }
+        };
+
+        function openQuestionsModal(expNum) {
+            const data = experimentQuestions[expNum];
+            document.getElementById("qModalTitle").innerText = data.title;
+            const container = document.getElementById("questionsContainer");
+            
+            container.innerHTML = data.questions.map(item => `
+                <div class="q-box">
+                    <div class="q-title">${item.q}</div>
+                    <div class="q-ans">${item.a}</div>
+                </div>
+            `).join('');
+
+            document.getElementById("questionModal").style.display = "block";
+        }
+
+        function closeQuestionsModal() {
+            document.getElementById("questionModal").style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("questionModal");
+            if (event.target == modal) {
+                closeQuestionsModal();
+            }
+        }
+    </script>
+</body>
+</html>

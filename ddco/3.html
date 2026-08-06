@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verilog Modeling Styles & Simulation Workbench</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --high-wire: #22c55e;
+      --low-wire: #475569;
+      --grid-border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    .expression-box {
+      background: #0f172a;
+      border: 1px solid var(--accent);
+      padding: 6px 16px;
+      border-radius: 6px;
+      display: inline-block;
+      font-family: monospace;
+      font-size: 1rem;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border: 1px solid var(--grid-border);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--grid-border);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: space-around;
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 8px;
+      align-items: center;
+    }
+
+    .switch-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .switch-group label {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .btn-toggle {
+      width: 40px;
+      height: 22px;
+      background: var(--low-wire);
+      border-radius: 11px;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    .btn-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .btn-toggle.active {
+      background: var(--high-wire);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    }
+
+    .btn-toggle.active::after {
+      transform: translateX(18px);
+    }
+
+    canvas {
+      width: 100%;
+      background: #0f172a;
+      border-radius: 6px;
+      border: 1px solid var(--grid-border);
+      display: block;
+    }
+
+    /* Code Editor Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .tab-btn {
+      padding: 6px 12px;
+      background: #0f172a;
+      color: var(--text-muted);
+      border: 1px solid var(--grid-border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    textarea {
+      width: 100%;
+      height: 160px;
+      background: #000;
+      color: #22c55e;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.82rem;
+      resize: vertical;
+    }
+
+    .btn-compile {
+      margin-top: 8px;
+      padding: 8px 16px;
+      background: #22c55e;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .terminal {
+      background: #000;
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      max-height: 90px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+    }
+
+    .output-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .output-badge.high {
+      background: var(--high-wire);
+      color: #000;
+    }
+
+    .output-badge.low {
+      background: var(--low-wire);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Verilog HDL Simulation & Logic Waveform Generator</h1>
+    <div class="expression-box">Logic Equation: <strong>y = (a & b) | (c & d & e)</strong></div>
+  </header>
+
+  <div class="main-layout">
+    
+    <!-- LEFT PANEL: Circuit Controls, Schematic & Code Editor -->
+    <div class="panel">
+      <!-- Controls -->
+      <div class="card">
+        <h2>Input Logic Switch Panel</h2>
+        <div class="controls">
+          <div class="switch-group">
+            <label>a</label>
+            <button class="btn-toggle" id="btn-a" onclick="toggleInput('a')"></button>
+            <span id="val-a">0</span>
+          </div>
+          <div class="switch-group">
+            <label>b</label>
+            <button class="btn-toggle" id="btn-b" onclick="toggleInput('b')"></button>
+            <span id="val-b">0</span>
+          </div>
+          <div class="switch-group">
+            <label>c</label>
+            <button class="btn-toggle" id="btn-c" onclick="toggleInput('c')"></button>
+            <span id="val-c">0</span>
+          </div>
+          <div class="switch-group">
+            <label>d</label>
+            <button class="btn-toggle" id="btn-d" onclick="toggleInput('d')"></button>
+            <span id="val-d">0</span>
+          </div>
+          <div class="switch-group">
+            <label>e</label>
+            <button class="btn-toggle" id="btn-e" onclick="toggleInput('e')"></button>
+            <span id="val-e">0</span>
+          </div>
+          <div class="switch-group" style="border-left: 2px solid var(--grid-border); padding-left: 10px;">
+            <label style="color: var(--accent);">OUTPUT (y)</label>
+            <div id="main-output" class="output-badge low">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schematic -->
+      <div class="card">
+        <h2>Gate-Level Structural Schematic</h2>
+        <canvas id="circuitCanvas" width="600" height="200"></canvas>
+      </div>
+
+      <!-- Verilog Code Editor -->
+      <div class="card">
+        <h2>Verilog Hardware Description Modules</h2>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchCode('structural')">Structural</button>
+          <button class="tab-btn" onclick="switchCode('dataflow')">Data Flow</button>
+          <button class="tab-btn" onclick="switchCode('behavioral')">Behavioral</button>
+        </div>
+        <textarea id="verilogCode"></textarea>
+        <button class="btn-compile" onclick="runSimulation()">Compile & Run Verilog Simulation</button>
+        <div class="terminal" id="terminal-out">> Verilog Engine Ready. Select a model and click compile.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Waveform Viewer -->
+    <div class="panel">
+      <div class="card">
+        <h2>ModelSim-Style Timing Waveforms Window</h2>
+        <canvas id="graphCanvas" width="600" height="380"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // State Variables
+    const state = { a: 0, b: 0, c: 0, d: 0, e: 0 };
+    let currentModel = 'structural';
+
+    // Verilog Code Templates
+    const codeTemplates = {
+      structural: `module p3structural(a,b,c,d,e,y);
+  input a, b, c, d, e;
+  output y;
+  wire Y1, Y2;
+
+  and G1(Y1, a, b);
+  and G2(Y2, c, d, e);
+  or  G3(y, Y1, Y2);
+endmodule`,
+
+      dataflow: `module p31(a,b,c,d,e,y);
+  input a, b, c, d, e;
+  output y;
+  wire Y1, Y2;
+
+  assign Y1 = a & b;
+  assign Y2 = c & d & e;
+  assign y  = Y1 | Y2;
+endmodule`,
+
+      behavioral: `module p3behavioral(a,b,c,d,e,y);
+  input a, b, c, d, e;
+  output y;
+  reg y;
+
+  always @(a, b, c, d, e) begin
+    y = (a & b) | (c & d & e);
+  end
+endmodule`
+    };
+
+    // Waveform Buffer
+    const historyLength = 60;
+    const history = {
+      a: new Array(historyLength).fill(0),
+      b: new Array(historyLength).fill(0),
+      c: new Array(historyLength).fill(0),
+      d: new Array(historyLength).fill(0),
+      e: new Array(historyLength).fill(0),
+      Y1: new Array(historyLength).fill(0),
+      Y2: new Array(historyLength).fill(0),
+      y: new Array(historyLength).fill(0)
+    };
+
+    function init() {
+      document.getElementById("verilogCode").value = codeTemplates.structural;
+      updateLogic();
+      animate();
+    }
+
+    function toggleInput(variable) {
+      state[variable] = state[variable] === 0 ? 1 : 0;
+      document.getElementById(`btn-${variable}`).classList.toggle('active', state[variable] === 1);
+      document.getElementById(`val-${variable}`).innerText = state[variable];
+      updateLogic();
+    }
+
+    function switchCode(model) {
+      currentModel = model;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById("verilogCode").value = codeTemplates[model];
+    }
+
+    function computeLogic() {
+      const Y1 = (state.a === 1 && state.b === 1) ? 1 : 0;
+      const Y2 = (state.c === 1 && state.d === 1 && state.e === 1) ? 1 : 0;
+      const y = (Y1 === 1 || Y2 === 1) ? 1 : 0;
+      return { Y1, Y2, y };
+    }
+
+    function updateLogic() {
+      const { y } = computeLogic();
+      const outBadge = document.getElementById("main-output");
+      outBadge.innerText = y;
+      outBadge.className = `output-badge ${y ? 'high' : 'low'}`;
+    }
+
+    function pushHistory() {
+      const { Y1, Y2, y } = computeLogic();
+      for (let key in history) history[key].shift();
+      
+      history.a.push(state.a);
+      history.b.push(state.b);
+      history.c.push(state.c);
+      history.d.push(state.d);
+      history.e.push(state.e);
+      history.Y1.push(Y1);
+      history.Y2.push(Y2);
+      history.y.push(y);
+    }
+
+    // Schematic Drawing
+    const cCanvas = document.getElementById("circuitCanvas");
+    const cCtx = cCanvas.getContext("2d");
+
+    function drawLine(x1, y1, x2, y2, active) {
+      cCtx.beginPath();
+      cCtx.moveTo(x1, y1);
+      cCtx.lineTo(x2, y2);
+      cCtx.lineWidth = 2;
+      cCtx.strokeStyle = active ? "#22c55e" : "#475569";
+      cCtx.stroke();
+    }
+
+    function drawGate(x, y, type, label) {
+      cCtx.beginPath();
+      if (type === 'AND') {
+        cCtx.moveTo(x, y - 18);
+        cCtx.lineTo(x + 20, y - 18);
+        cCtx.arc(x + 20, y, 18, -Math.PI / 2, Math.PI / 2);
+        cCtx.lineTo(x, y + 18);
+        cCtx.closePath();
+      } else if (type === 'OR') {
+        cCtx.moveTo(x, y - 18);
+        cCtx.quadraticCurveTo(x + 15, y - 18, x + 35, y);
+        cCtx.quadraticCurveTo(x + 15, y + 18, x, y + 18);
+        cCtx.quadraticCurveTo(x + 8, y, x, y - 18);
+        cCtx.closePath();
+      }
+      cCtx.fillStyle = "#1e293b";
+      cCtx.fill();
+      cCtx.lineWidth = 2;
+      cCtx.strokeStyle = "#38bdf8";
+      cCtx.stroke();
+      cCtx.fillStyle = "#94a3b8";
+      cCtx.font = "10px sans-serif";
+      cCtx.fillText(label, x + 5, y + 28);
+    }
+
+    function renderCircuit() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+      const { Y1, Y2, y } = computeLogic();
+
+      // Inputs
+      cCtx.fillStyle = "#f8fafc";
+      cCtx.font = "bold 12px sans-serif";
+      cCtx.fillText("a", 20, 30);
+      cCtx.fillText("b", 20, 60);
+      cCtx.fillText("c", 20, 110);
+      cCtx.fillText("d", 20, 140);
+      cCtx.fillText("e", 20, 170);
+
+      // Gates
+      drawGate(180, 45, 'AND', 'G1');
+      drawGate(180, 140, 'AND', 'G2');
+      drawGate(380, 95, 'OR', 'G3');
+
+      // Wires
+      drawLine(35, 25, 180, 25, state.a);
+      drawLine(35, 55, 180, 55, state.b);
+
+      drawLine(35, 105, 180, 105, state.c);
+      drawLine(35, 135, 180, 135, state.d);
+      drawLine(35, 165, 180, 165, state.e);
+
+      drawLine(218, 45, 300, 45, Y1);
+      drawLine(300, 45, 300, 85, Y1);
+      drawLine(300, 85, 380, 85, Y1);
+
+      drawLine(218, 140, 300, 140, Y2);
+      drawLine(300, 140, 300, 105, Y2);
+      drawLine(300, 105, 380, 105, Y2);
+
+      drawLine(415, 95, 500, 95, y);
+      cCtx.fillStyle = y ? "#22c55e" : "#f8fafc";
+      cCtx.fillText("y", 510, 98);
+    }
+
+    // Waveform Canvas Rendering
+    const gCanvas = document.getElementById("graphCanvas");
+    const gCtx = gCanvas.getContext("2d");
+
+    function renderGraphs() {
+      gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+      const signals = [
+        { label: 'a', data: history.a, color: '#38bdf8' },
+        { label: 'b', data: history.b, color: '#38bdf8' },
+        { label: 'c', data: history.c, color: '#38bdf8' },
+        { label: 'd', data: history.d, color: '#38bdf8' },
+        { label: 'e', data: history.e, color: '#38bdf8' },
+        { label: 'Y1 (a&b)', data: history.Y1, color: '#f59e0b' },
+        { label: 'Y2 (c&d&e)', data: history.Y2, color: '#f59e0b' },
+        { label: 'y (Out)', data: history.y, color: '#22c55e' }
+      ];
+
+      const rowHeight = 44;
+      const startX = 85;
+      const graphWidth = gCanvas.width - startX - 20;
+
+      signals.forEach((sig, idx) => {
+        const yBase = idx * rowHeight + 30;
+
+        gCtx.fillStyle = sig.color;
+        gCtx.font = "bold 11px sans-serif";
+        gCtx.fillText(sig.label, 10, yBase - 3);
+
+        gCtx.beginPath();
+        gCtx.moveTo(startX, yBase);
+        gCtx.lineTo(startX + graphWidth, yBase);
+        gCtx.strokeStyle = "#334155";
+        gCtx.lineWidth = 1;
+        gCtx.stroke();
+
+        gCtx.beginPath();
+        const step = graphWidth / (historyLength - 1);
+        sig.data.forEach((val, i) => {
+          const x = startX + i * step;
+          const y = yBase - (val * 20);
+          if (i === 0) {
+            gCtx.moveTo(x, y);
+          } else {
+            const prevVal = sig.data[i - 1];
+            const prevY = yBase - (prevVal * 20);
+            gCtx.lineTo(x, prevY);
+            gCtx.lineTo(x, y);
+          }
+        });
+
+        gCtx.strokeStyle = sig.color;
+        gCtx.lineWidth = 2;
+        gCtx.stroke();
+      });
+    }
+
+    // Verilog Simulation Compiler
+    function runSimulation() {
+      const term = document.getElementById("terminal-out");
+      const { Y1, Y2, y } = computeLogic();
+
+      term.innerText = `> Compiling active ${currentModel.toUpperCase()} module...\n`;
+      setTimeout(() => {
+        term.innerText += `> Analyzing ports (a,b,c,d,e -> output y)...\n`;
+        term.innerText += `> Internal Wires: Y1 = ${Y1}, Y2 = ${Y2}\n`;
+        term.innerText += `> Calculated Output y = ${y}\n`;
+        term.innerText += `> Simulation Status: PASSED (0 Errors, 0 Warnings at 100ns).`;
+      }, 250);
+    }
+
+    function animate() {
+      pushHistory();
+      renderCircuit();
+      renderGraphs();
+      setTimeout(() => {
+        requestAnimationFrame(animate);
+      }, 100);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

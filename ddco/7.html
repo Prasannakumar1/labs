@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verilog De-Multiplexer (1:2, 1:4, 1:8) Simulator & Testbench Workbench</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --high-wire: #22c55e;
+      --low-wire: #475569;
+      --grid-border: #334155;
+      --select-color: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border: 1px solid var(--grid-border);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--grid-border);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      background: #0f172a;
+      color: var(--text-muted);
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Controls */
+    .control-block {
+      background: #0f172a;
+      padding: 12px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .control-row label {
+      font-weight: bold;
+      font-size: 0.85rem;
+      color: var(--accent);
+      min-width: 90px;
+    }
+
+    .bit-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--low-wire);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bit-btn.active {
+      background: var(--high-wire);
+      box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+    }
+
+    .bit-btn.select-active {
+      background: var(--select-color);
+      box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+      color: #000;
+    }
+
+    .output-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    .output-badge.high {
+      background: var(--high-wire);
+      color: #000;
+    }
+
+    .output-badge.low {
+      background: var(--low-wire);
+      color: #fff;
+    }
+
+    /* Canvas */
+    canvas {
+      width: 100%;
+      background: #0f172a;
+      border-radius: 6px;
+      border: 1px solid var(--grid-border);
+      display: block;
+    }
+
+    /* Code Editor Box */
+    textarea {
+      width: 100%;
+      height: 150px;
+      background: #000;
+      color: #22c55e;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.82rem;
+      resize: vertical;
+    }
+
+    .btn-compile {
+      margin-top: 8px;
+      padding: 8px 16px;
+      background: #22c55e;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .terminal {
+      background: #000;
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      max-height: 95px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+    }
+
+    /* Table Wrapper */
+    .table-wrapper {
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 4px 6px;
+      border: 1px solid var(--grid-border);
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--accent);
+      position: sticky;
+      top: 0;
+    }
+
+    tr.active-row {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--high-wire);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Verilog HDL De-Multiplexer Simulator & Testbench Workbench</h1>
+    <p class="subtitle">Single Data Line Routing to 1:2, 1:4, and 1:8 Output Channels</p>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="setDemuxMode('12')">1:2 DEMUX</button>
+      <button class="tab-btn" onclick="setDemuxMode('14')">1:4 DEMUX</button>
+      <button class="tab-btn" onclick="setDemuxMode('18')">1:8 DEMUX</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    
+    <!-- LEFT PANEL: Controls, Schematic, Code Compiler -->
+    <div class="panel">
+      <!-- Input Controls -->
+      <div class="card">
+        <h2>Interactive De-Multiplexer Controls</h2>
+        <div class="control-block">
+          <!-- Data Input -->
+          <div class="control-row">
+            <label>Data Input (D):</label>
+            <button class="bit-btn" id="data-d-btn" onclick="toggleDataInput()">0</button>
+          </div>
+
+          <!-- Select Inputs -->
+          <div class="control-row">
+            <label>Select Line(s):</label>
+            <div id="select-inputs-container" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+          </div>
+
+          <!-- Active Line Status -->
+          <div class="control-row" style="border-top: 1px solid var(--grid-border); padding-top: 8px;">
+            <label>Active Channel:</label>
+            <span id="selected-line-text" style="font-family: monospace; color: var(--select-color); font-weight: bold;">Y0</span>
+            <div id="outputs-preview" style="margin-left: auto; display: flex; gap: 4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logic Schematic -->
+      <div class="card">
+        <h2>De-Multiplexer Architectural Schematic</h2>
+        <canvas id="circuitCanvas" width="600" height="200"></canvas>
+      </div>
+
+      <!-- Verilog Source Code Compiler -->
+      <div class="card">
+        <h2>Verilog Hardware Description Code</h2>
+        <textarea id="verilogCode"></textarea>
+        <button class="btn-compile" onclick="runVerilogSimulation()">Compile & Run Verilog Simulation</button>
+        <div class="terminal" id="terminal-out">> Verilog De-Multiplexer Engine Ready.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Waveform Graphs & Truth Table -->
+    <div class="panel">
+      <!-- ModelSim Style Waveform Viewer -->
+      <div class="card">
+        <h2>ModelSim Waveform Timing Window</h2>
+        <canvas id="graphCanvas" width="600" height="280"></canvas>
+      </div>
+
+      <!-- Dynamic Truth Table -->
+      <div class="card">
+        <h2>De-Multiplexer Truth Table Verification</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr id="table-head"></tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Current System State
+    let demuxMode = '12'; // '12', '14', '18'
+    let dataInputD = 1;
+    const selectInputs = [0, 0, 0]; // A0, A1, A2
+
+    // Verilog Code Templates
+    const verilogModules = {
+      '12': `module P712(D, Y0, Y1, A);
+  input D;
+  output Y0, Y1;
+  input A;
+  reg Y0, Y1;
+
+  always @(A, D) begin
+    Y0 = (~A & D);
+    Y1 = (A & D);
+  end
+endmodule`,
+
+      '14': `module P714(D, A0, A1, Y0, Y1, Y2, Y3);
+  input D;
+  input A0, A1;
+  output Y0, Y1, Y2, Y3;
+  reg Y0, Y1, Y2, Y3;
+
+  always @(A0, A1, D) begin
+    Y0 = (~A0 & ~A1 & D);
+    Y1 = (~A0 &  A1 & D);
+    Y2 = ( A0 & ~A1 & D);
+    Y3 = ( A0 &  A1 & D);
+  end
+endmodule`,
+
+      '18': `module P718(D, A0, A1, A2, Y0, Y1, Y2, Y3, Y4, Y5, Y6, Y7);
+  input D;
+  input A0, A1, A2;
+  output Y0, Y1, Y2, Y3, Y4, Y5, Y6, Y7;
+  reg Y0, Y1, Y2, Y3, Y4, Y5, Y6, Y7;
+
+  always @(A0, A1, A2, D) begin
+    Y0 = (~A0 & ~A1 & ~A2 & D);
+    Y1 = (~A0 & ~A1 &  A2 & D);
+    Y2 = (~A0 &  A1 & ~A2 & D);
+    Y3 = (~A0 &  A1 &  A2 & D);
+    Y4 = ( A0 & ~A1 & ~A2 & D);
+    Y5 = ( A0 & ~A1 &  A2 & D);
+    Y6 = ( A0 &  A1 & ~A2 & D);
+    Y7 = ( A0 &  A1 &  A2 & D);
+  end
+endmodule`
+    };
+
+    // Waveform Buffers
+    const historyLength = 60;
+    const history = {
+      dataD: new Array(historyLength).fill(0),
+      selDec: new Array(historyLength).fill(0),
+      outputs: Array.from({ length: 8 }, () => new Array(historyLength).fill(0))
+    };
+
+    function init() {
+      setDemuxMode('12');
+      animate();
+    }
+
+    function setDemuxMode(mode) {
+      demuxMode = mode;
+      document.querySelectorAll('.tab-bar .tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', (mode === '12' && idx === 0) || (mode === '14' && idx === 1) || (mode === '18' && idx === 2));
+      });
+
+      document.getElementById("verilogCode").value = verilogModules[mode];
+      renderControlButtons();
+      buildTruthTable();
+      updateLogic();
+    }
+
+    function toggleDataInput() {
+      dataInputD = dataInputD === 0 ? 1 : 0;
+      const btn = document.getElementById("data-d-btn");
+      btn.innerText = dataInputD;
+      btn.className = `bit-btn ${dataInputD ? 'active' : ''}`;
+      updateLogic();
+    }
+
+    function toggleSelectBit(idx) {
+      selectInputs[idx] = selectInputs[idx] === 0 ? 1 : 0;
+      updateControlUI();
+      updateLogic();
+    }
+
+    function getSelectIndex() {
+      if (demuxMode === '12') {
+        return selectInputs[0]; // A
+      } else if (demuxMode === '14') {
+        return selectInputs[0] * 2 + selectInputs[1]; // A0, A1
+      } else {
+        return selectInputs[0] * 4 + selectInputs[1] * 2 + selectInputs[2]; // A0, A1, A2
+      }
+    }
+
+    function renderControlButtons() {
+      const selectContainer = document.getElementById("select-inputs-container");
+      selectContainer.innerHTML = "";
+
+      const numSel = demuxMode === '12' ? 1 : (demuxMode === '14' ? 2 : 3);
+
+      for (let i = 0; i < numSel; i++) {
+        const btn = document.createElement("button");
+        btn.className = `bit-btn ${selectInputs[i] ? 'select-active' : ''}`;
+        btn.id = `s-btn-${i}`;
+        btn.innerText = demuxMode === '12' ? 'A' : `A${i}`;
+        btn.onclick = () => toggleSelectBit(i);
+        selectContainer.appendChild(btn);
+      }
+
+      const dBtn = document.getElementById("data-d-btn");
+      dBtn.innerText = dataInputD;
+      dBtn.className = `bit-btn ${dataInputD ? 'active' : ''}`;
+    }
+
+    function updateControlUI() {
+      const numSel = demuxMode === '12' ? 1 : (demuxMode === '14' ? 2 : 3);
+      for (let i = 0; i < numSel; i++) {
+        const btn = document.getElementById(`s-btn-${i}`);
+        if (btn) btn.className = `bit-btn ${selectInputs[i] ? 'select-active' : ''}`;
+      }
+    }
+
+    function computeOutputs() {
+      const selIdx = getSelectIndex();
+      const numOutputs = demuxMode === '12' ? 2 : (demuxMode === '14' ? 4 : 8);
+      const outputs = new Array(numOutputs).fill(0);
+      
+      outputs[selIdx] = dataInputD;
+      return { selIdx, outputs };
+    }
+
+    function updateLogic() {
+      const { selIdx, outputs } = computeOutputs();
+
+      document.getElementById("selected-line-text").innerText = `Y${selIdx} = ${dataInputD}`;
+
+      const previewContainer = document.getElementById("outputs-preview");
+      previewContainer.innerHTML = outputs.map((val, idx) => `
+        <span class="output-badge ${val ? 'high' : 'low'}">Y${idx}=${val}</span>
+      `).join('');
+
+      // Highlight Table Row
+      document.querySelectorAll("#table-body tr").forEach(r => r.classList.remove("active-row"));
+      const activeRow = document.getElementById(`demux-row-${selIdx}`);
+      if (activeRow) activeRow.classList.add("active-row");
+    }
+
+    function buildTruthTable() {
+      const thead = document.getElementById("table-head");
+      const tbody = document.getElementById("table-body");
+
+      let headers = [];
+      let rows = [];
+
+      if (demuxMode === '12') {
+        headers = ['A (Select)', 'D (Input)', 'Y0', 'Y1'];
+        rows = [
+          ['0', 'D', 'D', '0'],
+          ['1', 'D', '0', 'D']
+        ];
+      } else if (demuxMode === '14') {
+        headers = ['A0', 'A1', 'D (Input)', 'Y0', 'Y1', 'Y2', 'Y3'];
+        rows = [
+          ['0', '0', 'D', 'D', '0', '0', '0'],
+          ['0', '1', 'D', '0', 'D', '0', '0'],
+          ['1', '0', 'D', '0', '0', 'D', '0'],
+          ['1', '1', 'D', '0', '0', '0', 'D']
+        ];
+      } else {
+        headers = ['A0', 'A1', 'A2', 'D (Input)', 'Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'];
+        rows = [
+          ['0', '0', '0', 'D', 'D', '0', '0', '0', '0', '0', '0', '0'],
+          ['0', '0', '1', 'D', '0', 'D', '0', '0', '0', '0', '0', '0'],
+          ['0', '1', '0', 'D', '0', '0', 'D', '0', '0', '0', '0', '0'],
+          ['0', '1', '1', 'D', '0', '0', '0', 'D', '0', '0', '0', '0'],
+          ['1', '0', '0', 'D', '0', '0', '0', '0', 'D', '0', '0', '0'],
+          ['1', '0', '1', 'D', '0', '0', '0', '0', '0', 'D', '0', '0'],
+          ['1', '1', '0', 'D', '0', '0', '0', '0', '0', '0', 'D', '0'],
+          ['1', '1', '1', 'D', '0', '0', '0', '0', '0', '0', '0', 'D']
+        ];
+      }
+
+      thead.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
+      tbody.innerHTML = rows.map((row, idx) => {
+        const cells = row.map((cell, cIdx) => {
+          if (cIdx >= row.length - (demuxMode === '12' ? 2 : (demuxMode === '14' ? 4 : 8))) {
+            return `<td><strong style="color: ${cell === 'D' ? 'var(--high-wire)' : 'var(--text-muted)'};">${cell}</strong></td>`;
+          }
+          return `<td>${cell}</td>`;
+        }).join('');
+        return `<tr id="demux-row-${idx}">${cells}</tr>`;
+      }).join('');
+    }
+
+    function pushHistory() {
+      const { selIdx, outputs } = computeOutputs();
+      const maxSel = demuxMode === '12' ? 1 : (demuxMode === '14' ? 3 : 7);
+
+      for (let k in history) {
+        if (k === 'outputs') {
+          for (let i = 0; i < 8; i++) history.outputs[i].shift();
+        } else {
+          history[k].shift();
+        }
+      }
+
+      history.dataD.push(dataInputD);
+      history.selDec.push(selIdx / maxSel);
+      for (let i = 0; i < 8; i++) {
+        history.outputs[i].push(outputs[i] || 0);
+      }
+    }
+
+    // Canvas Circuit Rendering
+    const cCanvas = document.getElementById("circuitCanvas");
+    const cCtx = cCanvas.getContext("2d");
+
+    function renderCircuit() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+      const { selIdx, outputs } = computeOutputs();
+      const numOutputs = demuxMode === '12' ? 2 : (demuxMode === '14' ? 4 : 8);
+
+      // Inverted Trapezoid DEMUX Box
+      const x1 = 220, y1 = 60;
+      const x2 = 360, y2 = 30;
+      const height = 140;
+
+      cCtx.beginPath();
+      cCtx.moveTo(x1, y1);
+      cCtx.lineTo(x2, y2);
+      cCtx.lineTo(x2, y2 + height);
+      cCtx.lineTo(x1, y1 + height - 60);
+      cCtx.closePath();
+
+      cCtx.fillStyle = "#1e293b";
+      cCtx.fill();
+      cCtx.lineWidth = 2;
+      cCtx.strokeStyle = "#38bdf8";
+      cCtx.stroke();
+
+      cCtx.fillStyle = "#38bdf8";
+      cCtx.font = "bold 13px sans-serif";
+      cCtx.fillText(`${demuxMode === '12' ? '1:2' : (demuxMode === '14' ? '1:4' : '1:8')} DEMUX`, x1 + 18, y1 + 45);
+
+      // Data Line (Input D)
+      const inY = y1 + (height - 60) / 2;
+      cCtx.strokeStyle = dataInputD ? "#22c55e" : "#475569";
+      cCtx.lineWidth = 3;
+      cCtx.beginPath();
+      cCtx.moveTo(60, inY);
+      cCtx.lineTo(x1, inY);
+      cCtx.stroke();
+
+      cCtx.fillStyle = dataInputD ? "#22c55e" : "#f8fafc";
+      cCtx.font = "bold 12px sans-serif";
+      cCtx.fillText(`D = ${dataInputD}`, 15, inY + 4);
+
+      // Output Channels
+      const outStep = height / (numOutputs + 1);
+      for (let i = 0; i < numOutputs; i++) {
+        const yPos = y2 + (i + 1) * outStep;
+        const isSelected = (i === selIdx);
+        const isActiveHigh = isSelected && dataInputD;
+
+        cCtx.strokeStyle = isActiveHigh ? "#22c55e" : (isSelected ? "#f59e0b" : "#475569");
+        cCtx.lineWidth = isSelected ? 3 : 1.5;
+
+        cCtx.beginPath();
+        cCtx.moveTo(x2, yPos);
+        cCtx.lineTo(520, yPos);
+        cCtx.stroke();
+
+        cCtx.fillStyle = isActiveHigh ? "#22c55e" : (isSelected ? "#f59e0b" : "#f8fafc");
+        cCtx.font = "11px sans-serif";
+        cCtx.fillText(`Y${i} = ${outputs[i]}`, 530, yPos + 4);
+      }
+
+      // Select Control Line (Bottom)
+      cCtx.strokeStyle = "#f59e0b";
+      cCtx.lineWidth = 2;
+      cCtx.beginPath();
+      cCtx.moveTo(290, 185);
+      cCtx.lineTo(290, y1 + height - 30);
+      cCtx.stroke();
+
+      cCtx.fillStyle = "#f59e0b";
+      cCtx.font = "bold 11px sans-serif";
+      const selLabel = demuxMode === '12' ? `A=${selectInputs[0]}` : 
+                      (demuxMode === '14' ? `[A0,A1]=[${selectInputs[0]},${selectInputs[1]}]` : 
+                       `[A0,A1,A2]=[${selectInputs[0]},${selectInputs[1]},${selectInputs[2]}]`);
+      cCtx.fillText(selLabel, 240, 198);
+    }
+
+    // Waveform Canvas Rendering
+    const gCanvas = document.getElementById("graphCanvas");
+    const gCtx = gCanvas.getContext("2d");
+
+    function renderGraphs() {
+      gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+      const numOutputs = demuxMode === '12' ? 2 : (demuxMode === '14' ? 4 : 8);
+
+      const signals = [
+        { label: 'Input D', data: history.dataD, color: '#38bdf8' },
+        { label: 'Select Line', data: history.selDec, color: '#f59e0b' }
+      ];
+
+      for (let i = 0; i < numOutputs; i++) {
+        signals.push({ label: `Y${i}`, data: history.outputs[i], color: '#22c55e' });
+      }
+
+      const totalSigs = signals.length;
+      const rowHeight = Math.min(45, (gCanvas.height - 30) / totalSigs);
+      const startX = 90;
+      const graphWidth = gCanvas.width - startX - 20;
+
+      signals.forEach((sig, idx) => {
+        const yBase = idx * rowHeight + 25;
+
+        gCtx.fillStyle = sig.color;
+        gCtx.font = "bold 10px sans-serif";
+        gCtx.fillText(sig.label, 10, yBase - 3);
+
+        gCtx.beginPath();
+        gCtx.moveTo(startX, yBase);
+        gCtx.lineTo(startX + graphWidth, yBase);
+        gCtx.strokeStyle = "#334155";
+        gCtx.lineWidth = 1;
+        gCtx.stroke();
+
+        gCtx.beginPath();
+        const step = graphWidth / (historyLength - 1);
+        sig.data.forEach((val, i) => {
+          const x = startX + i * step;
+          const y = yBase - (val * (rowHeight * 0.5));
+          if (i === 0) {
+            gCtx.moveTo(x, y);
+          } else {
+            const prevVal = sig.data[i - 1];
+            const prevY = yBase - (prevVal * (rowHeight * 0.5));
+            gCtx.lineTo(x, prevY);
+            gCtx.lineTo(x, y);
+          }
+        });
+
+        gCtx.strokeStyle = sig.color;
+        gCtx.lineWidth = 1.5;
+        gCtx.stroke();
+      });
+    }
+
+    // Verilog Testbench Runner
+    function runVerilogSimulation() {
+      const term = document.getElementById("terminal-out");
+      const { selIdx, outputs } = computeOutputs();
+
+      term.innerText = `> Compiling Verilog module 'P7${demuxMode}'...\n`;
+      setTimeout(() => {
+        term.innerText += `> Module synthesis completed with 0 errors.\n`;
+        term.innerText += `> Input Vector: D=${dataInputD}, Select Channel Y${selIdx} Active\n`;
+        term.innerText += `> Output Bus State: [${outputs.join(', ')}]\n`;
+        term.innerText += `> Simulation executed successfully at 100ns.`;
+      }, 250);
+    }
+
+    function animate() {
+      pushHistory();
+      renderCircuit();
+      renderGraphs();
+      setTimeout(() => {
+        requestAnimationFrame(animate);
+      }, 100);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4-Variable Logic Circuit & Signal Waveform Simulator</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --high-wire: #22c55e;
+      --low-wire: #475569;
+      --grid-border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    .expression-box {
+      background: #0f172a;
+      border: 1px solid var(--accent);
+      padding: 6px 16px;
+      border-radius: 6px;
+      display: inline-block;
+      font-family: monospace;
+      font-size: 1rem;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Dual Panel Grid */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border: 1px solid var(--grid-border);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--grid-border);
+      padding-bottom: 6px;
+    }
+
+    /* Input Controls */
+    .controls {
+      display: flex;
+      justify-content: space-around;
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 8px;
+      align-items: center;
+    }
+
+    .switch-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .switch-group label {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .btn-toggle {
+      width: 44px;
+      height: 24px;
+      background: var(--low-wire);
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    .btn-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .btn-toggle.active {
+      background: var(--high-wire);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    }
+
+    .btn-toggle.active::after {
+      transform: translateX(20px);
+    }
+
+    /* Canvas Styles */
+    canvas {
+      width: 100%;
+      background: #0f172a;
+      border-radius: 6px;
+      border: 1px solid var(--grid-border);
+      display: block;
+    }
+
+    /* K-Map Styles */
+    .kmap-grid {
+      display: grid;
+      grid-template-columns: 50px repeat(4, 1fr);
+      gap: 2px;
+      background: var(--grid-border);
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+      overflow: hidden;
+      text-align: center;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    .kmap-cell {
+      background: var(--card-bg);
+      padding: 8px 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .kmap-header {
+      background: #0f172a;
+      color: var(--text-muted);
+    }
+
+    .kmap-val-1 {
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .kmap-active {
+      outline: 2px solid var(--high-wire);
+      background: rgba(34, 197, 94, 0.25) !important;
+      z-index: 2;
+    }
+
+    /* Truth Table Styles */
+    .table-wrapper {
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid var(--grid-border);
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 4px 6px;
+      border: 1px solid var(--grid-border);
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--accent);
+      position: sticky;
+      top: 0;
+    }
+
+    tr.active-row {
+      background: rgba(34, 197, 94, 0.2);
+      font-weight: bold;
+      color: var(--high-wire);
+    }
+
+    .output-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .output-badge.high {
+      background: var(--high-wire);
+      color: #000;
+    }
+
+    .output-badge.low {
+      background: var(--low-wire);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Digital Logic Circuit Realization & Signal Waveform Simulator</h1>
+    <div class="expression-box">Simplified Expression: <strong>Y = A B̅ + C D̅</strong></div>
+  </header>
+
+  <div class="main-layout">
+    
+    <!-- LEFT PANEL: Controls, Circuit Simulation, and K-Map -->
+    <div class="panel">
+      <!-- Interactive Gate Circuit Simulation -->
+      <div class="card">
+        <h2>Gate-Level Circuit Simulation (IC 7404, 7408, 7432)</h2>
+        <div class="controls" style="margin-bottom: 10px;">
+          <div class="switch-group">
+            <label>A</label>
+            <button class="btn-toggle" id="btn-A" onclick="toggleInput('A')"></button>
+            <span id="val-A">0</span>
+          </div>
+          <div class="switch-group">
+            <label>B</label>
+            <button class="btn-toggle" id="btn-B" onclick="toggleInput('B')"></button>
+            <span id="val-B">0</span>
+          </div>
+          <div class="switch-group">
+            <label>C</label>
+            <button class="btn-toggle" id="btn-C" onclick="toggleInput('C')"></button>
+            <span id="val-C">0</span>
+          </div>
+          <div class="switch-group">
+            <label>D</label>
+            <button class="btn-toggle" id="btn-D" onclick="toggleInput('D')"></button>
+            <span id="val-D">0</span>
+          </div>
+          <div class="switch-group" style="border-left: 2px solid var(--grid-border); padding-left: 15px;">
+            <label style="color: var(--accent);">OUTPUT (Y)</label>
+            <div id="main-output" class="output-badge low" style="font-size: 1rem;">0</div>
+          </div>
+        </div>
+        <canvas id="circuitCanvas" width="600" height="200"></canvas>
+      </div>
+
+      <!-- K-Map Visualization -->
+      <div class="card">
+        <h2>Karnaugh Map (K-Map)</h2>
+        <div class="kmap-grid" id="kmap">
+          <div class="kmap-cell kmap-header">AB \ CD</div>
+          <div class="kmap-cell kmap-header">00</div>
+          <div class="kmap-cell kmap-header">01</div>
+          <div class="kmap-cell kmap-header">11</div>
+          <div class="kmap-cell kmap-header">10</div>
+
+          <div class="kmap-cell kmap-header">00</div>
+          <div class="kmap-cell" id="kcell-0000">0</div>
+          <div class="kmap-cell" id="kcell-0001">0</div>
+          <div class="kmap-cell" id="kcell-0011">0</div>
+          <div class="kmap-cell kmap-val-1" id="kcell-0010">1</div>
+
+          <div class="kmap-cell kmap-header">01</div>
+          <div class="kmap-cell" id="kcell-0100">0</div>
+          <div class="kmap-cell" id="kcell-0101">0</div>
+          <div class="kmap-cell" id="kcell-0111">0</div>
+          <div class="kmap-cell kmap-val-1" id="kcell-0110">1</div>
+
+          <div class="kmap-cell kmap-header">11</div>
+          <div class="kmap-cell" id="kcell-1100">0</div>
+          <div class="kmap-cell" id="kcell-1101">0</div>
+          <div class="kmap-cell" id="kcell-1111">0</div>
+          <div class="kmap-cell kmap-val-1" id="kcell-1110">1</div>
+
+          <div class="kmap-cell kmap-header">10</div>
+          <div class="kmap-cell kmap-val-1" id="kcell-1000">1</div>
+          <div class="kmap-cell kmap-val-1" id="kcell-1001">1</div>
+          <div class="kmap-cell kmap-val-1" id="kcell-1011">1</div>
+          <div class="kmap-cell kmap-val-1" id="kcell-1010">1</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Timing Waveform Graph & Truth Table -->
+    <div class="panel">
+      <!-- Signal Waveform Graphs -->
+      <div class="card">
+        <h2>Live Logic Waveforms & Timing Diagram</h2>
+        <canvas id="graphCanvas" width="600" height="280"></canvas>
+      </div>
+
+      <!-- Truth Table -->
+      <div class="card">
+        <h2>Truth Table Verification</h2>
+        <div class="table-wrapper">
+          <table id="truth-table">
+            <thead>
+              <tr><th>A</th><th>B</th><th>C</th><th>D</th><th>Y (Output)</th></tr>
+            </thead>
+            <tbody>
+              <!-- Generated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Global Circuit State
+    const state = { A: 0, B: 0, C: 0, D: 0 };
+    
+    // Waveform History Buffer
+    const historyLength = 60;
+    const history = {
+      A: new Array(historyLength).fill(0),
+      B: new Array(historyLength).fill(0),
+      C: new Array(historyLength).fill(0),
+      D: new Array(historyLength).fill(0),
+      AB_not: new Array(historyLength).fill(0),
+      CD_not: new Array(historyLength).fill(0),
+      Y: new Array(historyLength).fill(0)
+    };
+
+    const truthTableData = [
+      [0,0,0,0,0], [0,0,0,1,0], [0,0,1,0,1], [0,0,1,1,0],
+      [0,1,0,0,0], [0,1,0,1,0], [0,1,1,0,1], [0,1,1,1,0],
+      [1,0,0,0,1], [1,0,0,1,1], [1,0,1,0,1], [1,0,1,1,1],
+      [1,1,0,0,0], [1,1,0,1,0], [1,1,1,0,1], [1,1,1,1,0]
+    ];
+
+    function init() {
+      buildTruthTable();
+      updateLogic();
+      animate();
+    }
+
+    function toggleInput(variable) {
+      state[variable] = state[variable] === 0 ? 1 : 0;
+      document.getElementById(`btn-${variable}`).classList.toggle('active', state[variable] === 1);
+      document.getElementById(`val-${variable}`).innerText = state[variable];
+      updateLogic();
+    }
+
+    function buildTruthTable() {
+      const tbody = document.querySelector("#truth-table tbody");
+      tbody.innerHTML = "";
+      truthTableData.forEach((row) => {
+        const tr = document.createElement("tr");
+        tr.id = `row-${row[0]}${row[1]}${row[2]}${row[3]}`;
+        tr.innerHTML = `
+          <td>${row[0]}</td>
+          <td>${row[1]}</td>
+          <td>${row[2]}</td>
+          <td>${row[3]}</td>
+          <td><span class="output-badge ${row[4] ? 'high' : 'low'}">${row[4]}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateLogic() {
+      const { A, B, C, D } = state;
+      const B_not = B === 0 ? 1 : 0;
+      const D_not = D === 0 ? 1 : 0;
+      const term1 = (A === 1 && B_not === 1) ? 1 : 0;
+      const term2 = (C === 1 && D_not === 1) ? 1 : 0;
+      const Y = (term1 === 1 || term2 === 1) ? 1 : 0;
+
+      // Update Header Output Badge
+      const outBadge = document.getElementById("main-output");
+      outBadge.innerText = Y;
+      outBadge.className = `output-badge ${Y ? 'high' : 'low'}`;
+
+      // Highlight Table Row
+      document.querySelectorAll("#truth-table tr").forEach(r => r.classList.remove("active-row"));
+      const activeRow = document.getElementById(`row-${A}${B}${C}${D}`);
+      if (activeRow) activeRow.classList.add("active-row");
+
+      // Highlight Active K-Map Cell
+      document.querySelectorAll(".kmap-cell").forEach(c => c.classList.remove("kmap-active"));
+      const activeKCell = document.getElementById(`kcell-${A}${B}${C}${D}`);
+      if (activeKCell) activeKCell.classList.add("kmap-active");
+    }
+
+    function pushHistory() {
+      const { A, B, C, D } = state;
+      const B_not = B === 0 ? 1 : 0;
+      const D_not = D === 0 ? 1 : 0;
+      const term1 = (A === 1 && B_not === 1) ? 1 : 0;
+      const term2 = (C === 1 && D_not === 1) ? 1 : 0;
+      const Y = (term1 === 1 || term2 === 1) ? 1 : 0;
+
+      for (let key in history) {
+        history[key].shift();
+      }
+      history.A.push(A);
+      history.B.push(B);
+      history.C.push(C);
+      history.D.push(D);
+      history.AB_not.push(term1);
+      history.CD_not.push(term2);
+      history.Y.push(Y);
+    }
+
+    // Interactive Circuit Rendering
+    const cCanvas = document.getElementById("circuitCanvas");
+    const cCtx = cCanvas.getContext("2d");
+
+    function drawLine(ctx, x1, y1, x2, y2, active) {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = active ? "#22c55e" : "#475569";
+      ctx.stroke();
+    }
+
+    function drawGate(ctx, x, y, type, label) {
+      ctx.beginPath();
+      if (type === 'NOT') {
+        ctx.moveTo(x, y - 10); ctx.lineTo(x + 20, y); ctx.lineTo(x, y + 10); ctx.closePath();
+      } else if (type === 'AND') {
+        ctx.moveTo(x, y - 15); ctx.lineTo(x + 15, y - 15);
+        ctx.arc(x + 15, y, 15, -Math.PI/2, Math.PI/2);
+        ctx.lineTo(x, y + 15); ctx.closePath();
+      } else if (type === 'OR') {
+        ctx.moveTo(x, y - 15); ctx.quadraticCurveTo(x + 10, y - 15, x + 25, y);
+        ctx.quadraticCurveTo(x + 10, y + 15, x, y + 15);
+        ctx.quadraticCurveTo(x + 5, y, x, y - 15); ctx.closePath();
+      }
+      ctx.fillStyle = "#1e293b"; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = "#38bdf8"; ctx.stroke();
+      if (type === 'NOT') {
+        ctx.beginPath(); ctx.arc(x + 24, y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#1e293b"; ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = "#94a3b8"; ctx.font = "10px sans-serif";
+      ctx.fillText(label, x, y + 24);
+    }
+
+    function renderCircuit() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+      const { A, B, C, D } = state;
+      const B_not = B === 0 ? 1 : 0;
+      const D_not = D === 0 ? 1 : 0;
+      const term1 = (A === 1 && B_not === 1) ? 1 : 0;
+      const term2 = (C === 1 && D_not === 1) ? 1 : 0;
+      const Y = (term1 === 1 || term2 === 1) ? 1 : 0;
+
+      // Inputs
+      cCtx.fillStyle = "#f8fafc"; cCtx.font = "bold 12px sans-serif";
+      cCtx.fillText("A", 20, 35); cCtx.fillText("B", 20, 75);
+      cCtx.fillText("C", 20, 125); cCtx.fillText("D", 20, 165);
+
+      // Gate Realization
+      drawGate(cCtx, 80, 75, 'NOT', '7404');
+      drawGate(cCtx, 80, 165, 'NOT', '7404');
+      drawGate(cCtx, 220, 50, 'AND', '7408');
+      drawGate(cCtx, 220, 140, 'AND', '7408');
+      drawGate(cCtx, 380, 95, 'OR', '7432');
+
+      // Connection Wires
+      drawLine(cCtx, 35, 30, 220, 30, A); drawLine(cCtx, 220, 30, 220, 42, A);
+      drawLine(cCtx, 35, 75, 80, 75, B);
+      drawLine(cCtx, 105, 75, 220, 75, B_not); drawLine(cCtx, 220, 75, 220, 58, B_not);
+
+      drawLine(cCtx, 35, 120, 220, 120, C); drawLine(cCtx, 220, 120, 220, 132, C);
+      drawLine(cCtx, 35, 165, 80, 165, D);
+      drawLine(cCtx, 105, 165, 220, 165, D_not); drawLine(cCtx, 220, 165, 220, 148, D_not);
+
+      drawLine(cCtx, 250, 50, 320, 50, term1); drawLine(cCtx, 320, 50, 320, 88, term1); drawLine(cCtx, 320, 88, 380, 88, term1);
+      drawLine(cCtx, 250, 140, 320, 140, term2); drawLine(cCtx, 320, 140, 320, 102, term2); drawLine(cCtx, 320, 102, 380, 102, term2);
+
+      drawLine(cCtx, 405, 95, 480, 95, Y);
+      cCtx.fillStyle = Y ? "#22c55e" : "#f8fafc"; cCtx.fillText("Y", 490, 98);
+    }
+
+    // Graph & Waveform Canvas Rendering
+    const gCanvas = document.getElementById("graphCanvas");
+    const gCtx = gCanvas.getContext("2d");
+
+    function renderGraphs() {
+      gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+      const signals = [
+        { label: 'A', data: history.A, color: '#38bdf8' },
+        { label: 'B', data: history.B, color: '#38bdf8' },
+        { label: 'C', data: history.C, color: '#38bdf8' },
+        { label: 'D', data: history.D, color: '#38bdf8' },
+        { label: 'A·B̅', data: history.AB_not, color: '#f59e0b' },
+        { label: 'C·D̅', data: history.CD_not, color: '#f59e0b' },
+        { label: 'Y (Out)', data: history.Y, color: '#22c55e' }
+      ];
+
+      const rowHeight = 35;
+      const startX = 60;
+      const graphWidth = gCanvas.width - startX - 20;
+
+      signals.forEach((sig, idx) => {
+        const yBase = idx * rowHeight + 28;
+
+        // Signal Labels
+        gCtx.fillStyle = sig.color;
+        gCtx.font = "bold 11px sans-serif";
+        gCtx.fillText(sig.label, 10, yBase - 2);
+
+        // Grid Base Lines
+        gCtx.beginPath();
+        gCtx.moveTo(startX, yBase);
+        gCtx.lineTo(startX + graphWidth, yBase);
+        gCtx.strokeStyle = "#334155";
+        gCtx.lineWidth = 1;
+        gCtx.stroke();
+
+        // Waveform Square Step Rendering
+        gCtx.beginPath();
+        const step = graphWidth / (historyLength - 1);
+        sig.data.forEach((val, i) => {
+          const x = startX + i * step;
+          const y = yBase - (val * 18);
+          if (i === 0) {
+            gCtx.moveTo(x, y);
+          } else {
+            const prevVal = sig.data[i - 1];
+            const prevY = yBase - (prevVal * 18);
+            gCtx.lineTo(x, prevY);
+            gCtx.lineTo(x, y);
+          }
+        });
+
+        gCtx.strokeStyle = sig.color;
+        gCtx.lineWidth = 2;
+        gCtx.stroke();
+      });
+    }
+
+    function animate() {
+      pushHistory();
+      renderCircuit();
+      renderGraphs();
+      setTimeout(() => {
+        requestAnimationFrame(animate);
+      }, 100);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
